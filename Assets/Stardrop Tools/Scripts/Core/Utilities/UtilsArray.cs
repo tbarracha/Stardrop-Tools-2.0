@@ -163,6 +163,16 @@ public static class UtilsArray
     }
     #endregion // lists
 
+    public static List<T> RemoveEmpty<T>(List<T> list)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[i] == null)
+                list.Remove(list[i]);
+        }
+
+        return list;
+    }
 
     public static T[] RemoveDuplicates<T>(T[] array)
     {
