@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace StardropTools
 {
-    [CreateAssetMenu(menuName = "Stardrop / Weighted List")]
+    [CreateAssetMenu(menuName = "Stardrop / Weighted Int List")]
     public class WeightedListSO : ScriptableObject
     {
         [SerializeField] WeightedList<int> list;

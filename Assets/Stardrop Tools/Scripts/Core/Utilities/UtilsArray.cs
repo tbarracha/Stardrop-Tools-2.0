@@ -102,12 +102,7 @@ public static class UtilsArray
 
     #region List Extensions
     public static bool Exists<T>(this List<T> list)
-    {
-        if (list != null && list.Count > 0)
-            return true;
-        else
-            return false;
-    }
+        => list != null && list.Count > 0 ? true : false;
 
     public static bool AddSafe<T>(this List<T> list, T element)
     {

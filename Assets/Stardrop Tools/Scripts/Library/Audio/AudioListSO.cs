@@ -6,8 +6,8 @@ namespace StardropTools.Audio
     /// <summary>
     /// List of audios to cycle or randomize through, with different pitch
     /// </summary>
-    [CreateAssetMenu(menuName = "Stardrop / Audio / Audio Group")]
-    public class AudioGroupSO : ScriptableObject
+    [CreateAssetMenu(menuName = "Stardrop / Audio / Audio List")]
+    public class AudioListSO : ScriptableObject
     {
         [SerializeField] System.Collections.Generic.List<AudioClip> clips;
         [SerializeField] float minPitch = 1;
@@ -15,7 +15,7 @@ namespace StardropTools.Audio
         [Space]
         [SerializeField] bool clearClips;
 
-        public System.Collections.Generic.List<AudioClip> Clips { get => clips; }
+        // public System.Collections.Generic.List<AudioClip> Clips { get => clips; }
 
         public float MinPitch { get => minPitch; }
         public float MaxPitch { get => maxPitch; }
@@ -32,6 +32,19 @@ namespace StardropTools.Audio
                 clips.Add(clip);
         }
 
+        public void RemoveClip(AudioClip clip)
+        {
+            if (clips.Contains(clip))
+                clips.Remove(clip);
+        }
+
+        public void RemoveClip(int clipID)
+        {
+            if (clips[clipID] != null)
+                clips.Remove(clips[clipID]);
+        }
+
+
         public void SetClips(AudioClip[] clips)
         {
             if (this.clips == null)
@@ -42,11 +55,13 @@ namespace StardropTools.Audio
                     this.clips.Add(clips[i]);
         }
 
+
         public AudioClip GetRandomClip() => clips[Random.Range(0, clips.Count)];
 
         public AudioClip GetClipAtIndex(int index) => clips[index];
 
         public float GetRandomPitch() => Random.Range(minPitch, maxPitch);
+
 
         protected virtual void OnValidate()
         {

@@ -4,7 +4,7 @@ using UnityEngine;
 namespace StardropTools.Pool
 {
     /// <summary>
-    /// Group of several Item Pools that inherit from the same Component.
+    /// Although a pool cluster is meant to be a group of several Item Pools that inherit from the same Component, you can still use it to group non component related objects and get them through the Spawn TComponent method.
     /// <para> Useful when spawning derived/inherited components of the main Component. Ex: enemies, bullets, spells </para>
     /// </summary>
     [System.Serializable]

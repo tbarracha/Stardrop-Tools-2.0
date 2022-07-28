@@ -2,13 +2,13 @@
 namespace StardropTools.Audio
 {
     [System.Serializable]
-    public class AudioGroupWithSource
+    public class AudioListWithSource
     {
         [UnityEngine.SerializeField] UnityEngine.AudioSource source;
-        [UnityEngine.SerializeField] AudioGroupSO group;
+        [UnityEngine.SerializeField] AudioListSO group;
 
         public UnityEngine.AudioSource Source { get => source; }
-        public AudioGroupSO AudioDB { get => group; }
+        public AudioListSO AudioDB { get => group; }
         public UnityEngine.AudioClip RandomClip { get => group.GetRandomClip(); }
         public float RandomPitch { get => group.GetRandomPitch(); }
 
