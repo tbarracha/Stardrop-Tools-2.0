@@ -4,7 +4,7 @@ using UnityEngine;
 namespace StardropTools
 {
     /// <summary>
-    /// Lists colliders and events based on contact with filtered colliders
+    /// Lists colliders and invokes events based on contact with filtered colliders
     /// </summary>
     public abstract class OverlapScanner : BaseObject
     {
