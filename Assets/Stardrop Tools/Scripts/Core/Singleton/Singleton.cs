@@ -31,7 +31,7 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 		}
 	}
 
-	void SingletonInitialization()
+	public void SingletonInitialization()
 	{
 		if (instance == null)
 		{
@@ -39,8 +39,8 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 			DontDestroyOnLoad(gameObject);
 		}
 
-		else
-			Destroy(gameObject);
+		//else
+		//	Destroy(gameObject);
 	}
 
 

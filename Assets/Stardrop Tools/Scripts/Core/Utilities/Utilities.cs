@@ -1,6 +1,7 @@
 ﻿
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,6 +9,9 @@ public static class Utilities
 {
     static Camera camera;
 
+    /// <summary>
+    /// Returns a list of components found under parent transform
+    /// </summary>
     public static List<T> GetItems<T>(Transform parent)
     {
         if (parent != null && parent.childCount > 0)
@@ -40,6 +44,28 @@ public static class Utilities
         point.position = position;
         point.parent = parent;
         return point;
+    }
+
+    /// <summary>
+    /// 0 - False, 1 - True
+    /// </summary>
+    public static bool ConvertIntToBool(int id)
+    {
+        if (id == 0)
+            return false;
+        else
+            return true;
+    }
+
+    /// <summary>
+    /// 0 - False, 1 - True
+    /// </summary>
+    public static int ConvertBoolToInt(bool value)
+    {
+        if (value == false)
+            return 0;
+        else
+            return 1;
     }
 
     public static Vector3 ViewportRaycast(LayerMask layerMask)
@@ -105,6 +131,39 @@ public static class Utilities
             StopCoroutine(coroutine);
     }
 
+    /// <summary>
+    /// Puts the string into the Clipboard.
+    /// </summary>
+    public static void CopyStringToClipboard(this string str)
+    {
+        GUIUtility.systemCopyBuffer = str;
+    }
+
+    /// <summary>
+    /// Creates new file if there isn't one or adds contents to an existing one.
+    /// File name ex: 'logs.txt' (extensions can be whatever ex: .bnb, .cro, etc,.)
+    /// </summary>
+    /// <param name="fileName"></param>
+    public static void CreateOrAddTextToFile(string path, string fileName, string content, int newLineAmount = 0)
+    {
+        // path to file
+        string filePath = path + fileName;
+
+        // add new lines
+        if (newLineAmount > 0)
+            for (int i = 0; i < newLineAmount; i++)
+                content += "\n";
+
+        // create file it if doesnt exist
+        if (File.Exists(filePath) == false)
+            File.WriteAllText(filePath, content);
+
+        // add content to file
+        else
+            File.AppendAllText(filePath, content);
+
+    }
+
 #if UNITY_EDITOR
     public static void ClearLog() //you can copy/paste this code to the bottom of your script
     {
@@ -167,14 +226,16 @@ public static class Utilities
     /// </summary>
     /// <param name="className">Name of scriptable object class</param>
     /// <param name="path"> Path to save ex: "Assets/Resources/SO" </param>
-    /// <returns></returns>
-    public static void CreateScriptableObject(string soClassName, string path)
+    public static ScriptableObject CreateScriptableObject(string scriptableClassName, string path, string name)
     {
-        ScriptableObject so = ScriptableObject.CreateInstance(soClassName);
+        ScriptableObject so = ScriptableObject.CreateInstance(scriptableClassName);
+        so.name = name;
 
         AssetDatabase.CreateAsset(so, path);
         AssetDatabase.SaveAssets();
         Selection.activeObject = so;
+
+        return so;
     }
 
     public static T CreatePrefab<T>(GameObject prefab, Transform parent)

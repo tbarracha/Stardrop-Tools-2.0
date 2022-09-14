@@ -13,6 +13,14 @@ public static class UtilsArray
             return false;
     }
 
+    public static bool Exists<T>(this T[] array, int minLength)
+    {
+        if (array != null && array.Length >= minLength)
+            return true;
+        else
+            return false;
+    }
+
 
     public static bool ContainsObject(this Object[] array, Object obj)
     {
@@ -102,12 +110,7 @@ public static class UtilsArray
 
     #region List Extensions
     public static bool Exists<T>(this List<T> list)
-    {
-        if (list != null && list.Count > 0)
-            return true;
-        else
-            return false;
-    }
+        => list != null && list.Count > 0 ? true : false;
 
     public static bool AddSafe<T>(this List<T> list, T element)
     {
@@ -133,15 +136,40 @@ public static class UtilsArray
             return false;
     }
 
-    public static void AddArrayToList<T>(this List<T> listToAdd, T[] array)
+
+    /// <summary>
+    /// Add array elements to list
+    /// </summary>
+    public static List<T> AddArrayToList<T>(this List<T> listToAdd, T[] array)
     {
         for (int i = 0; i < array.Length; i++)
             listToAdd.AddSafe(array[i]);
+
+        return listToAdd;
     }
 
+
+    /// <summary>
+    /// Add list elements to another list without repeating
+    /// </summary>
+    public static List<T> AddListToList<T>(this List<T> listToAdd, List<T> thisToBeAdded)
+    {
+        for (int i = 0; i < thisToBeAdded.Count; i++)
+            listToAdd.AddSafe(thisToBeAdded[i]);
+
+        return listToAdd;
+    }
+
+
+    /// <summary>
+    /// Returns a single random element from a list
+    /// </summary>
     public static T GetRandom<T>(this List<T> list)
         => list[Random.Range(0, list.Count)];
 
+    /// <summary>
+    /// Returns several random elements from a list without repeating values
+    /// </summary>
     public static List<T> GetRandomNonRepeat<T>(this List<T> list, int amount, float divisionIfExceed = 2)
     {
         if (list.Count <= amount)
@@ -163,6 +191,16 @@ public static class UtilsArray
     }
     #endregion // lists
 
+    public static List<T> RemoveEmpty<T>(List<T> list)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[i] == null)
+                list.Remove(list[i]);
+        }
+
+        return list;
+    }
 
     public static T[] RemoveDuplicates<T>(T[] array)
     {
@@ -192,14 +230,27 @@ public static class UtilsArray
         return list;
     }
 
-    public static List<T> ReverseList<T>(List<T> list)
+    public static List<T> ReverseList<T>(List<T> list, bool debug = false)
     {
+        if (list.Count == 0)
+        {
+            Debug.Log("List too short!");
+            return list;
+        }
+
         var reversed = new List<T>();
 
         for (int i = 0; i < list.Count; i++)
         {
-            int index = Mathf.Clamp(list.Count - 1 - i, 0, list.Count);
-            reversed[index] = list[i];
+            int index = Mathf.Clamp(list.Count - 1 - i, 0, list.Count - 1);
+
+            if (debug)
+            {
+                Debug.Log("List count: " + list.Count);
+                Debug.Log("Reversed Index: " + index);
+            }
+
+            reversed.Add(list[index]);
         }
 
         return reversed;

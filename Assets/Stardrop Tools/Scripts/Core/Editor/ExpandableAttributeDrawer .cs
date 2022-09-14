@@ -13,7 +13,7 @@ using UnityEditor;
 
 #if UNITY_EDITOR
 /// <summary>
-/// Draws the property field for any field marked with ExpandableAttribute.
+/// *Deprecated! - Draws the property field for any field marked with ExpandableAttribute.
 /// </summary>
 [CustomPropertyDrawer(typeof(ExpandableAttribute), true)]
 public class ExpandableAttributeDrawer : PropertyDrawer

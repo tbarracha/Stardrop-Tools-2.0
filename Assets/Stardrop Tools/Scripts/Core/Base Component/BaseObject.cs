@@ -38,6 +38,8 @@ namespace StardropTools
         public Vector3 EnabledPosition { get; protected set; }
         public Vector3 DisabledPosition { get; protected set; }
 
+        public Vector3 Forward { get => Transform.forward; }
+
         public float PosX { get => Position.x; set => objectData.SetPositionX(value); }
         public float PosY { get => Position.y; set => objectData.SetPositionY(value); }
         public float PosZ { get => Position.z; set => objectData.SetPositionZ(value); }
@@ -87,17 +89,17 @@ namespace StardropTools
 
         #region Events
 
-        public readonly BaseEvent OnActivate = new BaseEvent();
-        public readonly BaseEvent OnDeactivate = new BaseEvent();
+        public readonly GameEvent OnActivate = new GameEvent();
+        public readonly GameEvent OnDeactivate = new GameEvent();
 
-        public readonly BaseEvent OnParentChange = new BaseEvent();
-        public readonly BaseEvent OnChildrenChange = new BaseEvent();
+        public readonly GameEvent OnParentChange = new GameEvent();
+        public readonly GameEvent OnChildrenChange = new GameEvent();
         #endregion // Events
 
 
-        protected void DataCheck()
+        protected virtual void DataCheck()
         {
-            if (objectData.GameObject == null || objectData.Transform == null)
+            if (objectData.GameObject == null)
                 objectData = new BaseObjectData(gameObject);
         }
 
@@ -112,12 +114,16 @@ namespace StardropTools
         protected override void OnEnable()
         {
             base.OnEnable();
+
+            DataCheck();
             EnabledPosition = Position;
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
+
+            DataCheck();
             DisabledPosition = Position;
         }
 

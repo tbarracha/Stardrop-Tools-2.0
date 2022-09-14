@@ -22,17 +22,17 @@ namespace StardropTools
 
         #region Events
 
-        public readonly BaseEvent OnInitialize = new BaseEvent();
-        public readonly BaseEvent OnLateInitialize = new BaseEvent();
+        public readonly GameEvent OnInitialize = new GameEvent();
+        public readonly GameEvent OnLateInitialize = new GameEvent();
 
-        public readonly BaseEvent OnUpdate = new BaseEvent();
-        public readonly BaseEvent OnFixedUpdate = new BaseEvent();
-        public readonly BaseEvent OnLateUpdate = new BaseEvent();
+        public readonly GameEvent OnUpdate = new GameEvent();
+        public readonly GameEvent OnFixedUpdate = new GameEvent();
+        public readonly GameEvent OnLateUpdate = new GameEvent();
 
-        public readonly BaseEvent OnEnabled = new BaseEvent();
-        public readonly BaseEvent OnDisabled = new BaseEvent();
+        public readonly GameEvent OnEnabled = new GameEvent();
+        public readonly GameEvent OnDisabled = new GameEvent();
 
-        public readonly BaseEvent OnReset = new BaseEvent();
+        public readonly GameEvent OnReset = new GameEvent();
 
         #endregion // events
 
@@ -144,19 +144,19 @@ namespace StardropTools
 
         protected virtual void Awake()
         {
-            if (baseData.InitializationAt == EBaseInitialization.awake)
+            if (baseData.InitializationAt == BaseInitialization.awake)
                 Initialize();
 
-            if (baseData.LateInitializationAt == EBaseInitialization.awake)
+            if (baseData.LateInitializationAt == BaseInitialization.awake)
                 LateInitialize();
         }
 
         protected virtual void Start()
         {
-            if (baseData.InitializationAt == EBaseInitialization.start)
+            if (baseData.InitializationAt == BaseInitialization.start)
                 Initialize();
 
-            if (baseData.LateInitializationAt == EBaseInitialization.start)
+            if (baseData.LateInitializationAt == BaseInitialization.start)
                 LateInitialize();
         }
 
