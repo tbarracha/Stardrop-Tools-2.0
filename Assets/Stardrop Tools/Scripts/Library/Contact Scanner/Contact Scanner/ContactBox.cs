@@ -4,7 +4,7 @@ using UnityEngine;
 namespace StardropTools
 {
     /// <summary>
-    /// Checks and invokes events based on contact with filtered colliders
+    /// Collider like Class, that checks and invokes events based on contact with filtered colliders
     /// </summary>
     public class ContactBox : ContactScanner
     {
@@ -12,7 +12,7 @@ namespace StardropTools
 
         public override bool ContactScan()
         {
-            var contact = Physics.CheckBox(Position, scale, Rotation, contactLayers);
+            bool contact = Physics.CheckBox(Position, scale, Rotation, contactLayers);
             return ContactCheck(contact);
         }
 

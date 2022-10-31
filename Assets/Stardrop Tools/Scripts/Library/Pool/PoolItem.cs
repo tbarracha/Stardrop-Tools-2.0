@@ -14,16 +14,18 @@ namespace StardropTools.Pool
 
         public bool IsActive => GameObject.activeInHierarchy;
 
-        public PoolItem(Pool<T> pool, IPoolable<T> poolable, GameObject instance, int instanceID)
+        public PoolItem(Pool<T> pool, GameObject instance, int instanceID)
         {
             OriginPool = pool;
             InstanceID = instanceID;
 
             Component = instance.GetComponent<T>();
-            Poolable = poolable;
+            Poolable = instance.GetComponent<IPoolable<T>>();
 
             GameObject = Component.gameObject;
             Transform = Component.transform;
+
+            Poolable.SetPoolItem(this);
         }
 
         public void SetActive(bool value)

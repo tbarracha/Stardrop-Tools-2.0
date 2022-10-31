@@ -1,4 +1,5 @@
 ﻿
+
 namespace StardropTools.CustomCommands
 {
 #if UNITY_EDITOR
@@ -394,7 +395,7 @@ namespace StardropTools.CustomCommands
         }
 
 
-        
+
         // Set Selected Image Opacity all different
         // =============================================== Image Opacity Chain
         [MenuItem("Custom Commands/Image Opacity Chain #i")] // shift + i
@@ -434,7 +435,7 @@ namespace StardropTools.CustomCommands
                         a -= d;
 
                         img.color = color;
-                        
+
                         img.gameObject.SetActive(false);
                         img.gameObject.SetActive(true);
                         counter++;
@@ -442,6 +443,59 @@ namespace StardropTools.CustomCommands
                 }
 
                 Debug.Log("<color=cyan> Opacity Chain Complete </color>");
+            }
+        }
+
+
+        // Inverse XYZ Positions of selected objects
+        // =============================================== Inverse Axis
+        [MenuItem("Custom Commands/Inverse X Axis #x")] // shift + x
+        static void InverseX()
+        {
+            if (Selection.activeTransform != null && _cmdsActive)
+            {
+                GameObject[] objs;
+                objs = Selection.gameObjects;
+
+                foreach (GameObject go in objs)
+                {
+                    Undo.RecordObject(go.transform, "Inverse Axis");
+                    go.transform.position = UtilsVector.InverseVector3Axis(go.transform.position, 0);
+                }
+            }
+        }
+
+
+        [MenuItem("Custom Commands/Inverse Y Axis #y")] // shift + y
+        static void InverseY()
+        {
+            if (Selection.activeTransform != null && _cmdsActive)
+            {
+                GameObject[] objs;
+                objs = Selection.gameObjects;
+
+                foreach (GameObject go in objs)
+                {
+                    Undo.RecordObject(go.transform, "Inverse Axis");
+                    go.transform.position = UtilsVector.InverseVector3Axis(go.transform.position, 1);
+                }
+            }
+        }
+
+
+        [MenuItem("Custom Commands/Inverse Z Axis #z")] // shift + z
+        static void InverseZ()
+        {
+            if (Selection.activeTransform != null && _cmdsActive)
+            {
+                GameObject[] objs;
+                objs = Selection.gameObjects;
+
+                foreach (GameObject go in objs)
+                {
+                    Undo.RecordObject(go.transform, "Inverse Axis");
+                    go.transform.position = UtilsVector.InverseVector3Axis(go.transform.position, 2);
+                }
             }
         }
     }
@@ -462,7 +516,7 @@ namespace StardropTools.CustomCommands
                 propertyInfo.SetValue(inspectorToBeLocked, !value, null);
                 inspectorToBeLocked.Repaint();
 
-                Debug.LogFormat("<Color=white>Inspector Locked:</color> <color=cyan>{0}</color>", !value );
+                Debug.LogFormat("<Color=white>Inspector Locked:</color> <color=cyan>{0}</color>", !value);
             }
         }
     }

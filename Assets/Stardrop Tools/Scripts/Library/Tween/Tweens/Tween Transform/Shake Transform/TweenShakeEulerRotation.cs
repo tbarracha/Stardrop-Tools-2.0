@@ -3,9 +3,18 @@ using UnityEngine;
 
 namespace StardropTools.Tween
 {
+    /// <summary>
+    /// Set Intensity before all else
+    /// </summary>
     public class TweenShakeEulerRotation : TweenShakeVector3
     {
         public Transform target;
+
+        protected override void SetEssentials()
+        {
+            //tweenID = target.GetHashCode();
+            tweenType = TweenType.ShakeEulerRotation;
+        }
 
         public TweenShakeEulerRotation(Transform target, Vector3 start, Vector3 end)
         {
@@ -13,8 +22,7 @@ namespace StardropTools.Tween
             this.start = start;
             this.end = end;
 
-            tweenID = target.GetInstanceID();
-            tweenType = TweenType.ShakeEulerRotation;
+            SetEssentials();
         }
 
         public TweenShakeEulerRotation(Transform target, Vector3 end)
@@ -23,8 +31,7 @@ namespace StardropTools.Tween
             start = target.eulerAngles;
             this.end = end;
 
-            tweenID = target.GetInstanceID();
-            tweenType = TweenType.ShakeEulerRotation;
+            SetEssentials();
         }
 
         protected override void TweenUpdate(float percent)
@@ -36,9 +43,18 @@ namespace StardropTools.Tween
 
 
     // Local Rotation
+    /// <summary>
+    /// Set Intensity before all else
+    /// </summary>
     public class TweenShakeLocalEulerRotation : TweenShakeVector3
     {
         public Transform target;
+
+        protected override void SetEssentials()
+        {
+            tweenID = target.GetInstanceID();
+            tweenType = TweenType.ShakeLocalEulerRotation;
+        }
 
         public TweenShakeLocalEulerRotation(Transform target, Vector3 start, Vector3 end)
         {
@@ -46,7 +62,7 @@ namespace StardropTools.Tween
             this.start = start;
             this.end = end;
 
-            tweenType = TweenType.ShakeLocalEulerRotation;
+            SetEssentials();
         }
 
         public TweenShakeLocalEulerRotation(Transform target, Vector3 end)
@@ -56,13 +72,17 @@ namespace StardropTools.Tween
             start = target.localEulerAngles;
             this.end = end;
 
-            tweenType = TweenType.ShakeLocalEulerRotation;
+            SetEssentials();
         }
 
 
         protected override void TweenUpdate(float percent)
         {
             base.TweenUpdate(percent);
+
+            if (target == null)
+                ChangeState(TweenState.Canceled);
+
             target.localEulerAngles = lerped;
         }
     }

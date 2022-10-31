@@ -1,17 +1,17 @@
 ﻿
 using System.Collections.Generic;
+using NaughtyAttributes;
 
 namespace StardropTools
 {
     [System.Serializable]
     public class WeightedList<T>
     {
-        [UnityEngine.TextArea] [UnityEngine.SerializeField] string description = "Insert Weight Desciption...";
+        [ResizableTextArea][UnityEngine.SerializeField] string description = "Insert Weight Desciption...";
         public List<WeightedItem<T>> list = new List<WeightedItem<T>>();
 
         public int Count { get => list.Count; }
         public T RandomValue { get => GetRandom(); }
-
 
         public void Add(T item, int weight)
             => list.Add(new WeightedItem<T>(item, weight));

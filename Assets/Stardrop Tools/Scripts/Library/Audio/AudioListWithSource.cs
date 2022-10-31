@@ -1,11 +1,12 @@
 ﻿
+
 namespace StardropTools.Audio
 {
     [System.Serializable]
     public class AudioListWithSource
     {
         [UnityEngine.SerializeField] UnityEngine.AudioSource source;
-        [UnityEngine.SerializeField] AudioListSO group;
+        [NaughtyAttributes.Expandable] [UnityEngine.SerializeField] AudioListSO group;
 
         public UnityEngine.AudioSource Source { get => source; }
         public AudioListSO AudioDB { get => group; }
@@ -15,8 +16,11 @@ namespace StardropTools.Audio
         public UnityEngine.AudioClip GetClipAtIndex(int index) => group.GetClipAtIndex(index);
 
         #region Play Audio
-        public void PlayRandom()
+        public void PlayRandom(bool randomPitch = false)
         {
+            if (randomPitch)
+                source.pitch = RandomPitch;
+
             StopPlaying();
             source.clip = RandomClip;
             source.Play();

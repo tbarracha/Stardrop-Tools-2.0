@@ -5,10 +5,10 @@ namespace StardropTools.Tween
 {
     public enum TweenState
     {
-        waiting,
-        running,
-        complete,
-        paused,
-        canceled
+        Waiting,
+        Running,
+        Complete,
+        Paused,
+        Canceled
     }
 }

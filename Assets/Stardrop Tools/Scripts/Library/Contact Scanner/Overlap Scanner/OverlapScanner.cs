@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace StardropTools
@@ -14,8 +15,8 @@ namespace StardropTools
         [SerializeField] protected bool hasContact;
         [SerializeField] protected bool debug;
         [Space]
-        [SerializeField] protected System.Collections.Generic.List<Collider> listColliders;
         protected Collider[] colliders;
+        protected List<Collider> colliderList;
 
         public int ColliderCount { get => colliders.Exists() ? colliders.Length : 0; }
         public Collider[] Colliders { get => colliders; }
@@ -23,120 +24,102 @@ namespace StardropTools
         public bool HasContact { get => hasContact; }
 
         #region Events
-        public readonly BaseEvent OnDetected = new BaseEvent();
+        public readonly GameEvent OnDetected = new GameEvent();
 
-        public readonly BaseEvent OnEnter = new BaseEvent();
-        public readonly BaseEvent OnStay = new BaseEvent();
-        public readonly BaseEvent OnExit = new BaseEvent();
+        public readonly GameEvent OnEnter = new GameEvent();
+        public readonly GameEvent OnStay = new GameEvent();
+        public readonly GameEvent OnExit = new GameEvent();
 
-        public readonly BaseEvent<Collider> OnColliderEnter = new BaseEvent<Collider>();
-        public readonly BaseEvent<Collider> OnColliderStay = new BaseEvent<Collider>();
-        public readonly BaseEvent<Collider> OnColliderExit = new BaseEvent<Collider>();
+        public readonly GameEvent<Collider> OnColliderEnter = new GameEvent<Collider>();
+        public readonly GameEvent<Collider> OnColliderStay = new GameEvent<Collider>();
+        public readonly GameEvent<Collider> OnColliderExit = new GameEvent<Collider>();
 
-        public readonly BaseEvent<string> OnTagEnter = new BaseEvent<string>();
-        public readonly BaseEvent<string> OnTagStay = new BaseEvent<string>();
-        public readonly BaseEvent<string> OnTagExit = new BaseEvent<string>();
+        public readonly GameEvent<string> OnTagEnter = new GameEvent<string>();
+        public readonly GameEvent<string> OnTagStay = new GameEvent<string>();
+        public readonly GameEvent<string> OnTagExit = new GameEvent<string>();
 
-        public readonly BaseEvent<int> OnCountEnter = new BaseEvent<int>();
-        public readonly BaseEvent<int> OnCountStay = new BaseEvent<int>();
-        public readonly BaseEvent<int> OnCountExit = new BaseEvent<int>();
+        public readonly GameEvent<int> OnColliderCountChanged = new GameEvent<int>();
+
         #endregion // events
 
         public override void Initialize()
         {
             base.Initialize();
+
             colliders = new Collider[0];
+            colliderList = new List<Collider>();
         }
 
         public void SetLayerMask(LayerMask layerMask) => contactLayers = layerMask;
 
-        public virtual void OverlapScan()
+        public virtual Collider[] OverlapScan()
         {
             ColliderCheck();
-        }
-
-        public virtual Collider[] Scan(LayerMask mask)
-        {
             return colliders;
         }
 
 
-        // Add & Remove detected colliders in order;
+        /// <summary>
+        /// Compare detected Physics.Overlap colliders with a copy of last frames list, invoking events if changes were detected
+        /// </summary>
         protected void ColliderCheck()
         {
             if (colliders == null)
                 return;
 
-            if (listColliders == null)
-                listColliders = new System.Collections.Generic.List<Collider>();
+            if (colliderList == null)
+                colliderList = new List<Collider>();
 
-            // check if list and array is of equal length
-            // if not, either add or remove from list & invoke events
-            if (colliders.Length != listColliders.Count)
+            // check for collider contact
+            hasContact = colliders.Length > 0;
+
+            // if both colliders length is different, we need to make some checks
+            if (colliders.Length != colliderList.Count)
             {
-                if (colliders.Length > 0)
+                for (int i = 0; i < colliders.Length; i++)
                 {
-                    // check colliders to add to queue
-                    for (int i = 0; i < colliders.Length; i++)
+                    Collider collider = colliders[i];
+
+                    // Add Collider!
+                    if (colliderList.Contains(collider) == false)
                     {
-                        Collider col = colliders[i];
+                        colliderList.Add(collider);
 
-                        // add to queue
-                        if (listColliders.Contains(col) == false)
-                        {
-                            listColliders.Add(col);
+                        OnColliderEnter?.Invoke(collider);
+                        OnTagEnter?.Invoke(collider.tag);
 
-                            OnEnter?.Invoke();
-                            OnColliderEnter?.Invoke(col);
-                            OnTagEnter?.Invoke(col.tag);
-                            OnCountEnter?.Invoke(ColliderCount);
-
-                            if (debug)
-                                Debug.Log("Collider Entered");
-                        }
+                        if (debug)
+                            Debug.Log("Collider Entered");
                     }
-                }
 
-                else
-                {
-                    // check list to remove Out Of Bounds colliders
-                    for (int i = 0; i < listColliders.Count; i++)
+                    // Remove Collider!
+                    else
                     {
-                        // check if collider in list exists in collider array
-                        Collider col = listColliders[i];
+                        colliderList.Remove(collider);
 
-                        listColliders.Remove(col);
-
-                        OnExit?.Invoke();
-                        OnColliderExit?.Invoke(col);
-                        OnTagExit?.Invoke(col.tag);
-                        OnCountExit?.Invoke(ColliderCount);
+                        OnColliderExit?.Invoke(collider);
+                        OnTagExit?.Invoke(collider.tag);
 
                         if (debug)
                             Debug.Log("Collider Exited");
                     }
 
-                    listColliders.Clear();
+                    OnDetected?.Invoke();
+                    OnColliderCountChanged?.Invoke(colliders.Length);
                 }
-
-                OnDetected?.Invoke();
             }
 
-            hasContact = colliders.Length > 0;
-        }
-
-        protected void FixedCollisionCheck()
-        {
-            if (colliders.Exists())
+            // No Changes. If there are colliders, all of them existed on the previous frame
+            else
             {
-                for (int i = 0; i < colliders.Length; i++)
-                {
-                    OnColliderStay?.Invoke(colliders[i]);
-                    OnTagStay?.Invoke(colliders[i].tag);
-                    OnCountStay?.Invoke(ColliderCount);
-                }
+                if (colliders.Length > 0)
+                    for (int i = 0; i < colliders.Length; i++)
+                    {
+                        Collider collider = colliders[i];
 
-                OnStay.Invoke();
+                        OnColliderStay?.Invoke(collider);
+                        OnTagStay?.Invoke(collider.tag);
+                    }
             }
         }
 
@@ -146,7 +129,10 @@ namespace StardropTools
 
         }
 
-        public virtual T GetDetectedComponent<T>(T component)
+        /// <summary>
+        /// If there are any colliders, returns the first element that conatains the specified Type of Component
+        /// </summary>
+        public virtual T CheckForComponent<T>()
         {
             if (colliders != null && colliders.Length > 0)
             {
@@ -156,6 +142,37 @@ namespace StardropTools
                     if (obj != null)
                         return obj;
                 }
+
+                Debug.Log("Object not found");
+                return default;
+            }
+
+            else
+            {
+                Debug.Log("No colliders detected");
+                return default;
+            }
+        }
+
+
+        /// <summary>
+        /// If there are any colliders, returns a list of elements that conatain the specified Type of Component
+        /// </summary>
+        public virtual List<T> CheckForComponents<T>()
+        {
+            List<T> components = new List<T>();
+
+            if (colliders != null && colliders.Length > 0)
+            {
+                for (int i = 0; i < colliders.Length; i++)
+                {
+                    T obj = colliders[i].GetComponent<T>();
+                    if (obj != null)
+                        components.Add(obj);
+                }
+
+                if (components.Count > 0)
+                    return components;
 
                 Debug.Log("Object not found");
                 return default;

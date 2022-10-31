@@ -12,19 +12,23 @@ namespace StardropTools
 
         public Vector3 BoxScale { get => boxScale; set => boxScale = value; }
 
-        public override void OverlapScan()
+        public override Collider[] OverlapScan()
             => OverlapBoxScan(Position, Rotation);
 
-        public void OverlapBoxScan(Vector3 position, Quaternion rotation)
+        public Collider[] OverlapBoxScan(Vector3 position, Quaternion rotation)
         {
             colliders = Physics.OverlapBox(position + positionOffset, boxScale / 2, rotation, contactLayers);
             ColliderCheck();
+
+            return colliders;
         }
 
-        public void OverlapBoxScan(Vector3 position, Vector3 scale, Quaternion rotation)
+        public Collider[] OverlapBoxScan(Vector3 position, Vector3 scale, Quaternion rotation)
         {
             colliders = Physics.OverlapBox(position + positionOffset, scale / 2, rotation, contactLayers);
             ColliderCheck();
+
+            return colliders;
         }
 
 #if UNITY_EDITOR

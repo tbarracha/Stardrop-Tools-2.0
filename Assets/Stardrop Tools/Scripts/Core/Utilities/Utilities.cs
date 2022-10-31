@@ -1,13 +1,100 @@
 ﻿
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
+using StardropTools;
 
+/// <summary>
+/// Class that contains miscellanious static utilities
+/// </summary>
 public static class Utilities
 {
     static Camera camera;
 
+    #region Debug & Log
+    public const string DebugAlert = "<color=orange>Debug: </color>";
+
+    /// <summary>
+    /// Logs "Debug:" + message, in default ORANGE color
+    /// </summary>
+    public static void LogDebug(object message)
+    {
+        Debug.Log(DebugAlert + message);
+    }
+
+    /// <summary>
+    /// Logs "Debug:" + message, in CHOSEN color
+    /// <para> Colors: red, orange, yellow, white, magenta, cyan, black, gray </para>
+    /// </summary>
+    public static void LogDebug(string color, object message)
+    {
+        Debug.Log("<color=" + color + "> Debug: </color>" + message);
+    }
+
+
+    /// <summary>
+    /// Logs a message in the Unity Console with CHOSEN Unity color
+    /// <para> Colors: red, orange, white, magenta, cyan, black, gray </para>
+    /// </summary>
+    public static void LogColored(string color, object message)
+    {
+        Debug.Log("<color=" + color + ">" + message + "</color>");
+    }
+
+#if UNITY_EDITOR
+    public static void ClearLog() //you can copy/paste this code to the bottom of your script
+    {
+        var assembly = System.Reflection.Assembly.GetAssembly(typeof(UnityEditor.Editor));
+        var type = assembly.GetType("UnityEditor.LogEntries");
+        var method = type.GetMethod("Clear");
+        method.Invoke(new object(), null);
+    }
+#endif
+#endregion
+
+    public static bool RandomTrueOrFalse() => ConvertIntToBool(Random.Range(0, 2));
+
+    /// <summary>
+    /// Invokes the InitializeManager() method on an array of IManager
+    /// </summary>
+    public static void InitializeManagers(IManager[] managers)
+    {
+        for (int i = 0; i < managers.Length; i++)
+            managers[i].InitializeManager();
+    }
+
+    /// <summary>
+    /// Invokes the LateInitializeManager() method on an array of IManager
+    /// </summary>
+    public static void LateInitializeManagers(IManager[] managers)
+    {
+        for (int i = 0; i < managers.Length; i++)
+            managers[i].LateInitializeManager();
+    }
+
+    /// <summary>
+    /// Invokes the Initialize() method on an array of BaseComponents
+    /// </summary>
+    public static void InitializeBaseComponents(BaseComponent[] baseComponents)
+    {
+        for (int i = 0; i < baseComponents.Length; i++)
+            baseComponents[i].Initialize();
+    }
+
+    /// <summary>
+    /// Invokes the LateInitialize() method on an array of BaseComponents
+    /// </summary>
+    public static void LateInitializeBaseComponents(BaseComponent[] baseComponents)
+    {
+        for (int i = 0; i < baseComponents.Length; i++)
+            baseComponents[i].LateInitialize();
+    }
+
+    /// <summary>
+    /// Returns a list of components found under parent transform
+    /// </summary>
     public static List<T> GetItems<T>(Transform parent)
     {
         if (parent != null && parent.childCount > 0)
@@ -40,6 +127,78 @@ public static class Utilities
         point.position = position;
         point.parent = parent;
         return point;
+    }
+
+    /// <summary>
+    /// 0 - False, 1 - True
+    /// </summary>
+    public static bool ConvertIntToBool(int id)
+    {
+        if (id == 0)
+            return false;
+        else
+            return true;
+    }
+
+    /// <summary>
+    /// 0 - False, 1 - True
+    /// </summary>
+    public static int ConvertBoolToInt(bool value)
+    {
+        if (value == false)
+            return 0;
+        else
+            return 1;
+    }
+
+    /// <summary>
+    /// Set a single Width to line
+    /// </summary>
+    public static void SetLineWidth(this LineRenderer line, float width)
+    {
+        line.startWidth = width;
+        line.endWidth = width;
+    }
+
+
+    /// <summary>
+    /// Sets line point count and points from an array
+    /// </summary>
+    public static void SetLinePoints(this LineRenderer line, Vector3[] points)
+    {
+        line.positionCount = points.Length;
+        line.SetPositions(points);
+    }
+
+    /// <summary>
+    /// Sets line point count and points from a list
+    /// </summary>
+    public static void SetLinePoints(this LineRenderer line, List<Vector3> points)
+    {
+        line.positionCount = points.Count;
+        line.SetPositions(points.ToArray());
+    }
+
+    /// <summary>
+    /// Sets a color to Line start and end
+    /// </summary>
+    public static void SetLineColor(this LineRenderer line, Color color)
+    {
+        line.startColor = color;
+        line.endColor = color;
+    }
+
+
+    public static string FirstLetterUppercase(this string str)
+    {
+        if (string.IsNullOrEmpty(str))
+            return string.Empty;
+
+        str.ToLower();
+        char[] characters = str.ToCharArray();
+        characters[0] = char.ToUpper(characters[0]);
+
+        return new string(characters);
     }
 
     public static Vector3 ViewportRaycast(LayerMask layerMask)
@@ -105,16 +264,149 @@ public static class Utilities
             StopCoroutine(coroutine);
     }
 
-#if UNITY_EDITOR
-    public static void ClearLog() //you can copy/paste this code to the bottom of your script
+    /// <summary>
+    /// Puts the string into the Clipboard.
+    /// </summary>
+    public static void CopyStringToClipboard(this string str)
     {
-        var assembly = System.Reflection.Assembly.GetAssembly(typeof(UnityEditor.Editor));
-        var type = assembly.GetType("UnityEditor.LogEntries");
-        var method = type.GetMethod("Clear");
-        method.Invoke(new object(), null);
+        GUIUtility.systemCopyBuffer = str;
     }
 
+    /// <summary>
+    /// Creates new file if there isn't one or adds contents to an existing one, and Returns its path
+    /// File name ex: 'logs.txt' (extensions can be whatever ex: .bnb, .cro, etc,.)
+    /// </summary>
+    public static string CreateOrAddTextToFile(string path, string fileName, string content, int newLineAmount = 0)
+    {
+        // path to file
+        string filePath = path + fileName;
+
+        // add new lines
+        if (newLineAmount > 0)
+            for (int i = 0; i < newLineAmount; i++)
+                content += "\n";
+
+        // create file it if doesnt exist
+        if (File.Exists(filePath) == false)
+            File.WriteAllText(filePath, content);
+
+        // add content to file
+        else
+            File.AppendAllText(filePath, content);
+
+        return filePath;
+    }
+
+    /// <summary>
+    /// Creates new file if there isn't one or adds contents to an existing one, and Returns its path
+    /// File name ex: 'logs.txt' (extensions can be whatever ex: .bnb, .cro, etc,.)
+    /// </summary>
+    public static string CreateOrAddTextToFile(string path, string content)
+    {
+        // create file it if doesnt exist
+        if (File.Exists(path) == false)
+            File.WriteAllText(path, content);
+
+        // add content to file
+        else
+            File.AppendAllText(path, content);
+
+        return path;
+    }
+
+    public static void SetImageArrayColor(UnityEngine.UI.Image[] images, Color color)
+    {
+        for (int i = 0; i < images.Length; i++)
+            images[i].color = color;
+    }
+
+    public static void SetImageArrayAlpha(UnityEngine.UI.Image[] images, float alpha)
+    {
+        Color color = Color.black;
+
+        for (int i = 0; i < images.Length; i++)
+        {
+            color = images[i].color;
+            color.a = alpha;
+
+            images[i].color = color;
+        }
+    }
+
+    public static void SetImagePixelsPerUnit(UnityEngine.UI.Image[] images, float pixelsPerUnit)
+    {
+        for (int i = 0; i < images.Length; i++)
+            images[i].pixelsPerUnitMultiplier = pixelsPerUnit;
+    }
+
+    #region Get Random
+
+    public static T GetRandom<T>(T[] array) => array.GetRandom(); // kinda redundant, isnt it?
+
+    public static T GetRandom<T>(T option1, T option2)
+    {
+        List<T> list = new List<T>();
+        list.Add(option1);
+        list.Add(option2);
+
+        return list.GetRandom();
+    }
+
+    public static T GetRandom<T>(T option1, T option2, T option3)
+    {
+        List<T> list = new List<T>();
+        list.Add(option1);
+        list.Add(option2);
+        list.Add(option3);
+
+        return list.GetRandom();
+    }
+
+    public static T GetRandom<T>(T option1, T option2, T option3, T option4)
+    {
+        List<T> list = new List<T>();
+        list.Add(option1);
+        list.Add(option2);
+        list.Add(option3);
+        list.Add(option4);
+
+        return list.GetRandom();
+    }
+
+    public static T GetRandom<T>(T option1, T option2, T option3, T option4, T option5)
+    {
+        List<T> list = new List<T>();
+        list.Add(option1);
+        list.Add(option2);
+        list.Add(option3);
+        list.Add(option4);
+        list.Add(option5);
+
+        return list.GetRandom();
+    }
+
+    #endregion // Get Random
+
+#if UNITY_EDITOR
     #region Gizmos
+
+    public static void DrawPoint(Vector3 position, Color color, float radius)
+    {
+        Gizmos.color = color;
+        Gizmos.DrawSphere(position, radius);
+    }
+
+    public static void DrawLine(Vector3 origin, Vector3 target, Color color)
+    {
+        Gizmos.color = color;
+        Gizmos.DrawLine(origin, target);
+    }
+
+    public static void DrawRay(Vector3 origin, Vector3 direction, Color color)
+    {
+        Gizmos.color = color;
+        Gizmos.DrawRay(origin, direction);
+    }
 
     public static void DrawCube(Vector3 position, Vector3 scale, Quaternion rotation)
     {
@@ -167,14 +459,16 @@ public static class Utilities
     /// </summary>
     /// <param name="className">Name of scriptable object class</param>
     /// <param name="path"> Path to save ex: "Assets/Resources/SO" </param>
-    /// <returns></returns>
-    public static void CreateScriptableObject(string soClassName, string path)
+    public static ScriptableObject CreateScriptableObject(string scriptableClassName, string path, string name)
     {
-        ScriptableObject so = ScriptableObject.CreateInstance(soClassName);
+        ScriptableObject so = ScriptableObject.CreateInstance(scriptableClassName);
+        so.name = name;
 
         AssetDatabase.CreateAsset(so, path);
         AssetDatabase.SaveAssets();
         Selection.activeObject = so;
+
+        return so;
     }
 
     public static T CreatePrefab<T>(GameObject prefab, Transform parent)

@@ -13,6 +13,14 @@ public static class UtilsArray
             return false;
     }
 
+    public static bool Exists<T>(this T[] array, int minLength)
+    {
+        if (array != null && array.Length >= minLength)
+            return true;
+        else
+            return false;
+    }
+
 
     public static bool ContainsObject(this Object[] array, Object obj)
     {
@@ -106,7 +114,7 @@ public static class UtilsArray
 
     public static bool AddSafe<T>(this List<T> list, T element)
     {
-        if (list.Exists() && list.Contains(element) == false)
+        if (list != null && list.Contains(element) == false)
         {
             list.Add(element);
             return true;
@@ -118,7 +126,7 @@ public static class UtilsArray
 
     public static bool RemoveSafe<T>(this List<T> list, T element)
     {
-        if (list.Exists() && list.Contains(element))
+        if (list != null && list.Contains(element))
         {
             list.Remove(element);
             return true;
@@ -128,15 +136,47 @@ public static class UtilsArray
             return false;
     }
 
-    public static void AddArrayToList<T>(this List<T> listToAdd, T[] array)
+
+    public static T GetFirst<T>(this T[] array) => array[0];
+    public static T GetFirst<T>(this List<T> array) => array[0];
+
+    public static T GetLast<T>(this T[] array) => array[array.Length - 1];
+    public static T GetLast<T>(this List<T> array) => array[array.Count - 1];
+
+
+    /// <summary>
+    /// Add array elements to list
+    /// </summary>
+    public static List<T> AddArrayToList<T>(this List<T> listToAdd, T[] array)
     {
         for (int i = 0; i < array.Length; i++)
             listToAdd.AddSafe(array[i]);
+
+        return listToAdd;
     }
 
+
+    /// <summary>
+    /// Add list elements to another list without repeating
+    /// </summary>
+    public static List<T> AddListToList<T>(this List<T> listToAdd, List<T> thisToBeAdded)
+    {
+        for (int i = 0; i < thisToBeAdded.Count; i++)
+            listToAdd.AddSafe(thisToBeAdded[i]);
+
+        return listToAdd;
+    }
+
+
+    /// <summary>
+    /// Returns a single random element from a list
+    /// </summary>
     public static T GetRandom<T>(this List<T> list)
         => list[Random.Range(0, list.Count)];
 
+    /// <summary>
+    /// Returns several random elements from a list without repeating values
+    /// </summary>
     public static List<T> GetRandomNonRepeat<T>(this List<T> list, int amount, float divisionIfExceed = 2)
     {
         if (list.Count <= amount)
@@ -169,7 +209,7 @@ public static class UtilsArray
         return list;
     }
 
-    public static T[] RemoveDuplicates<T>(T[] array)
+    public static T[] RemoveDuplicates<T>(this T[] array)
     {
         List<T> list = new List<T>();
         for (int i = 0; i < array.Length; i++)
@@ -178,7 +218,7 @@ public static class UtilsArray
         return RemoveDuplicates<T>(list).ToArray();
     }
 
-    public static List<T> RemoveDuplicates<T>(List<T> list)
+    public static List<T> RemoveDuplicates<T>(this List<T> list)
     {
         for (int i = 0; i < list.Count; i++)
         {
@@ -197,20 +237,33 @@ public static class UtilsArray
         return list;
     }
 
-    public static List<T> ReverseList<T>(List<T> list)
+    public static List<T> ReverseList<T>(this List<T> list, bool debug = false)
     {
+        if (list.Count == 0)
+        {
+            Debug.Log("List too short!");
+            return list;
+        }
+
         var reversed = new List<T>();
 
         for (int i = 0; i < list.Count; i++)
         {
-            int index = Mathf.Clamp(list.Count - 1 - i, 0, list.Count);
-            reversed[index] = list[i];
+            int index = Mathf.Clamp(list.Count - 1 - i, 0, list.Count - 1);
+
+            if (debug)
+            {
+                Debug.Log("List count: " + list.Count);
+                Debug.Log("Reversed Index: " + index);
+            }
+
+            reversed.Add(list[index]);
         }
 
         return reversed;
     }
 
-    public static List<T> ReverseArray<T>(T[] array)
+    public static List<T> ReverseArray<T>(this T[] array)
     {
         var reversed = new List<T>();
 
@@ -223,7 +276,7 @@ public static class UtilsArray
         return reversed;
     }
 
-    public static List<T> ArrayToList<T>(T[] array)
+    public static List<T> ArrayToList<T>(this T[] array)
     {
         var list = new List<T>();
 

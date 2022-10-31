@@ -7,14 +7,19 @@ namespace StardropTools.Tween
     {
         public Transform target;
 
+        protected override void SetEssentials()
+        {
+            //tweenID = target.GetHashCode();
+            tweenType = TweenType.Rotation;
+        }
+
         public TweenRotation(Transform target, Quaternion start, Quaternion end)
         {
             this.target = target;
             this.start = start;
             this.end = end;
 
-            tweenID = target.GetInstanceID();
-            tweenType = TweenType.Rotation;
+            SetEssentials();
         }
 
         public TweenRotation(Transform target, Quaternion end)
@@ -23,8 +28,7 @@ namespace StardropTools.Tween
             start = target.rotation;
             this.end = end;
 
-            tweenID = target.GetInstanceID();
-            tweenType = TweenType.Rotation;
+            SetEssentials();
         }
 
         protected override void TweenUpdate(float percent)
@@ -63,6 +67,10 @@ namespace StardropTools.Tween
         protected override void TweenUpdate(float percent)
         {
             base.TweenUpdate(percent);
+
+            if (target == null)
+                ChangeState(TweenState.Canceled);
+
             target.localRotation = lerped;
         }
     }

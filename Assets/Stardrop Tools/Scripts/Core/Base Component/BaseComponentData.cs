@@ -8,12 +8,12 @@ namespace StardropTools
     [System.Serializable]
     public struct BaseComponentData
     {
-        [UnityEngine.SerializeField] EBaseInitialization initializationAt;
-        [UnityEngine.SerializeField] EBaseInitialization lateInitializationAt;
+        [UnityEngine.SerializeField] BaseInitialization initializationAt;
+        [UnityEngine.SerializeField] BaseInitialization lateInitializationAt;
         public bool stopUpdateOnDisable;
 
-        public EBaseInitialization InitializationAt { get => initializationAt; }
-        public EBaseInitialization LateInitializationAt { get => lateInitializationAt; }
+        public BaseInitialization InitializationAt { get => initializationAt; }
+        public BaseInitialization LateInitializationAt { get => lateInitializationAt; }
     }
 }
 

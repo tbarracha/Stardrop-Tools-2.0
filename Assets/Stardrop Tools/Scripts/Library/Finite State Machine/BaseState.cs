@@ -6,14 +6,18 @@ namespace StardropTools.FiniteStateMachine
     /// <summary>
     /// Base state Class from which all other state may derive from.
     /// </summary>
-    public abstract class BaseState : IBaseState
+    [System.Serializable]
+    public class BaseState : IBaseState
     {
-        [SerializeField] protected FiniteStateMachine stateMachine;
+        [SerializeField] protected string stateName;
         [SerializeField] protected int stateID;
         [SerializeField] protected float timeInState;
+        [Space]
+        [SerializeField] protected FiniteStateMachine stateMachine;
 
         public FiniteStateMachine StateMachine => stateMachine;
         public int StateID => stateID;
+        public string StateName => stateName;
         public float TimeInState => timeInState;
 
         public bool IsInitialized { get; protected set; }
@@ -21,11 +25,57 @@ namespace StardropTools.FiniteStateMachine
         public int GetStateID() => stateID;
 
 
-        public readonly BaseEvent<BaseState> OnStateEnter = new BaseEvent<BaseState>();
-        public readonly BaseEvent<BaseState> OnStateExit = new BaseEvent<BaseState>();
-        public readonly BaseEvent<BaseState> OnStateUpdate = new BaseEvent<BaseState>();
-        public readonly BaseEvent<BaseState> OnStateInput = new BaseEvent<BaseState>();
+        public readonly GameEvent<BaseState> OnStateEnter = new GameEvent<BaseState>();
+        public readonly GameEvent<BaseState> OnStateExit = new GameEvent<BaseState>();
+        public readonly GameEvent<BaseState> OnStateUpdate = new GameEvent<BaseState>();
+        public readonly GameEvent<BaseState> OnStateInput = new GameEvent<BaseState>();
 
+        public readonly GameEvent OnEnter = new GameEvent();
+        public readonly GameEvent OnExit = new GameEvent();
+        public readonly GameEvent OnUpdate = new GameEvent();
+        public readonly GameEvent OnInput = new GameEvent();
+
+
+        #region Constructor
+        public BaseState() { }
+
+        public BaseState(string stateName) => this.stateName = stateName;
+
+        public BaseState(FiniteStateMachine stateMachine, int stateID, string stateName)
+        {
+            this.stateMachine = stateMachine;
+            this.stateID = stateID;
+            this.stateName = stateName;
+        }
+        #endregion // Constructor
+
+
+        #region Setters
+        public BaseState SetStateID(int stateID)
+        {
+            this.stateID = stateID;
+            return this;
+        }
+
+        public BaseState SetStateName(string stateName)
+        {
+            this.stateName = stateName;
+            return this;
+        }
+
+        public BaseState SetStateIDandName(int stateID, string stateName)
+        {
+            this.stateID = stateID;
+            this.stateName = stateName;
+            return this;
+        }
+
+        public BaseState SetStateMachine(FiniteStateMachine stateMachine)
+        {
+            this.stateMachine = stateMachine;
+            return this;
+        }
+        #endregion // setters
 
         public virtual void Initialize(FiniteStateMachine stateMachine, int stateID)
         {
@@ -38,16 +88,31 @@ namespace StardropTools.FiniteStateMachine
             IsInitialized = true;
         }
 
+        public virtual void Initialize(FiniteStateMachine stateMachine, int stateID, string stateName)
+        {
+            if (IsInitialized)
+                return;
+
+            this.stateMachine = stateMachine;
+            this.stateID = stateID;
+            this.stateName = stateName;
+
+            IsInitialized = true;
+        }
+
 
         public virtual void EnterState()
         {
             timeInState = 0;
+
+            OnEnter?.Invoke();
             OnStateEnter?.Invoke(this);
         }
 
 
         public virtual void ExitState()
         {
+            OnExit?.Invoke();
             OnStateExit?.Invoke(this);
         }
 
@@ -67,6 +132,8 @@ namespace StardropTools.FiniteStateMachine
                 return;
 
             timeInState += Time.deltaTime;
+
+            OnUpdate?.Invoke();
             OnStateUpdate?.Invoke(this);
         }
 
@@ -93,7 +160,6 @@ namespace StardropTools.FiniteStateMachine
         protected virtual void ChangeState(int nextStateID)
             => stateMachine.ChangeState(nextStateID);
 
-        public void SetStateID(int stateID)
-            => this.stateID = stateID;
+        public void SetID(int id) => stateID = id;
     }
 }

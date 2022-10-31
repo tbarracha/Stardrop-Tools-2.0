@@ -1,6 +1,7 @@
 ﻿
 using System.Collections.Generic;
 using UnityEngine;
+using NaughtyAttributes;
 
 namespace StardropTools.Pool
 {
@@ -14,24 +15,24 @@ namespace StardropTools.Pool
         public int poolID;
         [Space]
         [SerializeField] Transform parent;
-        [SerializeField] GameObject prefab;
+        [ShowAssetPreview][SerializeField] GameObject prefab;
         [SerializeField] int capacity;
         [SerializeField] bool canOverflow;
-        [Space]
-        [SerializeField] Queue<PoolItem<T>> itemQueue;
-        [SerializeField] List<PoolItem<T>> itemCache;
 
-        bool isPopulated;
+        Queue<PoolItem<T>> itemQueue;
+        List<PoolItem<T>> itemCache;
+
+        public bool IsPopulated { get; private set; }
 
         public GameObject Prefab { get => prefab; }
         public int Capacity { get => capacity; }
         public bool CanOverflow { get => canOverflow; }
 
-        public readonly BaseEvent OnSpawn = new BaseEvent();
-        public readonly BaseEvent OnDespawn = new BaseEvent();
+        public readonly GameEvent OnSpawn = new GameEvent();
+        public readonly GameEvent OnDespawn = new GameEvent();
 
-        public readonly BaseEvent<T> OnSpawnObject = new BaseEvent<T>();
-        public readonly BaseEvent<T> OnDespawnObject = new BaseEvent<T>();
+        public readonly GameEvent<T> OnSpawnObject = new GameEvent<T>();
+        public readonly GameEvent<T> OnDespawnObject = new GameEvent<T>();
 
 
         #region Constructors
@@ -82,9 +83,18 @@ namespace StardropTools.Pool
         /// <summary>
         /// Fill pool with items
         /// </summary>
+        public void Populate(Transform parent)
+        {
+            this.parent = parent;
+            Populate();
+        }
+
+        /// <summary>
+        /// Fill pool with items
+        /// </summary>
         public void Populate()
         {
-            if (isPopulated)
+            if (IsPopulated)
                 return;
 
             itemQueue = new Queue<PoolItem<T>>();
@@ -97,7 +107,7 @@ namespace StardropTools.Pool
                 itemCache.Add(item);
             }
 
-            isPopulated = true;
+            IsPopulated = true;
         }
 
         /// <summary>
@@ -111,10 +121,7 @@ namespace StardropTools.Pool
             instance.transform.position = parent.position;
             instance.name = prefab.name + " - " + instanceID;
 
-            // Pool Item
-            IPoolable<T> poolable = instance.GetComponent<IPoolable<T>>();
-
-            return new PoolItem<T>(this, poolable, instance, instanceID);
+            return new PoolItem<T>(this, instance, instanceID);
         }
 
         private PoolItem<T> GetItem()
@@ -230,9 +237,11 @@ namespace StardropTools.Pool
         /// </summary>
         public void Despawn(T component)
         {
+            int instanceID = component.GetInstanceID();
+
             for (int i = 0; i < itemCache.Count; i++)
             {
-                if (itemCache[i].Component.GetInstanceID() == component.GetInstanceID())
+                if (itemCache[i].Component.GetInstanceID() == instanceID)
                 {
                     Despawn(itemCache[i]);
                     return;

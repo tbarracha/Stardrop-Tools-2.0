@@ -4,14 +4,14 @@ public class LoopManager : Singleton<LoopManager>
 {
     public bool IsInitialized { get; private set; }
 
-    public static readonly BaseEvent OnAwake = new BaseEvent();
-    public static readonly BaseEvent OnStart = new BaseEvent();
-    public static readonly BaseEvent OnUpdate = new BaseEvent();
-    public static readonly BaseEvent OnLateUpdate = new BaseEvent();
-    public static readonly BaseEvent OnFixedUpdate = new BaseEvent();
+    public static readonly GameEvent OnAwake = new GameEvent();
+    public static readonly GameEvent OnStart = new GameEvent();
+    public static readonly GameEvent OnUpdate = new GameEvent();
+    public static readonly GameEvent OnLateUpdate = new GameEvent();
+    public static readonly GameEvent OnFixedUpdate = new GameEvent();
 
-    public static readonly BaseEvent OnEnabled = new BaseEvent();
-    public static readonly BaseEvent OnDisabled = new BaseEvent();
+    public static readonly GameEvent OnEnabled = new GameEvent();
+    public static readonly GameEvent OnDisabled = new GameEvent();
 
 
     public static UnityEngine.Transform Transform;

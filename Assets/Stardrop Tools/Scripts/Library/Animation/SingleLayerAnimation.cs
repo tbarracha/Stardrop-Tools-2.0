@@ -30,16 +30,17 @@ namespace StardropTools
         public AnimState CurrentState { get => animStates[currentAnimID]; }
         public int CurrentAnimID { get => currentAnimID; }
 
-        public readonly BaseEvent OnAnimStart = new BaseEvent();
-        public readonly BaseEvent OnAnimComplete = new BaseEvent();
+        public readonly GameEvent OnAnimStart = new GameEvent();
+        public readonly GameEvent OnAnimComplete = new GameEvent();
 
-        public readonly BaseEvent<int> OnAnimStartID = new BaseEvent<int>();
-        public readonly BaseEvent<int> OnAnimCompleteID = new BaseEvent<int>();
+        public readonly GameEvent<int> OnAnimStartID = new GameEvent<int>();
+        public readonly GameEvent<int> OnAnimCompleteID = new GameEvent<int>();
 
-        public readonly BaseEvent<AnimState> OnAnimStateStart = new BaseEvent<AnimState>();
-        public readonly BaseEvent<AnimState> OnAnimStateComplete = new BaseEvent<AnimState>();
+        public readonly GameEvent<AnimState> OnAnimStateStart = new GameEvent<AnimState>();
+        public readonly GameEvent<AnimState> OnAnimStateComplete = new GameEvent<AnimState>();
 
-        public BaseEvent<int> OnAnimEventDectected { get => animEventDetector.OnAnimEvent; }
+        public GameEvent<int> OnAnimEventINT { get => animEventDetector.OnAnimEventINT; }
+        public GameEvent<string> OnAnimEventSTRING { get => animEventDetector.OnAnimEventSTRING; }
 
 
         /// <summary>
@@ -161,6 +162,11 @@ namespace StardropTools
             OnAnimComplete?.Invoke();
             OnAnimCompleteID?.Invoke(currentAnimID);
             OnAnimStateComplete?.Invoke(CurrentState);
+        }
+
+        public void ChangeRuntimeAnimatorController(RuntimeAnimatorController runtimeAnimator)
+        {
+            animator.runtimeAnimatorController = runtimeAnimator;
         }
 
 #if UNITY_EDITOR

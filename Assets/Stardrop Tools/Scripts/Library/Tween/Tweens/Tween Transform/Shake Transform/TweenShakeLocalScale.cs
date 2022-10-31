@@ -3,9 +3,18 @@ using UnityEngine;
 
 namespace StardropTools.Tween
 {
+    /// <summary>
+    /// Set Intensity before all else
+    /// </summary>
     public class TweenShakeLocalScale : TweenShakeVector3
     {
         public Transform target;
+
+        protected override void SetEssentials()
+        {
+            //tweenID = target.GetHashCode();
+            tweenType = TweenType.ShakeLocalScale;
+        }
 
         public TweenShakeLocalScale(Transform target, Vector3 start, Vector3 end)
         {
@@ -13,8 +22,7 @@ namespace StardropTools.Tween
             this.start = start;
             this.end = end;
 
-            tweenID = target.GetInstanceID();
-            tweenType = TweenType.ShakeLocalScale;
+            SetEssentials();
         }
 
         public TweenShakeLocalScale(Transform target, Vector3 end)
@@ -23,14 +31,23 @@ namespace StardropTools.Tween
             start = target.localScale;
             this.end = end;
 
-            tweenID = target.GetInstanceID();
-            tweenType = TweenType.ShakeLocalScale;
+            SetEssentials();
         }
 
         protected override void TweenUpdate(float percent)
         {
             base.TweenUpdate(percent);
             target.localScale = lerped;
+        }
+
+        protected override void Complete()
+        {
+            base.Complete();
+
+            if (target == null)
+                ChangeState(TweenState.Canceled);
+
+            target.localScale = end;
         }
     }
 }

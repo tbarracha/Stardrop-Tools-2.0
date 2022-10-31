@@ -11,6 +11,7 @@ namespace StardropTools.Tween
         Vector4,
         Quaternion,
         Color,
+        ColorOpacity,
 
         // Shake / Punch Values
         ShakeFloat,
@@ -49,5 +50,19 @@ namespace StardropTools.Tween
         AnchoredPosition,
         SizeDelta,
         RectSize,
+
+        // Image
+        ImageColor,
+        ImageOpacity,
+        ImagePixelsPerUnitMultiplier,
+
+        // Text Mesh UGui
+        TextMeshColor,
+        TextMeshOpacity,
+        TextMeshSize,
+
+        // Sprite renderer
+        SpriteRendererColor,
+        SpriteRendererOpacity,
     }
 }

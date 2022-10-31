@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace StardropTools.Tween
 {
+    /// <summary>
+    /// Set Intensity before all else
+    /// </summary>
     public class TweenShakePosition : TweenShakeVector3
     {
         public Transform target;
@@ -14,7 +17,7 @@ namespace StardropTools.Tween
             this.end = end;
 
             tweenID = target.GetInstanceID();
-            tweenType = TweenType.Position;
+            tweenType = TweenType.ShakePosition;
         }
 
         public TweenShakePosition(Transform target, Vector3 end)
@@ -24,7 +27,7 @@ namespace StardropTools.Tween
             this.end = end;
 
             tweenID = target.GetInstanceID();
-            tweenType = TweenType.Position;
+            tweenType = TweenType.ShakePosition;
         }
 
         protected override void TweenUpdate(float percent)
@@ -36,9 +39,18 @@ namespace StardropTools.Tween
 
 
     // Local Position
+    /// <summary>
+    /// Set Intensity before all else
+    /// </summary>
     public class TweenShakeLocalPosition : TweenShakeVector3
     {
         public Transform target;
+
+        protected override void SetEssentials()
+        {
+            //tweenID = target.GetInstanceID();
+            tweenType = TweenType.ShakeLocalPosition;
+        }
 
         public TweenShakeLocalPosition(Transform target, Vector3 start, Vector3 end)
         {
@@ -46,7 +58,7 @@ namespace StardropTools.Tween
             this.start = start;
             this.end = end;
 
-            tweenType = TweenType.Position;
+            SetEssentials();
         }
 
         public TweenShakeLocalPosition(Transform target, Vector3 end)
@@ -56,13 +68,17 @@ namespace StardropTools.Tween
             start = target.localPosition;
             this.end = end;
 
-            tweenType = TweenType.LocalPosition;
+            SetEssentials();
         }
 
 
         protected override void TweenUpdate(float percent)
         {
             base.TweenUpdate(percent);
+
+            if (target == null)
+                ChangeState(TweenState.Canceled);
+
             target.localPosition = lerped;
         }
     }

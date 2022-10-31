@@ -9,9 +9,16 @@ namespace StardropTools.Tween
         public int end;
         public int lerped;
 
-        public TweenInt()
+        public readonly GameEvent<int> OnTweenInt = new GameEvent<int>();
+
+        protected override void SetEssentials()
         {
             tweenType = TweenType.Int;
+        }
+
+        public TweenInt()
+        {
+            SetEssentials();
         }
 
         public TweenInt SetStart(int start)
@@ -36,12 +43,19 @@ namespace StardropTools.Tween
         protected override void TweenUpdate(float percent)
         {
             lerped = (int)Mathf.LerpUnclamped(start, end, Ease(percent));
+            OnTweenInt?.Invoke(lerped);
+        }
+
+        protected override void Complete()
+        {
+            base.Complete();
+            OnTweenInt?.Invoke(lerped);
         }
 
         protected override void Loop()
         {
             ResetRuntime();
-            ChangeState(TweenState.running);
+            ChangeState(TweenState.Running);
         }
 
         protected override void PingPong()
@@ -51,7 +65,7 @@ namespace StardropTools.Tween
             end = temp;
 
             ResetRuntime();
-            ChangeState(TweenState.running);
+            ChangeState(TweenState.Running);
         }
     }
 }

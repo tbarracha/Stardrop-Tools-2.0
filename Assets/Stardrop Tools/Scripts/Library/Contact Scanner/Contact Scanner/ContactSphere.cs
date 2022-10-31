@@ -12,7 +12,7 @@ namespace StardropTools
 
         public override bool ContactScan()
         {
-            var contact = Physics.CheckSphere(Position, radius, contactLayers);
+            bool contact = Physics.CheckSphere(Position, radius, contactLayers);
             return ContactCheck(contact);
         }
 

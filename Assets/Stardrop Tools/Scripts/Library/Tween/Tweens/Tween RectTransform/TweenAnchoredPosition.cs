@@ -7,14 +7,19 @@ namespace StardropTools.Tween
     {
         public RectTransform target;
 
+        protected override void SetEssentials()
+        {
+            //tweenID = target.GetHashCode();
+            tweenType = TweenType.ImageColor;
+        }
+
         public TweenAnchoredPosition(RectTransform target, Vector2 start, Vector2 end)
         {
             this.target = target;
             this.start = start;
             this.end = end;
 
-            tweenID = target.GetInstanceID();
-            tweenType = TweenType.AnchoredPosition;
+            SetEssentials();
         }
 
         public TweenAnchoredPosition(RectTransform target, Vector2 end)
@@ -23,13 +28,16 @@ namespace StardropTools.Tween
             start = target.anchoredPosition;
             this.end = end;
 
-            tweenID = target.GetInstanceID();
-            tweenType = TweenType.AnchoredPosition;
+            SetEssentials();
         }
 
         protected override void TweenUpdate(float percent)
         {
             base.TweenUpdate(percent);
+
+            if (target == null)
+                ChangeState(TweenState.Canceled);
+
             target.anchoredPosition = lerped;
         }
     }

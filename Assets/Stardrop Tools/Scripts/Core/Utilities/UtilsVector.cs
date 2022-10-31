@@ -39,7 +39,7 @@ public static class UtilsVector
 
 
     public static Vector3 GetMidPoint(Vector3 vectorOne, Vector3 vectorTwo)
-        => (vectorOne + vectorTwo) / 2;
+        => (vectorOne + vectorTwo) * .5f;
 
     public static Vector3 GetMidPoint(Vector3[] vectorArray)
     {
@@ -87,12 +87,27 @@ public static class UtilsVector
         return targetRot;
     }
 
-    public static Vector3 RandomInsideCricle(Vector3 referencePoint, float radius)
+
+    /// <summary>
+    /// Returns a random Vector3 on the horizontal axis, around a reference point inside a set radius
+    /// </summary>
+    public static Vector3 RandomInsideUnitCircleXZ(Vector3 referencePoint, float radius)
     {
         Vector2 circleRandom = Random.insideUnitCircle * radius;
         Vector3 circleRandomVector = new Vector3(circleRandom.x, 0, circleRandom.y);
 
         return circleRandomVector + referencePoint;
+    }
+
+    /// <summary>
+    /// Returns a random Vector3 on the horizontal axis, around a reference point inside a set radius
+    /// </summary>
+    public static Vector3 RandomInsideUnitCircleXZ(Transform referencePoint, float radius)
+    {
+        Vector2 circleRandom = Random.insideUnitCircle * radius;
+        Vector3 circleRandomVector = new Vector3(circleRandom.x, 0, circleRandom.y);
+
+        return circleRandomVector + referencePoint.position;
     }
 
     /// <summary>
@@ -130,6 +145,7 @@ public static class UtilsVector
                 curvedPoints.Add(points[0]);
             }
 
+            curvedPoints.Add(arrayToCurve.GetLast());
             return curvedPoints.ToArray();
         }
 
@@ -216,4 +232,19 @@ public static class UtilsVector
     /// </summary>
     public static float GetJumpForce(float jumpHeight, float gravity)
         => Mathf.Sqrt(jumpHeight * -2 * -gravity);
+
+
+    /// <summary>
+    /// 0-X, 1-Y, 2-Z
+    /// </summary>
+    /// <param name="targetVector"> The vector to change </param>
+    /// <param name="axisID"> The axis id of a vector </param>
+    /// <returns></returns>
+    public static Vector3 InverseVector3Axis(Vector3 targetVector, int axisID)
+    {
+        float inversedAxis = targetVector[axisID] * -1;
+        targetVector[axisID] = inversedAxis;
+
+        return targetVector;
+    }
 }

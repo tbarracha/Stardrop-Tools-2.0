@@ -7,14 +7,19 @@ namespace StardropTools.Tween
     {
         public Transform target;
 
+        protected override void SetEssentials()
+        {
+            //tweenID = target.GetHashCode();
+            tweenType = TweenType.EulerRotation;
+        }
+
         public TweenEulerRotation(Transform target, Vector3 start, Vector3 end)
         {
             this.target = target;
             this.start = start;
             this.end = end;
 
-            tweenID = target.GetInstanceID();
-            tweenType = TweenType.EulerRotation;
+            SetEssentials();
         }
 
         public TweenEulerRotation(Transform target, Vector3 end)
@@ -23,8 +28,7 @@ namespace StardropTools.Tween
             start = target.eulerAngles;
             this.end = end;
 
-            tweenID = target.GetInstanceID();
-            tweenType = TweenType.EulerRotation;
+            SetEssentials();
         }
 
         protected override void TweenUpdate(float percent)
@@ -63,6 +67,10 @@ namespace StardropTools.Tween
         protected override void TweenUpdate(float percent)
         {
             base.TweenUpdate(percent);
+
+            if (target == null)
+                ChangeState(TweenState.Canceled);
+
             target.localEulerAngles = lerped;
         }
     }

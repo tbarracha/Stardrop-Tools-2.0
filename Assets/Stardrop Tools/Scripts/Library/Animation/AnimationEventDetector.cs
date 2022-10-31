@@ -10,14 +10,23 @@ namespace StardropTools
     {
         [SerializeField] bool debug;
 
-        public readonly BaseEvent<int> OnAnimEvent = new BaseEvent<int>();
+        public readonly GameEvent<int> OnAnimEventINT = new GameEvent<int>();
+        public readonly GameEvent<string> OnAnimEventSTRING = new GameEvent<string>();
 
-        public void AnimationEvent(int eventID)
+        public void AnimEventInt(int eventID)
         {
             if (debug)
-                Debug.LogFormat("Anim event: {0}, detected!", eventID);
+                Debug.LogFormat("INT Anim event: {0}, detected!", eventID);
 
-            OnAnimEvent?.Invoke(eventID);
+            OnAnimEventINT?.Invoke(eventID);
+        }
+
+        public void AnimEventString(string eventString)
+        {
+            if (debug)
+                Debug.LogFormat("STRING Anim event: {0}, detected!", eventString);
+
+            OnAnimEventSTRING?.Invoke(eventString);
         }
     }
 }

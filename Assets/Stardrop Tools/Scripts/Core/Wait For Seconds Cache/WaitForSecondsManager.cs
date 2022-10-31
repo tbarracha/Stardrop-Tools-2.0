@@ -17,7 +17,7 @@ public static class WaitForSecondsManager
         if (waitForSecondsDictionary.TryGetValue(key, out var waitCache))
             return waitCache.GetWait(time);
 
-        // create one if requested WaitForSeconds does not exist
+        // else create one if requested WaitForSeconds does not exist
         waitForSecondsDictionary[key] = new WaitForSecondsCache();
         return waitForSecondsDictionary[key].GetWait(time);
     }

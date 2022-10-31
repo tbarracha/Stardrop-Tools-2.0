@@ -5,14 +5,15 @@ namespace StardropTools.Tween
 {
     public class TweenManager : Singleton<TweenManager>
     {
-        [SerializeField] List<Tween> tweens;
+        [SerializeField] int tweenCount;
+        List<Tween> tweens;
+        bool isUpdating;
 
         protected override void Awake()
         {
             base.Awake();
 
             tweens = new List<Tween>();
-            LoopManager.OnUpdate.AddListener(UpdateTweens);
         }
 
         public bool ProcessTween(Tween tween)
@@ -56,9 +57,21 @@ namespace StardropTools.Tween
         void AddTween(Tween tween)
         {
             if (tweens.Contains(tween) == false)
+            {
                 tweens.Add(tween);
+
+                if (isUpdating == false)
+                {
+                    LoopManager.OnUpdate.AddListener(UpdateTweens);
+                    isUpdating = true;
+                }
+            }
         }
 
+
+        /// <summary>
+        /// Remove input tween from update list
+        /// </summary>
         public void RemoveTween(Tween tween)
         {
             if (tweens.Contains(tween))
@@ -75,6 +88,27 @@ namespace StardropTools.Tween
 
                     tweens[i].UpdateTweenState();
                 }
+
+            tweenCount = tweens.Count;
+
+            if (tweenCount == 0)
+            {
+                LoopManager.OnUpdate.RemoveListener(UpdateTweens);
+                isUpdating = false;
+            }
+        }
+
+
+        /// <summary>
+        /// Search inside Tween List for the tween that meets input criteria and Stop()'s it
+        /// </summary>
+        public void StopTween(int tweenID, TweenType tweenType)
+        {
+            foreach (Tween tween in tweens)
+            {
+                if (tween.TweenID == tweenID && tween.TweenType == tweenType)
+                    tween.Stop();
+            }
         }
     }
 }

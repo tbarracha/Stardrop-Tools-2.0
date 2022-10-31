@@ -6,7 +6,7 @@ namespace StardropTools.FiniteStateMachine
     /// <summary>
     /// Base MonoBehaviour state from which all other state may derive from.
     /// </summary>
-    public abstract class BaseStateComponent : MonoBehaviour, IBaseState
+    public abstract class BaseStateComponent : MonoBehaviour
     {
         [SerializeField] protected FiniteStateMachine stateMachine;
         [SerializeField] protected int stateID;
@@ -21,10 +21,10 @@ namespace StardropTools.FiniteStateMachine
         public int GetStateID() => stateID;
 
 
-        public readonly BaseEvent<BaseStateComponent> OnStateEnter = new BaseEvent<BaseStateComponent>();
-        public readonly BaseEvent<BaseStateComponent> OnStateExit = new BaseEvent<BaseStateComponent>();
-        public readonly BaseEvent<BaseStateComponent> OnStateUpdate = new BaseEvent<BaseStateComponent>();
-        public readonly BaseEvent<BaseStateComponent> OnStateInput = new BaseEvent<BaseStateComponent>();
+        public readonly GameEvent<BaseStateComponent> OnStateEnter = new GameEvent<BaseStateComponent>();
+        public readonly GameEvent<BaseStateComponent> OnStateExit = new GameEvent<BaseStateComponent>();
+        public readonly GameEvent<BaseStateComponent> OnStateUpdate = new GameEvent<BaseStateComponent>();
+        public readonly GameEvent<BaseStateComponent> OnStateInput = new GameEvent<BaseStateComponent>();
 
 
         public virtual void Initialize(FiniteStateMachine stateMachine, int stateID)

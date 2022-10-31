@@ -3,13 +3,21 @@ using UnityEngine;
 
 namespace StardropTools.Tween
 {
+    /// <summary>
+    /// Set Intensity before all else
+    /// </summary>
     public class TweenShakeVector3 : TweenVector3
     {
         protected Vector3 intensity;
 
-        public TweenShakeVector3()
+        protected override void SetEssentials()
         {
             tweenType = TweenType.ShakeVector3;
+        }
+
+        public TweenShakeVector3()
+        {
+            SetEssentials();
         }
 
         public TweenShakeVector3 SetIntensity(Vector3 intensity)
@@ -37,6 +45,12 @@ namespace StardropTools.Tween
             amount.z = Random.Range(-amount.z, amount.z);
 
             lerped = amount + start;
+        }
+
+        protected override void Complete()
+        {
+            base.Complete();
+            lerped = end;
         }
     }
 }

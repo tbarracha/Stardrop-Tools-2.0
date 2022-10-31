@@ -10,6 +10,6 @@ namespace StardropTools.FiniteStateMachine
         public void ExitState();
 
         public int GetStateID();
-        public void SetStateID(int stateID);
+        public void SetID(int stateID);
     }
 }

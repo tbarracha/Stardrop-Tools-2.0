@@ -1,14 +1,16 @@
 
 using UnityEngine;
+using NaughtyAttributes;
 
 namespace StardropTools
 {
     public class ValueContainerInt : MonoBehaviour
     {
+        [ProgressBar("Value Percent", 1, EColor.Gray)]
+        [SerializeField] float percent;
         [SerializeField] int startValue;
         [SerializeField] int maxValue;
         [SerializeField] int value;
-        [SerializeField] float percent;
         [SerializeField] bool isEmpty;
 
         public int Value => value;
@@ -16,31 +18,45 @@ namespace StardropTools
         public bool IsEmpty => isEmpty;
         
 
-        public BaseEvent<int> OnRemoved = new BaseEvent<int>();
-        public BaseEvent<int> OnAdded = new BaseEvent<int>();
+        public GameEvent<int> OnRemoved = new GameEvent<int>();
+        public GameEvent<int> OnAdded = new GameEvent<int>();
 
-        public BaseEvent<int> OnValueChanged = new BaseEvent<int>();
-        public BaseEvent OnValueEmpty = new BaseEvent();
+        public GameEvent<int> OnValueChanged = new GameEvent<int>();
+        public GameEvent<float> OnPercentChanged = new GameEvent<float>();
+        public GameEvent OnValueEmpty = new GameEvent();
 
 
         #region Constructors
 
-        public ValueContainerInt(int startHealth, int maxHealth)
+        public void SetValue(int startHealth, int maxHealth)
         {
             this.startValue = startHealth;
             this.maxValue = maxHealth;
             value = startHealth;
+
+            GetPercent();
+            OnValueChanged?.Invoke(value);
         }
 
-        public ValueContainerInt(int startHealth, int maxHealth, int health)
+        public void SetValue(int startHealth, int maxHealth, int health)
         {
             this.startValue = startHealth;
             this.maxValue = maxHealth;
             this.value = health;
+
+            GetPercent();
+            OnValueChanged?.Invoke(value);
         }
 
         #endregion // Constructos
 
+        float GetPercent()
+        {
+            percent = Mathf.Clamp(value / maxValue, 0, 1);
+            OnPercentChanged?.Invoke(percent);
+
+            return percent;
+        }
 
         public int RemoveValue(int amountToRemove)
         {
@@ -55,6 +71,7 @@ namespace StardropTools
                 OnValueEmpty?.Invoke();
             }
 
+            GetPercent();
             OnValueChanged?.Invoke(value);
             return value;
         }
@@ -68,6 +85,8 @@ namespace StardropTools
                 return 0;
 
             int damage = fromMaxValue ? Mathf.CeilToInt(percent * maxValue) : Mathf.CeilToInt(percent * value);
+            GetPercent();
+
             return RemoveValue(damage);
         }
 
@@ -83,6 +102,7 @@ namespace StardropTools
             if (value > 0 && isEmpty == true)
                 isEmpty = false;
 
+            GetPercent();
             OnValueChanged?.Invoke(value);
             return value;
         }
@@ -93,6 +113,7 @@ namespace StardropTools
                 return 0;
 
             int heal = fromMaxValue ? Mathf.CeilToInt(percent * maxValue) : Mathf.CeilToInt(percent * value);
+
             return AddValue(heal);
         }
 
@@ -103,6 +124,7 @@ namespace StardropTools
             isEmpty = false;
             value = maxValue;
 
+            GetPercent();
             OnValueChanged?.Invoke(value);
         }
 
@@ -111,6 +133,7 @@ namespace StardropTools
             isEmpty = false;
             value = resetValue;
 
+            GetPercent();
             OnValueChanged?.Invoke(value);
         }
 
@@ -119,6 +142,7 @@ namespace StardropTools
             isEmpty = false;
             value = Mathf.CeilToInt(percentMaxValue * maxValue);
 
+            GetPercent();
             OnValueChanged?.Invoke(value);
         }
     }

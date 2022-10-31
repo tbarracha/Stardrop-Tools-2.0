@@ -12,18 +12,22 @@ namespace StardropTools
 
         public float Radius { get => radius; set => radius = value; }
 
-        public override void OverlapScan() => SphereScan(Position);
+        public override Collider[] OverlapScan() => SphereScan(Position);
 
-        public void SphereScan(Vector3 position)
+        public Collider[] SphereScan(Vector3 position)
         {
             colliders = Physics.OverlapSphere(position + positionOffset, radius, contactLayers);
             ColliderCheck();
+
+            return colliders;
         }
 
-        public void SphereScan(Vector3 position, float radius)
+        public Collider[] SphereScan(Vector3 position, float radius)
         {
             colliders = Physics.OverlapSphere(position + positionOffset, radius, contactLayers);
             ColliderCheck();
+
+            return colliders;
         }
 
 #if UNITY_EDITOR

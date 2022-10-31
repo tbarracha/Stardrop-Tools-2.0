@@ -41,14 +41,16 @@ namespace StardropTools.Tween
 
         #region Events
 
-        public readonly BaseEvent OnTweenStart = new BaseEvent();
-        public readonly BaseEvent OnTweenComplete = new BaseEvent();
-        public readonly BaseEvent OnTweenUpdate = new BaseEvent();
-        public readonly BaseEvent OnTweenPaused = new BaseEvent();
-        public readonly BaseEvent OnTweenCanceled = new BaseEvent();
+        public readonly GameEvent OnTweenStart = new GameEvent();
+        public readonly GameEvent OnTweenComplete = new GameEvent();
+        public readonly GameEvent OnTweenTick = new GameEvent();
+        public readonly GameEvent OnTweenPaused = new GameEvent();
+        public readonly GameEvent OnTweenCanceled = new GameEvent();
 
-        public readonly BaseEvent OnDelayStart = new BaseEvent();
-        public readonly BaseEvent OnDelayComplete = new BaseEvent();
+        public readonly GameEvent OnDelayStart = new GameEvent();
+        public readonly GameEvent OnDelayComplete = new GameEvent();
+
+        public readonly GameEvent<float> OnTweenPercent = new GameEvent<float>();
 
         #endregion // Events
 
@@ -59,6 +61,12 @@ namespace StardropTools.Tween
         public Tween SetID(int tweenID)
         {
             this.tweenID = tweenID;
+            return this;
+        }
+
+        public Tween SetID(GameObject uniqueObject)
+        {
+            tweenID = uniqueObject.GetInstanceID();
             return this;
         }
 
@@ -135,15 +143,14 @@ namespace StardropTools.Tween
 
         #endregion // Setters
 
-
         public Tween Initialize()
         {
             ResetRuntime();
 
             if (delay > 0)
-                ChangeState(TweenState.waiting);
+                ChangeState(TweenState.Waiting);
             else
-                ChangeState(TweenState.running);
+                ChangeState(TweenState.Running);
 
             isValid = TweenManager.Instance.ProcessTween(this);
 
@@ -158,23 +165,23 @@ namespace StardropTools.Tween
         {
             switch (tweenState)
             {
-                case TweenState.waiting:
+                case TweenState.Waiting:
                     Waiting();
                     break;
 
-                case TweenState.running:
+                case TweenState.Running:
                     Running();
                     break;
 
-                case TweenState.complete:
+                case TweenState.Complete:
                     Complete();
                     break;
 
-                case TweenState.paused:
+                case TweenState.Paused:
                     Pause();
                     break;
 
-                case TweenState.canceled:
+                case TweenState.Canceled:
                     Stop();
                     break;
             }
@@ -188,23 +195,23 @@ namespace StardropTools.Tween
                 return;
 
             // to delay
-            if (nextState == TweenState.waiting)
+            if (nextState == TweenState.Waiting)
                 OnDelayStart?.Invoke();
 
             // from delay to running
-            if (tweenState == TweenState.waiting && nextState == TweenState.running)
+            if (tweenState == TweenState.Waiting && nextState == TweenState.Running)
                 OnDelayComplete?.Invoke();
 
             // to complete
-            if (nextState == TweenState.complete)
+            if (nextState == TweenState.Complete)
                 OnTweenComplete?.Invoke();
             
             // to pause
-            if (nextState == TweenState.paused)
+            if (nextState == TweenState.Paused)
                 OnTweenPaused?.Invoke();
 
             // to cancel
-            if (nextState == TweenState.canceled)
+            if (nextState == TweenState.Canceled)
                 OnTweenCanceled?.Invoke();
 
             tweenState = nextState;
@@ -219,7 +226,7 @@ namespace StardropTools.Tween
                 runtime += Time.deltaTime;
 
             if (runtime >= delay)
-                ChangeState(TweenState.running);
+                ChangeState(TweenState.Running);
         }
 
         protected virtual void Running()
@@ -233,11 +240,12 @@ namespace StardropTools.Tween
             percent = Mathf.Min(runtime / duration, 1);
 
             TweenUpdate(percent);
+            OnTweenPercent?.Invoke(percent);
 
             if (percent >= 1)
-                ChangeState(TweenState.complete);
+                ChangeState(TweenState.Complete);
 
-            OnTweenUpdate?.Invoke();
+            OnTweenTick?.Invoke();
         }
 
         protected virtual void Complete()
@@ -264,7 +272,7 @@ namespace StardropTools.Tween
 
             else
             {
-                if (easeCurve.keys.Length < 2)
+                if (easeCurve.keys.Exists(2) == false)
                 {
                     Debug.Log("Tween Animation Curve needs more keys!");
                     return TweenEase.Ease(EaseType.Linear, percent);
@@ -274,6 +282,7 @@ namespace StardropTools.Tween
             }
         }
 
+        protected abstract void SetEssentials();
         protected abstract void TweenUpdate(float percent);
         protected abstract void Loop();
         protected abstract void PingPong();
@@ -281,7 +290,7 @@ namespace StardropTools.Tween
         protected void RemoveFromManagerList()
         {
             OnTweenStart.RemoveAllListeners();
-            OnTweenUpdate.RemoveAllListeners();
+            OnTweenTick.RemoveAllListeners();
             OnTweenComplete.RemoveAllListeners();
             OnTweenPaused.RemoveAllListeners();
             OnTweenCanceled.RemoveAllListeners();

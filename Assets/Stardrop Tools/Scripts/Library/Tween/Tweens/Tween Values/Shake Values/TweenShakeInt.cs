@@ -3,13 +3,21 @@ using UnityEngine;
 
 namespace StardropTools.Tween
 {
+    /// <summary>
+    /// Set Intensity before all else
+    /// </summary>
     public class TweenShakeInt : TweenInt
     {
         protected int intensity;
 
-        public TweenShakeInt()
+        protected override void SetEssentials()
         {
             tweenType = TweenType.ShakeInt;
+        }
+
+        public TweenShakeInt()
+        {
+            SetEssentials();
         }
 
         public TweenShakeInt SetIntensity(int intensity)

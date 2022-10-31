@@ -3,13 +3,21 @@ using UnityEngine;
 
 namespace StardropTools.Tween
 {
+    /// <summary>
+    /// Set Intensity before all else
+    /// </summary>
     public class TweenShakeFloat : TweenFloat
     {
         protected float intensity;
 
-        public TweenShakeFloat()
+        protected override void SetEssentials()
         {
             tweenType = TweenType.ShakeFloat;
+        }
+
+        public TweenShakeFloat()
+        {
+            SetEssentials();
         }
 
         public TweenShakeFloat SetIntensity(float intensity)

@@ -1,14 +1,16 @@
 
 using UnityEngine;
+using NaughtyAttributes;
 
 namespace StardropTools
 {
     public class ValueContainerFloat : MonoBehaviour
     {
+        [ProgressBar("Value Percent", 1, EColor.Gray)]
+        [SerializeField] float percent;
         [SerializeField] float startValue;
         [SerializeField] float maxValue;
         [SerializeField] float value;
-        [SerializeField] float percent;
         [SerializeField] bool isEmpty;
 
         public float Value => value;
@@ -16,30 +18,45 @@ namespace StardropTools
         public bool IsEmpty => isEmpty;
         
 
-        public BaseEvent<float> OnRemoved = new BaseEvent<float>();
-        public BaseEvent<float> OnAdded = new BaseEvent<float>();
+        public GameEvent<float> OnRemoved = new GameEvent<float>();
+        public GameEvent<float> OnAdded = new GameEvent<float>();
 
-        public BaseEvent<float> OnValueChanged = new BaseEvent<float>();
-        public BaseEvent OnValueEmpty = new BaseEvent();
+        public GameEvent<float> OnValueChanged = new GameEvent<float>();
+        public GameEvent<float> OnPercentChanged = new GameEvent<float>();
+        public GameEvent OnValueEmpty = new GameEvent();
 
 
-        #region Constructors
+        #region Setters
 
-        public ValueContainerFloat(float startHealth, float maxHealth)
+        public void SetValues(float startHealth, float maxHealth)
         {
             this.startValue = startHealth;
             this.maxValue = maxHealth;
             value = startHealth;
+
+            GetPercent();
+            OnValueChanged?.Invoke(value);
         }
 
-        public ValueContainerFloat(float startHealth, float maxHealth, float health)
+        public void SetValues(float startHealth, float maxHealth, float health)
         {
             this.startValue = startHealth;
             this.maxValue = maxHealth;
             this.value = health;
+
+            GetPercent();
+            OnValueChanged?.Invoke(value);
         }
 
-        #endregion // Constructos
+        #endregion // Setters
+
+        float GetPercent()
+        {
+            percent = Mathf.Clamp(value / maxValue, 0, 1);
+            OnPercentChanged?.Invoke(percent);
+
+            return percent;
+        }
 
 
         public float RemoveValue(int amountToRemove)
@@ -55,6 +72,7 @@ namespace StardropTools
                 OnValueEmpty?.Invoke();
             }
 
+            GetPercent();
             OnValueChanged?.Invoke(value);
             return value;
         }
@@ -83,6 +101,7 @@ namespace StardropTools
             if (value > 0 && isEmpty == true)
                 isEmpty = false;
 
+            GetPercent();
             OnValueChanged?.Invoke(value);
             return value;
         }
@@ -103,6 +122,7 @@ namespace StardropTools
             isEmpty = false;
             value = startValue;
 
+            GetPercent();
             OnValueChanged?.Invoke(value);
         }
 
@@ -111,6 +131,7 @@ namespace StardropTools
             isEmpty = false;
             value = resetValue;
 
+            GetPercent();
             OnValueChanged?.Invoke(value);
         }
 
@@ -119,6 +140,7 @@ namespace StardropTools
             isEmpty = false;
             value = Mathf.CeilToInt(percentMaxValue * maxValue);
 
+            GetPercent();
             OnValueChanged?.Invoke(value);
         }
     }
