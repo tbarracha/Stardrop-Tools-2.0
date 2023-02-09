@@ -46,5 +46,11 @@ namespace StardropTools.Tween
 
             lerped = amount + start;
         }
+
+        protected override void Complete()
+        {
+            base.Complete();
+            lerped = end;
+        }
     }
 }

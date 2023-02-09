@@ -22,7 +22,7 @@ public class EnumMakerSO : ScriptableObject
         // Convert to list and check for empty & duplicate values
         else
         {
-            var enumList = UtilsArray.ArrayToList(enumsToCreate);
+            var enumList = UtilsArray.ToList(enumsToCreate);
 
             UtilsArray.RemoveEmpty(enumList);
             UtilsArray.RemoveDuplicates(enumList);

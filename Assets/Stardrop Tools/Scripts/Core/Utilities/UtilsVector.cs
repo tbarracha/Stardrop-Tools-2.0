@@ -23,12 +23,134 @@ public static class UtilsVector
         return vector;
     }
 
+    public static Vector3 SetVectorXZ(Vector3 vector, float x, float z)
+    {
+        vector[0] = x;
+        vector[2] = z;
+
+        return vector;
+    }
+
+
+    // Set Transform Position
+    // =======================================================================
+
+    public static Vector3 SetPositionX(this Transform transform, float x)
+    {
+        Vector3 pos = transform.position;
+        transform.position = SetVectorX(pos, x);
+
+        return pos;
+    }
+
+    public static Vector3 SetPositionY(this Transform transform, float y)
+    {
+        Vector3 pos = transform.position;
+        transform.position = SetVectorY(pos, y);
+
+        return pos;
+    }
+
+    public static Vector3 SetPositionZ(this Transform transform, float z)
+    {
+        Vector3 pos = transform.position;
+        transform.position = SetVectorZ(pos, z);
+
+        return pos;
+    }
+
+
+
+    // Set Transform Local Position
+    // =======================================================================
+
+    public static Vector3 SetLocalPositionX(this Transform transform, float x)
+    {
+        Vector3 pos = transform.position;
+        transform.position = SetVectorX(pos, x);
+
+        return pos;
+    }
+
+    public static Vector3 SetLocalPositionY(this Transform transform, float y)
+    {
+        Vector3 pos = transform.position;
+        transform.position = SetVectorY(pos, y);
+
+        return pos;
+    }
+
+    public static Vector3 SetLocalPositionZ(this Transform transform, float z)
+    {
+        Vector3 pos = transform.position;
+        transform.position = SetVectorZ(pos, z);
+
+        return pos;
+    }
+
+
+
+    // Set Transform Scale
+    // =======================================================================
+
+    public static Vector3 SetScaleX(this Transform transform, float x)
+    {
+        Vector3 scale = transform.localScale;
+        scale[0] = x;
+        transform.localScale = scale;
+
+        return scale;
+    }
+
+    public static Vector3 SetScaleY(this Transform transform, float y)
+    {
+        Vector3 scale = transform.localScale;
+        scale[1] = y;
+        transform.localScale = scale;
+
+        return scale;
+    }
+
+    public static Vector3 SetScaleZ(this Transform transform, float z)
+    {
+        Vector3 scale = transform.localScale;
+        scale[2] = z;
+        transform.localScale = scale;
+
+        return scale;
+    }
+
+
+
     public static Quaternion LookAtMouse2D(Transform target, float offset = 0)
     {
         //var dir = Input.mousePosition - Camera.main.WorldToScreenPoint(target.position);
-        var dir = Input.mousePosition - target.position;
-        var angle = AngleLookAtDirectionXY(dir, offset);
+        var direction = Input.mousePosition - target.position;
+        return LookAtXY(direction, offset);
+    }
+
+    public static Quaternion LookAtXY(Vector3 startPosition, Vector3 targetPosition, float offset = 0)
+    {
+        Vector3 direction = targetPosition - startPosition;
+        return LookAtXY(direction, offset);
+    }
+
+    public static Quaternion LookAtXY(Vector3 direction, float offset = 0)
+    {
+        float angle = AngleLookAtDirectionXY(direction, offset);
         return Quaternion.AngleAxis(angle, Vector3.forward);
+    }
+
+    public static Quaternion LookAtXZ(Vector3 startPosition, Vector3 targetPosition, float offset = 0)
+    {
+        Vector3 direction = targetPosition - startPosition;
+        return LookAtXZ(direction, offset);
+    }
+
+    public static Quaternion LookAtXZ(Vector3 direction, float offset = 0)
+    {
+        float angle = AngleLookAtDirectionXZ(direction, offset);
+        return Quaternion.AngleAxis(angle, Vector3.up);
     }
 
     public static float AngleLookAtDirectionXY(Vector3 direction, float offset = 0)
@@ -39,7 +161,7 @@ public static class UtilsVector
 
 
     public static Vector3 GetMidPoint(Vector3 vectorOne, Vector3 vectorTwo)
-        => (vectorOne + vectorTwo) / 2;
+        => (vectorOne + vectorTwo) * .5f;
 
     public static Vector3 GetMidPoint(Vector3[] vectorArray)
     {
@@ -87,12 +209,27 @@ public static class UtilsVector
         return targetRot;
     }
 
-    public static Vector3 RandomInsideCricle(Vector3 referencePoint, float radius)
+
+    /// <summary>
+    /// Returns a random Vector3 on the horizontal axis, around a reference point inside a set radius
+    /// </summary>
+    public static Vector3 RandomInsideUnitCircleXZ(Vector3 referencePoint, float radius)
     {
         Vector2 circleRandom = Random.insideUnitCircle * radius;
         Vector3 circleRandomVector = new Vector3(circleRandom.x, 0, circleRandom.y);
 
         return circleRandomVector + referencePoint;
+    }
+
+    /// <summary>
+    /// Returns a random Vector3 on the horizontal axis, around a reference point inside a set radius
+    /// </summary>
+    public static Vector3 RandomInsideUnitCircleXZ(Transform referencePoint, float radius)
+    {
+        Vector2 circleRandom = Random.insideUnitCircle * radius;
+        Vector3 circleRandomVector = new Vector3(circleRandom.x, 0, circleRandom.y);
+
+        return circleRandomVector + referencePoint.position;
     }
 
     /// <summary>
@@ -130,6 +267,7 @@ public static class UtilsVector
                 curvedPoints.Add(points[0]);
             }
 
+            curvedPoints.Add(arrayToCurve.GetLast());
             return curvedPoints.ToArray();
         }
 
@@ -203,17 +341,32 @@ public static class UtilsVector
     }
 
 
-    public static Vector3 GetPointOnParabola(Vector3 startPosition, Vector3 startForward, float speed, float gravity, float time)
+    public static Vector3 GetPointOnParabola(Vector3 startPosition, Vector3 direction, float speed, float gravity, float time)
     {
-        Vector3 point = startPosition + (startForward * speed * time);
+        Vector3 point = startPosition + (direction * speed * time);
         Vector3 gravityVector = Vector3.down * gravity * time * time;
 
         return point + gravityVector;
     }
 
     /// <summary>
-    /// Returns Force needed to reach Jump Height affected by Gravity
+    /// Returns Force needed to reach Jump Height affected by (positive) Gravity
     /// </summary>
     public static float GetJumpForce(float jumpHeight, float gravity)
         => Mathf.Sqrt(jumpHeight * -2 * -gravity);
+
+
+    /// <summary>
+    /// 0-X, 1-Y, 2-Z
+    /// </summary>
+    /// <param name="targetVector"> The vector to change </param>
+    /// <param name="axisID"> The axis id of a vector </param>
+    /// <returns></returns>
+    public static Vector3 InverseVector3Axis(Vector3 targetVector, int axisID)
+    {
+        float inversedAxis = targetVector[axisID] * -1;
+        targetVector[axisID] = inversedAxis;
+
+        return targetVector;
+    }
 }

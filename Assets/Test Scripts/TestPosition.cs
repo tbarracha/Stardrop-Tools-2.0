@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 using StardropTools;
 
@@ -13,6 +12,6 @@ public class TestPosition : BaseObject
         base.OnValidate();
 
         PosX = positionX;
-        EulerX = eulerX;
+        SetEulerX(eulerX);
     }
 }

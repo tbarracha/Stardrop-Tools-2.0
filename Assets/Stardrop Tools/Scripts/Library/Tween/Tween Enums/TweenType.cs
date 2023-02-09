@@ -63,5 +63,6 @@ namespace StardropTools.Tween
 
         // Sprite renderer
         SpriteRendererColor,
+        SpriteRendererOpacity,
     }
 }

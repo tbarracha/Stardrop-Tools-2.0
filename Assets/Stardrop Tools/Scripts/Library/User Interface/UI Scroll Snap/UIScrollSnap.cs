@@ -6,8 +6,6 @@ namespace StardropTools.UI
 {
     public class UIScrollSnap : BaseUIObject, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
     {
-        public enum EOrientation { horizontal, vertical }
-
         [Header("Properties")]
         public int index = 0;
         public int priority = 1;
@@ -21,11 +19,12 @@ namespace StardropTools.UI
         [SerializeField] bool debug;
 
         [Header("Animation")]
-        [SerializeField] EOrientation orientation;
+        [SerializeField] UIOrientation orientation;
         [SerializeField] AnimationCurve animCurve;
         [SerializeField] float duration = .2f;
 
         [Header("Elements")]
+        [SerializeField] System.Collections.Generic.List<RectTransform> rectsToIgnore;
         [SerializeField] System.Collections.Generic.List<UIScrollSnapElement> elements;
 #if UNITY_EDITOR
         [SerializeField] bool getElements;
@@ -39,17 +38,25 @@ namespace StardropTools.UI
         [SerializeField] bool getButtons;
 #endif
 
+        [Header("Scroll Rect")]
+        [SerializeField] UIScrollRectInsideScrollSnap selectedScrollRect;
+        [SerializeField] UIScrollRectInsideScrollSnap[] scrollRects;
+#if UNITY_EDITOR
+        [SerializeField] bool getScrollRects;
+        [SerializeField] bool removeScrollRects;
+#endif
+
         Coroutine animCR;
         int direction;
         System.Guid uniqueID;
 
         public System.Guid UniqueID { get => uniqueID; }
 
-        public readonly GameEvent SwipeToNextPriority = new GameEvent();
+        public readonly EventHandler SwipeToNextPriority = new EventHandler();
 
-        public readonly GameEvent OnMoveStart = new GameEvent();
-        public readonly GameEvent OnMoving = new GameEvent();
-        public readonly GameEvent OnMoveComplete = new GameEvent();
+        public readonly EventHandler OnMoveStart = new EventHandler();
+        public readonly EventHandler OnMoving = new EventHandler();
+        public readonly EventHandler OnMoveComplete = new EventHandler();
 
 
         protected override void Start()
@@ -120,43 +127,48 @@ namespace StardropTools.UI
         }
 
         public void UnsubscribeSwipe()
-            => SwipeManager.OnSwipeDirection.RemoveListener(SwipeToIndex);
+        {
+            SwipeManager.OnSwipeDirection.RemoveListener(SwipeToIndex);
+            selectedScrollRect = null;
+        }
 
         public void SwipeToIndex(SwipeManager.SwipeDirection swipeDirection)
         {
             //if (debug)
             //    Debug.Log("Swiped to: " + direction);
 
-            if (orientation == EOrientation.horizontal)
+            if (orientation == UIOrientation.Horizontal)
             {
                 switch (swipeDirection)
                 {
                     case SwipeManager.SwipeDirection.left:
-                        if (orientation == EOrientation.horizontal)
+                        if (orientation == UIOrientation.Horizontal)
                             direction = 1;
                         break;
                     case SwipeManager.SwipeDirection.right:
-                        if (orientation == EOrientation.horizontal)
+                        if (orientation == UIOrientation.Horizontal)
                             direction = -1;
                         break;
                 }
             }
 
-            if (orientation == EOrientation.vertical)
+            if (orientation == UIOrientation.Vertical)
             {
                 switch (swipeDirection)
                 {
                     case SwipeManager.SwipeDirection.up:
-                        if (orientation == EOrientation.vertical)
+                        if (orientation == UIOrientation.Vertical)
                             direction = -1;
                         break;
                     case SwipeManager.SwipeDirection.down:
-                        if (orientation == EOrientation.vertical)
+                        if (orientation == UIOrientation.Vertical)
                             direction = 1;
                         break;
                 }
             }
 
+            if (selectedScrollRect != null && selectedScrollRect.CheckIfPassable(swipeDirection, .01f, .99f) == false)
+                return;
 
             NextDirection(direction);
         }
@@ -238,19 +250,19 @@ namespace StardropTools.UI
 
             // Reposition element to Show, instead of showing all elements until we reach target
             // this makes it look as if it was just next to each other
-            if (orientation == EOrientation.horizontal)
+            if (orientation == UIOrientation.Horizontal)
             {
                 Vector2 showPos = new Vector2(elementToHide.AnchoredPosition.x + elementToShow.WidthRect * direction, elementToHide.AnchoredPosition.y);
                 elementToShow.SetAnchoredPosition(showPos);
             }
 
-            else if (orientation == EOrientation.vertical)
+            else if (orientation == UIOrientation.Vertical)
             {
                 Vector2 showPos = new Vector2(elementToHide.AnchoredPosition.x, elementToHide.AnchoredPosition.y + elementToShow.HeightRect * direction);
                 elementToShow.SetAnchoredPosition(showPos);
             }
 
-            if (elementToShow.GameObject.activeInHierarchy == false)
+            if (elementToShow.SelfObject.activeInHierarchy == false)
                 elementToShow.SetActive(true);
 
             if (debug)
@@ -263,10 +275,10 @@ namespace StardropTools.UI
 
             // get old Target Pos
             Vector2 oldTargetPos = Vector2.zero;
-            if (orientation == EOrientation.horizontal) // width
+            if (orientation == UIOrientation.Horizontal) // width
                 oldTargetPos = Vector2.right * elementToHide.WidthRect * direction * -1; // inverse direction because of position
 
-            else if (orientation == EOrientation.vertical) // height
+            else if (orientation == UIOrientation.Vertical) // height
                 oldTargetPos = Vector2.up * elementToHide.HeightRect * direction * -1; // inverse direction because of position
 
             while (t < duration)
@@ -301,12 +313,13 @@ namespace StardropTools.UI
             // inverse direction because of coordenates
             direction *= -1;
 
-            if (orientation == EOrientation.horizontal) // width
+            if (orientation == UIOrientation.Horizontal) // width
                 element.SetAnchoredPosition(Vector2.right * element.WidthRect * direction);
 
-            else if (orientation == EOrientation.vertical) // height
+            else if (orientation == UIOrientation.Vertical) // height
                 element.SetAnchoredPosition(Vector2.up * element.HeightRect * direction);
         }
+
         public void ReorderElements()
         {
             elements[0].SetAnchoredPosition(Vector2.zero);
@@ -314,9 +327,9 @@ namespace StardropTools.UI
 
             for (int i = 1; i < elements.Count; i++)
             {
-                if (orientation == EOrientation.horizontal)
+                if (orientation == UIOrientation.Horizontal)
                     elements[i].SetAnchoredPosition(elements[i].WidthRect, 0);
-                else if (orientation == EOrientation.vertical)
+                else if (orientation == UIOrientation.Vertical)
                     elements[i].SetAnchoredPosition(0, elements[i].HeightRect);
 
                 elements[i].index = i;
@@ -335,30 +348,66 @@ namespace StardropTools.UI
                 buttons[currentIndex].Toggle(true);
         }
 
+        void GetScrollRects()
+        {
+            var scrollRectArray = GetComponentsInChildren<UnityEngine.UI.ScrollRect>();
+            scrollRects = new UIScrollRectInsideScrollSnap[scrollRectArray.Length];
+
+            for (int i = 0; i < scrollRects.Length; i++)
+            {
+                UIScrollRectInsideScrollSnap uiScrollRect = scrollRectArray[i].GetComponent<UIScrollRectInsideScrollSnap>();
+
+                if (uiScrollRect == null)
+                    uiScrollRect = scrollRectArray[i].gameObject.AddComponent<UIScrollRectInsideScrollSnap>();
+
+                uiScrollRect.SetTargetScrollSnap(this);
+                scrollRects[i] = uiScrollRect;
+            }
+        }
+
+        void RemoveScrollRects()
+        {
+            for (int i = 0; i < scrollRects.Length; i++)
+                DestroyImmediate(scrollRects[i]);
+
+            scrollRects = new UIScrollRectInsideScrollSnap[0];
+        }
+
+        public void SelectedScrollRect(UIScrollRectInsideScrollSnap selected)
+        {
+            if (selected == selectedScrollRect)
+                return;
+
+            selectedScrollRect = selected;
+        }
 
 #if UNITY_EDITOR
         void GetElements()
         {
-            var children = Utilities.GetItems<RectTransform>(transform);
-            elements = new System.Collections.Generic.List<UIScrollSnapElement>();
+            var children = Utilities.GetListComponentsInChildren<RectTransform>(transform);
             var copyElements = new System.Collections.Generic.List<RectTransform>();
+            elements = new System.Collections.Generic.List<UIScrollSnapElement>();
 
             for (int i = 0; i < children.Count; i++)
             {
+                if (rectsToIgnore.Contains(children[i]))
+                    continue;
+
                 // get or set Scroll Snap Element component
                 UIScrollSnapElement element = children[i].GetComponent<UIScrollSnapElement>();
+                
                 if (element == null)
                     element = (children[i].gameObject.AddComponent<UIScrollSnapElement>());
-                elements.Add(element);
+
+                element.isFirst = false;
+                element.isLast = false;
 
                 copyElements.Add(element.RectTransform);
-
-                if (i == 0)
-                    element.isFirst = true;
-
-                if (i == children.Count - 1)
-                    element.isLast = true;
+                elements.Add(element);
             }
+
+            elements.GetFirst().isFirst = true;
+            elements.GetLast().isLast   = true;
 
             UtilitiesUI.CopySizeRects(RectTransform, copyElements);
         }
@@ -368,7 +417,7 @@ namespace StardropTools.UI
             if (parentButtons == null)
                 return;
 
-            buttons = Utilities.GetItems<UIToggleButton>(parentButtons);
+            buttons = parentButtons.GetComponentsInChildren<UIToggleButton>().ToList();
 
             for (int i = 0; i < buttons.Count; i++)
                 buttons[i].ButtonID = i;
@@ -394,6 +443,18 @@ namespace StardropTools.UI
             {
                 GetButtons();
                 getButtons = false;
+            }
+
+            if (getScrollRects)
+            {
+                GetScrollRects();
+                getScrollRects = false;
+            }
+
+            if (removeScrollRects)
+            {
+                RemoveScrollRects();
+                removeScrollRects = false;
             }
         }
 #endif

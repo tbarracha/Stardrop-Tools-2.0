@@ -17,6 +17,8 @@ namespace StardropTools.Audio
 
         // public System.Collections.Generic.List<AudioClip> Clips { get => clips; }
 
+        public int ClipCount => clips.Count;
+
         public float MinPitch { get => minPitch; }
         public float MaxPitch { get => maxPitch; }
 
@@ -57,6 +59,7 @@ namespace StardropTools.Audio
 
 
         public AudioClip GetRandomClip() => clips[Random.Range(0, clips.Count)];
+        public AudioClip[] GetRandomClips(int clipAmount) => clips.GetRandomNonRepeat(clipAmount).ToArray();
 
         public AudioClip GetClipAtIndex(int index) => clips[index];
 

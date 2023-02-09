@@ -1,4 +1,5 @@
 ﻿
+
 namespace StardropTools.CustomCommands
 {
 #if UNITY_EDITOR
@@ -125,7 +126,7 @@ namespace StardropTools.CustomCommands
         // & = alt
         // Reset Position
         // =============================================== Reset Position
-        [MenuItem("Custom Commands/Reset Pos &s")]
+        [MenuItem("Custom Commands/Reset World Position &s")]
         static void ResetPos()
         {
             if (Selection.activeTransform != null && _cmdsActive)
@@ -158,7 +159,7 @@ namespace StardropTools.CustomCommands
         // & = alt
         // Reset Position
         // =============================================== Reset Position
-        [MenuItem("Custom Commands/Reset Local Posi #s")]
+        [MenuItem("Custom Commands/Reset Local Position #s")]
         static void ResetLocalPosi()
         {
             if (Selection.activeTransform != null && _cmdsActive)
@@ -191,7 +192,7 @@ namespace StardropTools.CustomCommands
         // & = alt
         // Reset Rotation
         // =============================================== Reset Rotation
-        [MenuItem("Custom Commands/Reset Rotation #r")]
+        [MenuItem("Custom Commands/Reset World Rotation #r")]
         static void ResetRotation()
         {
             if (Selection.activeTransform != null && _cmdsActive)
@@ -394,7 +395,7 @@ namespace StardropTools.CustomCommands
         }
 
 
-        
+
         // Set Selected Image Opacity all different
         // =============================================== Image Opacity Chain
         [MenuItem("Custom Commands/Image Opacity Chain #i")] // shift + i
@@ -434,7 +435,7 @@ namespace StardropTools.CustomCommands
                         a -= d;
 
                         img.color = color;
-                        
+
                         img.gameObject.SetActive(false);
                         img.gameObject.SetActive(true);
                         counter++;
@@ -444,12 +445,86 @@ namespace StardropTools.CustomCommands
                 Debug.Log("<color=cyan> Opacity Chain Complete </color>");
             }
         }
+
+
+        // Inverse XYZ Positions of selected objects
+        // =============================================== Inverse Axis
+        [MenuItem("Custom Commands/Inverse X Axis #x")] // shift + x
+        static void InverseX()
+        {
+            if (Selection.activeTransform != null && _cmdsActive)
+            {
+                GameObject[] objs;
+                objs = Selection.gameObjects;
+
+                foreach (GameObject go in objs)
+                {
+                    Undo.RecordObject(go.transform, "Inverse Axis");
+                    go.transform.position = UtilsVector.InverseVector3Axis(go.transform.position, 0);
+                }
+            }
+        }
+
+
+        [MenuItem("Custom Commands/Inverse Y Axis #y")] // shift + y
+        static void InverseY()
+        {
+            if (Selection.activeTransform != null && _cmdsActive)
+            {
+                GameObject[] objs;
+                objs = Selection.gameObjects;
+
+                foreach (GameObject go in objs)
+                {
+                    Undo.RecordObject(go.transform, "Inverse Axis");
+                    go.transform.position = UtilsVector.InverseVector3Axis(go.transform.position, 1);
+                }
+            }
+        }
+
+
+        [MenuItem("Custom Commands/Inverse Z Axis #z")] // shift + z
+        static void InverseZ()
+        {
+            if (Selection.activeTransform != null && _cmdsActive)
+            {
+                GameObject[] objs;
+                objs = Selection.gameObjects;
+
+                foreach (GameObject go in objs)
+                {
+                    Undo.RecordObject(go.transform, "Inverse Axis");
+                    go.transform.position = UtilsVector.InverseVector3Axis(go.transform.position, 2);
+                }
+            }
+        }
+
+
+        [MenuItem("Custom Commands/Delete Object Children %#DEL")] // Ctrl + Shift + Del
+        static void DeleteChildrenOfSelecteddObject()
+        {
+            if (Selection.activeTransform != null && _cmdsActive)
+            {
+                GameObject[] objs;
+                objs = Selection.gameObjects;
+
+                foreach (GameObject go in objs)
+                {
+                    Undo.RecordObject(go.transform, "Delete Children");
+
+                    var children = Utilities.GetChildren(go.transform);
+
+                    foreach (Transform child in children)
+                        GameObject.DestroyImmediate(child.gameObject);
+                }
+            }
+        }
     }
 
     // taken from https://forum.unity.com/threads/shortcut-key-for-lock-inspector.95815/
     public class InspectorLockToggle
     {
-        [MenuItem("Custom Commands/Toggle Lock #w")] // shift + w
+        [MenuItem("Custom Commands/Toggle Inspector Lock #w")] // shift + w
         static void ToggleInspectorLock() // Inspector must be inspecting something to be locked
         {
             EditorWindow inspectorToBeLocked = EditorWindow.mouseOverWindow; // "EditorWindow.focusedWindow" can be used instead
@@ -462,7 +537,24 @@ namespace StardropTools.CustomCommands
                 propertyInfo.SetValue(inspectorToBeLocked, !value, null);
                 inspectorToBeLocked.Repaint();
 
-                Debug.LogFormat("<Color=white>Inspector Locked:</color> <color=cyan>{0}</color>", !value );
+                Debug.LogFormat("<Color=white>Inspector Locked:</color> <color=cyan>{0}</color>", !value);
+            }
+        }
+
+        [MenuItem("Custom Commands/Toggle Inspector Debug #%d")] // shift + ctlr + d
+        static void ToggleDebugMode()
+        {
+            EditorWindow inspectorToBeDebugged = EditorWindow.mouseOverWindow; // "EditorWindow.focusedWindow" can be used instead
+
+            if (inspectorToBeDebugged != null && inspectorToBeDebugged.GetType().Name == "InspectorWindow")
+            {
+                Type type = Assembly.GetAssembly(typeof(Editor)).GetType("UnityEditor.InspectorWindow");
+                PropertyInfo propertyInfo = type.GetProperty("isLocked");
+                bool value = (bool)propertyInfo.GetValue(inspectorToBeDebugged, null);
+                propertyInfo.SetValue(inspectorToBeDebugged, !value, null);
+                inspectorToBeDebugged.Repaint();
+
+                Debug.LogFormat("<Color=white>Inspector Debug Mode:</color> <color=magenta>{0}</color>", !value);
             }
         }
     }

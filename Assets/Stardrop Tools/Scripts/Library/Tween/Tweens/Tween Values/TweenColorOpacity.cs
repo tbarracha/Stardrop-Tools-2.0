@@ -7,9 +7,11 @@ namespace StardropTools.Tween
     {
         public Color color;
 
+        public readonly EventHandler<Color> OnTweenColorOpacity = new EventHandler<Color>();
+             
         protected override void SetEssentials()
         {
-            tweenID = color.GetHashCode();
+            //tweenID = color.GetHashCode();
             tweenType = TweenType.ColorOpacity;
         }
 
@@ -35,6 +37,14 @@ namespace StardropTools.Tween
         {
             base.TweenUpdate(percent);
             color.a = lerped;
+
+            OnTweenColorOpacity?.Invoke(color);
+        }
+
+        protected override void Complete()
+        {
+            base.Complete();
+            OnTweenColorOpacity?.Invoke(color);
         }
     }
 }

@@ -1,61 +1,48 @@
-
+﻿using UnityEngine;
 
 namespace StardropTools
 {
     /// <summary>
-    /// Base component from which most of Stardrop Tools scripts derive
+    /// Base class for all Initializable MonoBehaviours
     /// </summary>
-    public class BaseComponent : UnityEngine.MonoBehaviour
+    public class BaseComponent : MonoBehaviour, IInitialize, ILateInitialize, IUpdate
     {
-        [UnityEngine.Header("Base Component")]
-        [UnityEngine.SerializeField] protected BaseComponentData baseData;
+        [Header("Initialization")]
+        [SerializeField] protected InitializeAt initializeAt;
 
-        protected bool StopUpdateOnDisable { get => baseData.stopUpdateOnDisable; set => baseData.stopUpdateOnDisable = value; }
+        [NaughtyAttributes.Foldout("Object Info")]
+        [NaughtyAttributes.ReadOnly]
+        [SerializeField] protected GameObject selfObject;
+
 
         public bool IsInitialized { get; protected set; }
         public bool IsLateInitialized { get; protected set; }
-
-        public bool IsUpdating { get; protected set; }
-        public bool IsFixedUpdating { get; protected set; }
-        public bool IsLateUpdating { get; protected set; }
+        public GameObject SelfObject => selfObject;
 
 
-        #region Events
+        protected virtual void Awake()
+        {
+            if (initializeAt == InitializeAt.Awake)
+                Initialize();
+        }
 
-        public readonly GameEvent OnInitialize = new GameEvent();
-        public readonly GameEvent OnLateInitialize = new GameEvent();
+        protected virtual void Start()
+        {
+            if (initializeAt == InitializeAt.Start)
+                Initialize();
+        }
 
-        public readonly GameEvent OnUpdate = new GameEvent();
-        public readonly GameEvent OnFixedUpdate = new GameEvent();
-        public readonly GameEvent OnLateUpdate = new GameEvent();
-
-        public readonly GameEvent OnEnabled = new GameEvent();
-        public readonly GameEvent OnDisabled = new GameEvent();
-
-        public readonly GameEvent OnReset = new GameEvent();
-
-        #endregion // events
-
-        #region Print & Debug.log
-        /// <summary>
-        /// substitute to Debug.Log();
-        /// </summary>
-        public static void Print(object message) => UnityEngine.Debug.Log(message);
 
         /// <summary>
-        /// substitute to Debug.LogWarning();
+        /// Instead of class initializing at Start() by itself,
+        /// we call this function when we want it to "Start"
         /// </summary>
-        public static void PrintWarning(object message) => UnityEngine.Debug.LogWarning(message);
-        #endregion // print
-
-
         public virtual void Initialize()
         {
             if (IsInitialized)
                 return;
 
             IsInitialized = true;
-            OnInitialize?.Invoke();
         }
 
         public virtual void LateInitialize()
@@ -64,123 +51,31 @@ namespace StardropTools
                 return;
 
             IsLateInitialized = true;
-            OnLateInitialize?.Invoke();
         }
 
 
-        // Start Update
-        public virtual void StartUpdate()
+        /// <summary>
+        /// Set objects active state
+        /// </summary>
+        public void SetActive(bool value) => selfObject.SetActive(value);
+
+
+
+        public virtual void StartUpdate() => LoopManager.AddToUpdate(this);
+
+        public virtual void StopUpdate() => LoopManager.RemoveFromUpdate(this);
+
+        public virtual void HandleUpdate()
         {
-            if (IsUpdating)
-                return;
 
-            LoopManager.OnUpdate.AddListener(UpdateLogic);
-            IsUpdating = true;
-        }
-
-        public virtual void StartFixedUpdate()
-        {
-            if (IsFixedUpdating)
-                return;
-
-            LoopManager.OnUpdate.AddListener(FixedUpdateLogic);
-            IsFixedUpdating = true;
-        }
-
-        public virtual void StartLateUpdate()
-        {
-            if (IsLateUpdating)
-                return;
-
-            LoopManager.OnUpdate.AddListener(LateUpdateLogic);
-            IsLateUpdating = true;
         }
 
 
-        // Update
-        public virtual void UpdateLogic()
-            => OnUpdate?.Invoke();
 
-        public virtual void FixedUpdateLogic()
-            => OnFixedUpdate?.Invoke();
-
-        public virtual void LateUpdateLogic()
-            => OnLateUpdate?.Invoke();
-
-
-        // Stop Update
-        public virtual void StopUpdate()
+        protected virtual void OnValidate()
         {
-            if (IsUpdating == false)
-                return;
-
-            LoopManager.OnUpdate.RemoveListener(UpdateLogic);
-            IsUpdating = false;
-        }
-
-        public virtual void StopFixedUpdate()
-        {
-            if (IsFixedUpdating == false)
-                return;
-
-            LoopManager.OnUpdate.RemoveListener(FixedUpdateLogic);
-            IsFixedUpdating = false;
-        }
-
-        public virtual void StopLateUpdate()
-        {
-            if (IsLateUpdating == false)
-                return;
-
-            LoopManager.OnUpdate.RemoveListener(LateUpdateLogic);
-            IsLateUpdating = false;
-        }
-
-        public virtual void ResetObject()
-        {
-            OnReset?.Invoke();
-        }
-
-
-        protected virtual void Awake()
-        {
-            if (baseData.InitializationAt == BaseInitialization.awake)
-                Initialize();
-
-            if (baseData.LateInitializationAt == BaseInitialization.awake)
-                LateInitialize();
-        }
-
-        protected virtual void Start()
-        {
-            if (baseData.InitializationAt == BaseInitialization.start)
-                Initialize();
-
-            if (baseData.LateInitializationAt == BaseInitialization.start)
-                LateInitialize();
-        }
-
-        protected virtual void OnEnable()
-        {
-            OnEnabled.Invoke();
-        }
-
-        protected virtual void OnDisable()
-        {
-            if (StopUpdateOnDisable)
-            {
-                StopUpdate();
-                StopFixedUpdate();
-                StopLateUpdate();
-            }
-
-            OnDisabled?.Invoke();
-        }
-
-        public virtual void Reset()
-        {
-            IsInitialized = false;
-            OnReset?.Invoke();
+            if (selfObject == null)
+                selfObject = gameObject;
         }
     }
 }

@@ -9,9 +9,11 @@ namespace StardropTools.Tween
         public Color end;
         public Color lerped;
 
+        public readonly EventHandler<Color> OnTweenColor = new EventHandler<Color>();
+
         protected override void SetEssentials()
         {
-            tweenID = start.GetHashCode();
+            //tweenID = start.GetHashCode();
             tweenType = TweenType.Color;
         }
 
@@ -42,12 +44,19 @@ namespace StardropTools.Tween
         protected override void TweenUpdate(float percent)
         {
             lerped = Color.LerpUnclamped(start, end, Ease(percent));
+            OnTweenColor?.Invoke(lerped);
+        }
+
+        protected override void Complete()
+        {
+            base.Complete();
+            OnTweenColor?.Invoke(lerped);
         }
 
         protected override void Loop()
         {
             ResetRuntime();
-            ChangeState(TweenState.running);
+            ChangeState(TweenState.Running);
         }
 
         protected override void PingPong()
@@ -57,7 +66,7 @@ namespace StardropTools.Tween
             end = temp;
 
             ResetRuntime();
-            ChangeState(TweenState.running);
+            ChangeState(TweenState.Running);
         }
     }
 }

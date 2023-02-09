@@ -10,7 +10,7 @@ namespace StardropTools.Tween
 
         protected override void SetEssentials()
         {
-            //tweenID = target.GetInstanceID();
+            //tweenID = target.GetHashCode();
             tweenType = TweenType.RectSize;
         }
 
@@ -35,6 +35,10 @@ namespace StardropTools.Tween
         protected override void TweenUpdate(float percent)
         {
             base.TweenUpdate(percent);
+
+            if (target == null)
+                ChangeState(TweenState.Canceled);
+
             target.sizeDelta = lerped;
         }
     }

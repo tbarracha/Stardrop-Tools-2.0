@@ -14,17 +14,17 @@ namespace StardropTools.UI
 
         public bool Value => toggle.Value;
 
-        public GameEvent OnToggle => toggle.OnToggle;
-        public GameEvent<bool> OnToggleValue => toggle.OnToggleValue;
+        public EventHandler OnToggle => toggle.OnToggle;
+        public EventHandler<bool> OnToggleValue => toggle.OnToggleValue;
         
-        public GameEvent OnToggleTrue => toggle.OnToggleTrue;
-        public GameEvent OnToggleFalse => toggle.OnToggleFalse;
+        public readonly EventHandler OnToggleTrue = new EventHandler();
+        public readonly EventHandler OnToggleFalse = new EventHandler();
 
-        public readonly GameEvent<UIToggleButton> OnToggleClass = new GameEvent<UIToggleButton>();
-        public readonly GameEvent<int> OnToggleIndex = new GameEvent<int>();
+        public readonly EventHandler<UIToggleButton> OnToggleClass = new EventHandler<UIToggleButton>();
+        public readonly EventHandler<int> OnToggleIndex = new EventHandler<int>();
 
-        public readonly GameEvent<int> OnToggleTrueIndex = new GameEvent<int>();
-        public readonly GameEvent<int> OnToggleFalseIndex = new GameEvent<int>();
+        public readonly EventHandler<int> OnToggleTrueIndex = new EventHandler<int>();
+        public readonly EventHandler<int> OnToggleFalseIndex = new EventHandler<int>();
 
 
 
@@ -32,14 +32,12 @@ namespace StardropTools.UI
         {
             base.Initialize();
 
-            Toggle(initialToggle);
-            
+            toggle.ToggleValue(initialToggle);
+            RefreshToggleComponents();
+
             OnClick.AddListener(Toggle);
             OnToggle.AddListener(() => OnToggleClass?.Invoke(this));
             OnToggle.AddListener(() => OnToggleIndex?.Invoke(ButtonID));
-
-            OnToggleTrue.AddListener(() => OnToggleTrueIndex?.Invoke(ButtonID));
-            OnToggleFalse.AddListener(() => OnToggleFalseIndex?.Invoke(ButtonID));
 
             if (toggleComponents.Exists())
                 for (int i = 0; i < toggleComponents.Length; i++)
@@ -50,23 +48,45 @@ namespace StardropTools.UI
         public void Toggle()
         {
             toggle.ToggleValue();
-            RefreshToggleComponents();
+            OnValueChanged();
         }
 
-        public void Toggle(bool value)
+        public void Toggle(bool value, bool validate = true)
         {
-            if (value == Value)
+            if (validate && value == Value)
                 return;
 
             toggle.ToggleValue(value);
-            RefreshToggleComponents();
+            OnValueChanged();
         }
-
 
         protected void RefreshToggleComponents()
         {
             for (int i = 0; i < toggleComponents.Length; i++)
                 toggleComponents[i].Toggle(Value);
+        }
+
+
+        protected void OnValueChanged()
+        {
+            if (Value == true)
+                OnTrue();
+            else
+                OnFalse();
+
+            RefreshToggleComponents();
+        }
+
+        protected virtual void OnTrue()
+        {
+            OnToggleTrue?.Invoke();
+            OnToggleTrueIndex?.Invoke(ButtonID);
+        }
+
+        protected virtual void OnFalse()
+        {
+            OnToggleFalse?.Invoke();
+            OnToggleFalseIndex?.Invoke(ButtonID);
         }
 
 
@@ -77,8 +97,8 @@ namespace StardropTools.UI
             if (toggle == null)
                 toggle = GetComponent<Toggle>();
 
-            if (parentComponents != null)
-                toggleComponents = Utilities.GetItems<UIToggleButtonComponent>(parentComponents).ToArray();
+            if (parentComponents != null && Utilities.GetListComponentsInChildren<UIToggleButtonComponent>(parentComponents) != null)
+                toggleComponents = Utilities.GetListComponentsInChildren<UIToggleButtonComponent>(parentComponents).ToArray();
         }
     }
 }

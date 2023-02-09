@@ -3,17 +3,18 @@ using UnityEngine;
 
 namespace StardropTools.Tween
 {
-    public class TweenManager : Singleton<TweenManager>
+    public class TweenManager : Singleton<TweenManager>, IUpdate
     {
         [SerializeField] int tweenCount;
-        List<Tween> tweens;
+        List<Tween> tweens = new List<Tween>();
         bool isUpdating;
 
         protected override void Awake()
         {
             base.Awake();
 
-            tweens = new List<Tween>();
+            if (tweens == null)
+                tweens = new List<Tween>();
         }
 
         public bool ProcessTween(Tween tween)
@@ -47,7 +48,16 @@ namespace StardropTools.Tween
         /// </summary>
         void FilterTween(int tweenID, TweenType tweenType)
         {
-            for (int i = tweens.Count - 1; i >= 0; i--)
+            //for (int i = tweens.Count - 1; i >= 0; i--)
+            //{
+            //    if (tweens[i].TweenID == tweenID && tweens[i].TweenType == tweenType)
+            //        tweens[i].Stop();
+            //}
+
+            if (tweens.Exists() == false)
+                return;
+
+            for (int i = 0; i < tweens.Count; i++)
             {
                 if (tweens[i].TweenID == tweenID && tweens[i].TweenType == tweenType)
                     tweens[i].Stop();
@@ -56,13 +66,17 @@ namespace StardropTools.Tween
 
         void AddTween(Tween tween)
         {
-            if (tweens.Contains(tween) == false)
+            if (tween == null)
+                return;
+
+            if (tween.isInManagerList == false)
             {
                 tweens.Add(tween);
+                tween.isInManagerList = true;
 
                 if (isUpdating == false)
                 {
-                    LoopManager.OnUpdate.AddListener(UpdateTweens);
+                    StartUpdate();
                     isUpdating = true;
                 }
             }
@@ -74,8 +88,14 @@ namespace StardropTools.Tween
         /// </summary>
         public void RemoveTween(Tween tween)
         {
-            if (tweens.Contains(tween))
+            if (tween == null)
+                return;
+
+            if (tween.isInManagerList == true)
+            {
+                tween.isInManagerList = false;
                 tweens.Remove(tween);
+            }
         }
 
         void UpdateTweens()
@@ -93,14 +113,14 @@ namespace StardropTools.Tween
 
             if (tweenCount == 0)
             {
-                LoopManager.OnUpdate.RemoveListener(UpdateTweens);
+                StopUpdate();
                 isUpdating = false;
             }
         }
 
 
         /// <summary>
-        /// Search inside Tween List for the tween that meets input criteria and Stop()'s it
+        /// Check cached tween list for the one that meets input criteria and Stop()'s it
         /// </summary>
         public void StopTween(int tweenID, TweenType tweenType)
         {
@@ -110,5 +130,40 @@ namespace StardropTools.Tween
                     tween.Stop();
             }
         }
+
+
+        /// <summary>
+        /// Check if tween is active. If true, Stop() tween
+        /// </summary>
+        public static void StopTween(Tween tween)
+        {
+            if (tween != null)
+                tween.Stop();
+        }
+
+        public static void StartTweenComponents(TweenComponent[] tweenComponents)
+        {
+            if (tweenComponents.Exists() == false)
+                return;
+
+            for (int i = 0; i < tweenComponents.Length; i++)
+                tweenComponents[i].StartTween();
+        }
+
+        public static void StopTweenComponents(TweenComponent[] tweenComponents)
+        {
+            if (tweenComponents.Exists() == false)
+                return;
+
+            for (int i = 0; i < tweenComponents.Length; i++)
+                tweenComponents[i].StopTween();
+        }
+
+
+        public void StartUpdate() => LoopManager.AddToUpdate(this);
+
+        public void StopUpdate() => LoopManager.RemoveFromUpdate(this);
+
+        public void HandleUpdate() => UpdateTweens();
     }
 }

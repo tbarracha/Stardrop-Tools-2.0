@@ -1,21 +1,51 @@
 ﻿
 using UnityEngine;
 
-namespace StardropTools
+namespace StardropTools.ScriptableValue
 {
-    [CreateAssetMenu(menuName = "Stardrop / Scriptable Values / Scriptable Bool")]
+    [CreateAssetMenu(menuName = scriptableValueMenuName + "Scriptable Bool")]
     public class ScriptableBool : ScriptableValue
     {
+        [SerializeField] bool defaultBool;
         [SerializeField] bool value;
-        [SerializeField] bool startValue;
 
-        public override void Default()
+        public bool Bool { get => value; set => SetBool(value); }
+        public bool DefaultBool => defaultBool;
+
+        public readonly EventHandler<bool> OnBoolChanged = new EventHandler<bool>();
+
+        protected override void InvokeEvents(bool invoke)
         {
-            value = startValue;
+            if (invoke == false)
+                return;
+
+            OnValueChanged?.Invoke();
+            OnBoolChanged?.Invoke(value);
         }
 
-        public bool Bool => value;
+        public override void Default(bool invokeEvents = true)
+        {
+            if (invokeEvents == false)
+                return;
 
-        public bool SetBool(bool value) => this.value = value;
+            value = defaultBool;
+            InvokeEvents(invokeEvents);
+        }
+
+        public void SetBool(bool value, bool invokeEvents = true)
+        {
+            this.value = value;
+            InvokeEvents(invokeEvents);
+        }
+
+        public void SetDefaultBool(bool defaultBool, bool setValueEqualsToDefault, bool invokeEvents = true)
+        {
+            this.defaultBool = defaultBool;
+
+            if (setValueEqualsToDefault)
+                value = defaultBool;
+
+            InvokeEvents(invokeEvents);
+        }
     }
 }

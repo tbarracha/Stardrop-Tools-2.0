@@ -18,12 +18,12 @@ namespace StardropTools
         public bool IsEmpty => isEmpty;
         
 
-        public GameEvent<int> OnRemoved = new GameEvent<int>();
-        public GameEvent<int> OnAdded = new GameEvent<int>();
+        public EventHandler<int> OnRemoved = new EventHandler<int>();
+        public EventHandler<int> OnAdded = new EventHandler<int>();
 
-        public GameEvent<int> OnValueChanged = new GameEvent<int>();
-        public GameEvent<float> OnPercentChanged = new GameEvent<float>();
-        public GameEvent OnValueEmpty = new GameEvent();
+        public EventHandler<int> OnValueChanged = new EventHandler<int>();
+        public EventHandler<float> OnPercentChanged = new EventHandler<float>();
+        public EventHandler OnValueEmpty = new EventHandler();
 
 
         #region Constructors

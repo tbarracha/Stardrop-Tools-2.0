@@ -4,7 +4,7 @@ using UnityEngine;
 namespace StardropTools.Tween
 {
     /// <summary>
-    /// Tweens MUST always end with .Initialize();
+    /// For a tween to start, it MUST always end with .Initialize();
     /// </summary>
     public abstract class Tween
     {
@@ -27,6 +27,8 @@ namespace StardropTools.Tween
         protected float runtime;
         protected bool isValid;
 
+        public bool isInManagerList;
+
         #region Parameters
 
         public int TweenID => tweenID;
@@ -41,17 +43,37 @@ namespace StardropTools.Tween
 
         #region Events
 
-        public readonly GameEvent OnTweenStart = new GameEvent();
-        public readonly GameEvent OnTweenComplete = new GameEvent();
-        public readonly GameEvent OnTweenUpdate = new GameEvent();
-        public readonly GameEvent OnTweenPaused = new GameEvent();
-        public readonly GameEvent OnTweenCanceled = new GameEvent();
+        public readonly EventHandler OnTweenStart = new EventHandler();
+        public readonly EventHandler OnTweenComplete = new EventHandler();
+        public readonly EventHandler OnTweenTick = new EventHandler();
+        public readonly EventHandler OnTweenPaused = new EventHandler();
+        public readonly EventHandler OnTweenCanceled = new EventHandler();
 
-        public readonly GameEvent OnDelayStart = new GameEvent();
-        public readonly GameEvent OnDelayComplete = new GameEvent();
+        public readonly EventHandler OnDelayStart = new EventHandler();
+        public readonly EventHandler OnDelayComplete = new EventHandler();
+
+        public readonly EventHandler<float> OnTweenPercent = new EventHandler<float>();
 
         #endregion // Events
 
+        #region Get Tween Type
+
+        // Values
+        public TweenInt asInt => this as TweenInt;
+        public TweenFloat asFloat => this as TweenFloat;
+        public TweenVector2 asVector2 => this as TweenVector2;
+        public TweenVector3 asVector3 => this as TweenVector3;
+        public TweenVector4 asVector4 => this as TweenVector4;
+        public TweenQuaternion asQuaternion => this as TweenQuaternion;
+
+        // Shake Values
+        public TweenShakeInt asShakeInt => this as TweenShakeInt;
+        public TweenShakeFloat asShakeFloat => this as TweenShakeFloat;
+        public TweenShakeVector2 asShakeVector2 => this as TweenShakeVector2;
+        public TweenShakeVector3 asShakeVector3 => this as TweenShakeVector3;
+        public TweenShakeVector4 asShakeVector4 => this as TweenShakeVector4;
+
+        #endregion // Get tween type
 
 
         #region Setters
@@ -146,9 +168,9 @@ namespace StardropTools.Tween
             ResetRuntime();
 
             if (delay > 0)
-                ChangeState(TweenState.waiting);
+                ChangeState(TweenState.Waiting);
             else
-                ChangeState(TweenState.running);
+                ChangeState(TweenState.Running);
 
             isValid = TweenManager.Instance.ProcessTween(this);
 
@@ -163,23 +185,23 @@ namespace StardropTools.Tween
         {
             switch (tweenState)
             {
-                case TweenState.waiting:
+                case TweenState.Waiting:
                     Waiting();
                     break;
 
-                case TweenState.running:
+                case TweenState.Running:
                     Running();
                     break;
 
-                case TweenState.complete:
+                case TweenState.Complete:
                     Complete();
                     break;
 
-                case TweenState.paused:
+                case TweenState.Paused:
                     Pause();
                     break;
 
-                case TweenState.canceled:
+                case TweenState.Canceled:
                     Stop();
                     break;
             }
@@ -193,23 +215,23 @@ namespace StardropTools.Tween
                 return;
 
             // to delay
-            if (nextState == TweenState.waiting)
+            if (nextState == TweenState.Waiting)
                 OnDelayStart?.Invoke();
 
             // from delay to running
-            if (tweenState == TweenState.waiting && nextState == TweenState.running)
+            if (tweenState == TweenState.Waiting && nextState == TweenState.Running)
                 OnDelayComplete?.Invoke();
 
             // to complete
-            if (nextState == TweenState.complete)
+            if (nextState == TweenState.Complete)
                 OnTweenComplete?.Invoke();
             
             // to pause
-            if (nextState == TweenState.paused)
+            if (nextState == TweenState.Paused)
                 OnTweenPaused?.Invoke();
 
             // to cancel
-            if (nextState == TweenState.canceled)
+            if (nextState == TweenState.Canceled)
                 OnTweenCanceled?.Invoke();
 
             tweenState = nextState;
@@ -224,7 +246,7 @@ namespace StardropTools.Tween
                 runtime += Time.deltaTime;
 
             if (runtime >= delay)
-                ChangeState(TweenState.running);
+                ChangeState(TweenState.Running);
         }
 
         protected virtual void Running()
@@ -238,11 +260,12 @@ namespace StardropTools.Tween
             percent = Mathf.Min(runtime / duration, 1);
 
             TweenUpdate(percent);
+            OnTweenPercent?.Invoke(percent);
 
             if (percent >= 1)
-                ChangeState(TweenState.complete);
+                ChangeState(TweenState.Complete);
 
-            OnTweenUpdate?.Invoke();
+            OnTweenTick?.Invoke();
         }
 
         protected virtual void Complete()
@@ -286,13 +309,13 @@ namespace StardropTools.Tween
 
         protected void RemoveFromManagerList()
         {
-            OnTweenStart.RemoveAllListeners();
-            OnTweenUpdate.RemoveAllListeners();
-            OnTweenComplete.RemoveAllListeners();
-            OnTweenPaused.RemoveAllListeners();
-            OnTweenCanceled.RemoveAllListeners();
-            OnDelayStart.RemoveAllListeners();
-            OnDelayComplete.RemoveAllListeners();
+            OnTweenStart.ClearAllListeners();
+            OnTweenTick.ClearAllListeners();
+            OnTweenComplete.ClearAllListeners();
+            OnTweenPaused.ClearAllListeners();
+            OnTweenCanceled.ClearAllListeners();
+            OnDelayStart.ClearAllListeners();
+            OnDelayComplete.ClearAllListeners();
 
             TweenManager.Instance.RemoveTween(this);
         }

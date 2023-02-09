@@ -9,6 +9,8 @@ namespace StardropTools.Tween
         protected Vector3 end;
         protected Vector3 lerped;
 
+        public readonly EventHandler<Vector3> OnTweenVector3 = new EventHandler<Vector3>();
+
         protected override void SetEssentials()
         {
             tweenType = TweenType.Vector3;
@@ -41,12 +43,19 @@ namespace StardropTools.Tween
         protected override void TweenUpdate(float percent)
         {
             lerped = Vector3.LerpUnclamped(start, end, Ease(percent));
+            OnTweenVector3?.Invoke(lerped);
+        }
+
+        protected override void Complete()
+        {
+            base.Complete();
+            OnTweenVector3?.Invoke(lerped);
         }
 
         protected override void Loop()
         {
             ResetRuntime();
-            ChangeState(TweenState.running);
+            ChangeState(TweenState.Running);
         }
 
         protected override void PingPong()
@@ -56,7 +65,7 @@ namespace StardropTools.Tween
             end = temp;
 
             ResetRuntime();
-            ChangeState(TweenState.running);
+            ChangeState(TweenState.Running);
         }
     }
 }

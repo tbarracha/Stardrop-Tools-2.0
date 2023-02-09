@@ -10,7 +10,7 @@ namespace StardropTools.UI
         [Tooltip("0-false, 1-true")]
         public Color[] colors = { Color.gray, Color.white };
         [Space]
-        public EaseType easeType;
+        public EaseType easeType = EaseType.EaseOutSine;
         public float duration = .2f;
 
         Tween.Tween tween;

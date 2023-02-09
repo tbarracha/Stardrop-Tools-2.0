@@ -10,7 +10,7 @@ namespace StardropTools.Tween
 
         protected override void SetEssentials()
         {
-            //tweenID = image.GetInstanceID();
+            //tweenID = textMesh.GetHashCode();
             tweenType = TweenType.TextMeshColor;
         }
 
@@ -35,6 +35,10 @@ namespace StardropTools.Tween
         protected override void TweenUpdate(float percent)
         {
             base.TweenUpdate(percent);
+
+            if (textMesh == null)
+                ChangeState(TweenState.Complete);
+
             textMesh.color = lerped;
         }
     }

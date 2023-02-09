@@ -1,10 +1,11 @@
 ﻿
 using UnityEngine;
+using StardropTools;
 
 /// <summary>
 /// Input Class focused on user swipe input (pc or mobile)
 /// </summary>
-public class SwipeManager : Singleton<SwipeManager>
+public class SwipeManager : Singleton<SwipeManager>, IUpdate
 {
     public enum SwipeDirection
     {
@@ -53,23 +54,23 @@ public class SwipeManager : Singleton<SwipeManager>
 
     #region Events
 
-    public static readonly GameEvent<SwipeData> OnSwipe = new GameEvent<SwipeData>();
-    public static readonly GameEvent<SwipeDirection> OnSwipeDirection = new GameEvent<SwipeDirection>();
+    public static readonly EventHandler<SwipeData> OnSwipe = new EventHandler<SwipeData>();
+    public static readonly EventHandler<SwipeDirection> OnSwipeDirection = new EventHandler<SwipeDirection>();
 
-    public static readonly GameEvent<int> OnSwipeHorizontal = new GameEvent<int>();
-    public static readonly GameEvent<int> OnSwipeVertical = new GameEvent<int>();
+    public static readonly EventHandler<int> OnSwipeHorizontal = new EventHandler<int>();
+    public static readonly EventHandler<int> OnSwipeVertical = new EventHandler<int>();
 
-    public static readonly GameEvent OnSwipeUp = new GameEvent();
-    public static readonly GameEvent OnSwipeDown = new GameEvent();
+    public static readonly EventHandler OnSwipeUp = new EventHandler();
+    public static readonly EventHandler OnSwipeDown = new EventHandler();
 
-    public static readonly GameEvent OnSwipeLeft = new GameEvent();
-    public static readonly GameEvent OnSwipeRight = new GameEvent();
+    public static readonly EventHandler OnSwipeLeft = new EventHandler();
+    public static readonly EventHandler OnSwipeRight = new EventHandler();
 
-    public static readonly GameEvent OnSwipeUpLeft = new GameEvent();
-    public static readonly GameEvent OnSwipeUpRight = new GameEvent();
+    public static readonly EventHandler OnSwipeUpLeft = new EventHandler();
+    public static readonly EventHandler OnSwipeUpRight = new EventHandler();
 
-    public static readonly GameEvent OnSwipeDownLeft = new GameEvent();
-    public static readonly GameEvent OnSwipeDownRight = new GameEvent();
+    public static readonly EventHandler OnSwipeDownLeft = new EventHandler();
+    public static readonly EventHandler OnSwipeDownRight = new EventHandler();
 
     #endregion // events
 
@@ -78,7 +79,7 @@ public class SwipeManager : Singleton<SwipeManager>
         screenSize = new Vector2(Screen.width, Screen.height);
         CalculateScreenPercent();
 
-        LoopManager.OnUpdate.AddListener(CheckSwipe);
+        StartUpdate();
     }
 
     public void CheckSwipe()
@@ -270,4 +271,11 @@ public class SwipeManager : Singleton<SwipeManager>
         else
             return SwipeDirection.upRight;
     }
+
+
+    public void StartUpdate() => LoopManager.AddToUpdate(this);
+
+    public void StopUpdate() => LoopManager.RemoveFromUpdate(this);
+
+    public void HandleUpdate() => CheckSwipe();
 }

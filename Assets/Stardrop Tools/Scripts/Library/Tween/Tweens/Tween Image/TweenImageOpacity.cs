@@ -37,6 +37,10 @@ namespace StardropTools.Tween
         protected override void TweenUpdate(float percent)
         {
             base.TweenUpdate(percent);
+
+            if (image == null)
+                ChangeState(TweenState.Canceled);
+
             image.color = color;
         }
     }

@@ -4,12 +4,18 @@ namespace StardropTools
     [System.Serializable]
     public class AnimState
     {
+#if UNITY_EDITOR
+        public string indexedStateName;
+        public void SetIndexStateName(int index) => indexedStateName = index + " - " + stateName;
+#endif
+
         [UnityEngine.SerializeField] string stateName;
         [UnityEngine.SerializeField] int stateHash;
+        [UnityEngine.SerializeField] string transitionName;
         [UnityEngine.SerializeField] int layer;
         [UnityEngine.SerializeField] float lengthInSeconds;
-        [UnityEngine.SerializeField] string transitionName;
         [UnityEngine.Range(0, 1)] public float crossfade = .15f;
+
 
         public string StateName { get => stateName; }
         public int StateHash { get => stateHash; }
@@ -29,6 +35,8 @@ namespace StardropTools
             this.layer = layer;
             crossfade = crossfadeTime;
             lengthInSeconds = animLength;
+
+            indexedStateName = stateName;
         }
 
         public AnimState(string stateName, int layer, string transitionName, float crossfadeTime, float animLength)
@@ -38,6 +46,8 @@ namespace StardropTools
             this.transitionName = transitionName;
             crossfade = crossfadeTime;
             lengthInSeconds = animLength;
+
+            indexedStateName = stateName;
         }
     }
 }

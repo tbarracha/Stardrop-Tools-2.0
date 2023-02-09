@@ -16,7 +16,7 @@ namespace StardropTools.FiniteStateMachine
         [Tooltip("Log State events to the Unity Console so we can just Copy/Paste to any script")]
         [SerializeField] protected bool logStateEventsToConsole;
 #endif
-
+        
         [Header("State Machine")]
         [SerializeField] protected int startIndex = 0;
         [SerializeField] protected BaseState currentState;
@@ -45,9 +45,9 @@ namespace StardropTools.FiniteStateMachine
         }
 
 
-        public override void UpdateLogic()
+        public override void HandleUpdate()
         {
-            base.UpdateLogic();
+            base.HandleUpdate();
             UpdateStateMachine();
         }
 

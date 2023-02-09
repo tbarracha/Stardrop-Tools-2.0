@@ -12,7 +12,7 @@ namespace StardropTools.Tween
 
         protected override void SetEssentials()
         {
-            //tweenID = target.GetInstanceID();
+            //tweenID = target.GetHashCode();
             tweenType = TweenType.ShakeLocalScale;
         }
 
@@ -38,6 +38,16 @@ namespace StardropTools.Tween
         {
             base.TweenUpdate(percent);
             target.localScale = lerped;
+        }
+
+        protected override void Complete()
+        {
+            base.Complete();
+
+            if (target == null)
+                ChangeState(TweenState.Canceled);
+
+            target.localScale = end;
         }
     }
 }

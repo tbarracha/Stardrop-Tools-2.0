@@ -4,15 +4,171 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using StardropTools;
 
+/// <summary>
+/// Class that contains miscellanious static utilities
+/// </summary>
 public static class Utilities
 {
     static Camera camera;
 
+    #region Debug & Log
+    public const string DebugAlert = "<color=orange>Debug: </color>";
+
     /// <summary>
-    /// Returns a list of components found under parent transform
+    /// Logs "Debug:" + message, in default ORANGE color
     /// </summary>
-    public static List<T> GetItems<T>(Transform parent)
+    public static void LogDebug(object message)
+    {
+        Debug.Log(DebugAlert + message);
+    }
+
+    /// <summary>
+    /// Logs "Debug:" + message, in CHOSEN color
+    /// <para> Colors: red, orange, yellow, white, magenta, cyan, black, gray </para>
+    /// </summary>
+    public static void LogDebug(string color, object message)
+    {
+        Debug.Log("<color=" + color + "> Debug: </color>" + message);
+    }
+
+
+    /// <summary>
+    /// Logs a message in the Unity Console with CHOSEN Unity color
+    /// <para> Colors: red, orange, white, magenta, cyan, black, gray </para>
+    /// </summary>
+    public static void LogColored(string color, object message)
+    {
+        Debug.Log("<color=" + color + ">" + message + "</color>");
+    }
+
+#if UNITY_EDITOR
+    public static void ClearLog() //you can copy/paste this code to the bottom of your script
+    {
+        var assembly = System.Reflection.Assembly.GetAssembly(typeof(UnityEditor.Editor));
+        var type = assembly.GetType("UnityEditor.LogEntries");
+        var method = type.GetMethod("Clear");
+        method.Invoke(new object(), null);
+    }
+#endif
+    #endregion
+
+    public static bool RandomTrueOrFalse() => ConvertIntToBool(Random.Range(0, 2));
+
+    public static int RandomPositiveOrNegativeOne()
+    {
+        int[] ints = { -1, 1 };
+        return ints.GetRandom();
+    }
+
+    /// <summary>
+    /// Invokes the InitializeManager() method on an array of IManager
+    /// </summary>
+    public static void InitializeManagers(IManager[] managers)
+    {
+        if (managers.Exists())
+            for (int i = 0; i < managers.Length; i++)
+                managers[i].InitializeManager();
+    }
+
+    /// <summary>
+    /// Invokes the LateInitializeManager() method on an array of IManager
+    /// </summary>
+    public static void LateInitializeManagers(IManager[] managers)
+    {
+        if (managers.Exists())
+            for (int i = 0; i < managers.Length; i++)
+                managers[i].LateInitializeManager();
+    }
+
+    /// <summary>
+    /// Loops through an array of BaseManagerUpdateables and calls UpdateManager() on each
+    /// </summary>
+    public static void UpdateManagers(BaseManagerUpdatable[] updateableManagers)
+    {
+        if (updateableManagers.Exists())
+            for (int i = 0; i < updateableManagers.Length; i++)
+                updateableManagers[i].UpdateManager();
+    }
+
+
+
+    /// <summary>
+    /// Invokes the Initialize() method on an Array of BaseComponents
+    /// </summary>
+    public static void InitializeBaseComponents(BaseComponent[] baseComponents)
+    {
+        if (baseComponents.Exists())
+            for (int i = 0; i < baseComponents.Length; i++)
+                baseComponents[i].Initialize();
+    }
+
+    /// <summary>
+    /// Invokes the Initialize() method on a List of BaseComponents
+    /// </summary>
+    public static void InitializeBaseComponents(List<BaseComponent> baseComponents)
+    {
+        if (baseComponents.Exists())
+            for (int i = 0; i < baseComponents.Count; i++)
+                baseComponents[i].Initialize();
+    }
+
+
+
+    /// <summary>
+    /// Invokes the LateInitialize() method on an Array of BaseComponents
+    /// </summary>
+    public static void LateInitializeBaseComponents(BaseComponent[] baseComponents)
+    {
+        if (baseComponents.Exists())
+            for (int i = 0; i < baseComponents.Length; i++)
+                baseComponents[i].LateInitialize();
+    }
+
+    /// <summary>
+    /// Invokes the LateInitialize() method on a List of BaseComponents
+    /// </summary>
+    public static void LateInitializeBaseComponents(List<BaseComponent> baseComponents)
+    {
+        if (baseComponents.Exists())
+            for (int i = 0; i < baseComponents.Count; i++)
+                baseComponents[i].LateInitialize();
+    }
+
+
+    /// <summary>
+    /// Returns a list of all childrens Transforms of parent transform
+    /// </summary>
+    public static List<Transform> GetChildren(this Transform parent)
+    {
+        List<Transform> childrenList = new List<Transform>();
+
+        for (int i = 0; i < parent.childCount; i++)
+            childrenList.Add(parent.GetChild(i));
+
+        return childrenList;
+    }
+
+
+    /// <summary>
+    /// Returns a list of all childrens GameObjects of parent transform
+    /// </summary>
+    public static List<GameObject> GetChildrenObjects(this Transform parent)
+    {
+        List<GameObject> childrenList = new List<GameObject>();
+
+        for (int i = 0; i < parent.childCount; i++)
+            childrenList.Add(parent.GetChild(i).gameObject);
+
+        return childrenList;
+    }
+
+
+    /// <summary>
+    /// Returns a List of components found ONLY under the parent transform. Doesn't search bellow the Transform parent 
+    /// </summary>
+    public static List<T> GetListComponentsInChildren<T>(Transform parent)
     {
         if (parent != null && parent.childCount > 0)
         {
@@ -22,8 +178,12 @@ public static class Utilities
             // loop to find components
             for (int i = 0; i < parent.childCount; i++)
             {
-                var component = parent.GetChild(i).GetComponent<T>();
-                if (component != null && componentList.Contains(component) == false)
+                T component = parent.GetChild(i).GetComponent<T>();
+
+                if (component == null || component.Equals(null)) // compare for UNITY & compile
+                    continue;
+
+                if (componentList.Contains(component) == false)
                     componentList.Add(component);
             }
 
@@ -38,6 +198,12 @@ public static class Utilities
         }
     }
 
+    /// <summary>
+    /// Returns an Array of components found ONLY under the parent transform. Doesn't search bellow the Transform parent 
+    /// </summary>
+    public static T[] GetArrayComponentsInChildren<T>(Transform parent) => GetListComponentsInChildren<T>(parent).ToArray();
+
+
     public static Transform CreateEmpty(string name, Vector3 position, Transform parent)
     {
         Transform point = new GameObject(name).transform;
@@ -45,6 +211,23 @@ public static class Utilities
         point.parent = parent;
         return point;
     }
+
+
+
+    public static void SetGameObjectsActive(GameObject[] gameObjects, bool value)
+    {
+        for (int i = 0; i < gameObjects.Length; i++)
+            gameObjects[i].SetActive(value);
+    }
+
+
+    public static void SetGameObjectsActive(List<GameObject> gameObjects, bool value)
+    {
+        for (int i = 0; i < gameObjects.Count; i++)
+            gameObjects[i].SetActive(value);
+    }
+
+
 
     /// <summary>
     /// 0 - False, 1 - True
@@ -66,6 +249,90 @@ public static class Utilities
             return 0;
         else
             return 1;
+    }
+
+    /// <summary>
+    /// Set a single Width to line
+    /// </summary>
+    public static void SetLineWidth(this LineRenderer line, float width)
+    {
+        line.startWidth = width;
+        line.endWidth = width;
+    }
+
+
+    /// <summary>
+    /// Sets line point count and points from an array
+    /// </summary>
+    public static void SetLinePoints(this LineRenderer line, Vector3[] points)
+    {
+        line.positionCount = points.Length;
+        line.SetPositions(points);
+    }
+
+    /// <summary>
+    /// Sets line point count and points from a list
+    /// </summary>
+    public static void SetLinePoints(this LineRenderer line, List<Vector3> points)
+    {
+        line.positionCount = points.Count;
+        line.SetPositions(points.ToArray());
+    }
+
+    /// <summary>
+    /// Sets 2 points in a line
+    /// </summary>
+    public static void SetTwoPointLine(this LineRenderer line, Vector3 startPoint, Vector3 endPoint)
+    {
+        line.positionCount = 2;
+        line.SetPosition(0, startPoint);
+        line.SetPosition(1, endPoint);
+    }
+
+    /// <summary>
+    /// Sets a color to Line start and end
+    /// </summary>
+    public static void SetLineColor(this LineRenderer line, Color color)
+    {
+        line.startColor = color;
+        line.endColor = color;
+    }
+
+    /// <summary>
+    /// Removes all points from each Trail Tenderer
+    /// </summary>
+    public static void ClearTrails(TrailRenderer[] trailRenderers)
+    {
+        if (trailRenderers.Exists() == false)
+            return;
+
+        for (int i = 0; i < trailRenderers.Length; i++)
+            trailRenderers[i].Clear();
+    }
+
+    /// <summary>
+    /// Removes all particles from each Particle System
+    /// </summary>
+    public static void ClearParticles(ParticleSystem[] particleSystems)
+    {
+        if (particleSystems.Exists() == false)
+            return;
+
+        for (int i = 0; i < particleSystems.Length; i++)
+            particleSystems[i].Clear();
+    }
+
+
+    public static string FirstLetterUppercase(this string str)
+    {
+        if (string.IsNullOrEmpty(str))
+            return string.Empty;
+
+        str.ToLower();
+        char[] characters = str.ToCharArray();
+        characters[0] = char.ToUpper(characters[0]);
+
+        return new string(characters);
     }
 
     public static Vector3 ViewportRaycast(LayerMask layerMask)
@@ -140,11 +407,10 @@ public static class Utilities
     }
 
     /// <summary>
-    /// Creates new file if there isn't one or adds contents to an existing one.
+    /// Creates new file if there isn't one or adds contents to an existing one, and Returns its path
     /// File name ex: 'logs.txt' (extensions can be whatever ex: .bnb, .cro, etc,.)
     /// </summary>
-    /// <param name="fileName"></param>
-    public static void CreateOrAddTextToFile(string path, string fileName, string content, int newLineAmount = 0)
+    public static string CreateOrAddTextToFile(string path, string fileName, string content, int newLineAmount = 0)
     {
         // path to file
         string filePath = path + fileName;
@@ -162,18 +428,127 @@ public static class Utilities
         else
             File.AppendAllText(filePath, content);
 
+        return filePath;
     }
 
-#if UNITY_EDITOR
-    public static void ClearLog() //you can copy/paste this code to the bottom of your script
+    /// <summary>
+    /// Creates new file if there isn't one or adds contents to an existing one, and Returns its path
+    /// File name ex: 'logs.txt' (extensions can be whatever ex: .bnb, .cro, etc,.)
+    /// </summary>
+    public static string CreateOrAddTextToFile(string path, string content)
     {
-        var assembly = System.Reflection.Assembly.GetAssembly(typeof(UnityEditor.Editor));
-        var type = assembly.GetType("UnityEditor.LogEntries");
-        var method = type.GetMethod("Clear");
-        method.Invoke(new object(), null);
+        // create file it if doesnt exist
+        if (File.Exists(path) == false)
+            File.WriteAllText(path, content);
+
+        // add content to file
+        else
+            File.AppendAllText(path, content);
+
+        return path;
     }
+
+    public static void SetImageArrayColor(UnityEngine.UI.Image[] images, Color color)
+    {
+        for (int i = 0; i < images.Length; i++)
+            images[i].color = color;
+    }
+
+    public static void SetImageArrayAlpha(UnityEngine.UI.Image[] images, float alpha)
+    {
+        Color color = Color.black;
+
+        for (int i = 0; i < images.Length; i++)
+        {
+            color = images[i].color;
+            color.a = alpha;
+
+            images[i].color = color;
+        }
+    }
+
+    public static void SetImagePixelsPerUnit(UnityEngine.UI.Image[] images, float pixelsPerUnit)
+    {
+        for (int i = 0; i < images.Length; i++)
+            images[i].pixelsPerUnitMultiplier = pixelsPerUnit;
+    }
+
+    public static bool SimpleWait(float waitTime)
+    {
+        float t = 0;
+        while (t < waitTime)
+            t += Time.deltaTime;
+
+        return true;
+    }
+
+    #region Get Random
+
+    public static T GetRandom<T>(T[] array) => array.GetRandom(); // kinda redundant, isnt it?
+
+    public static T GetRandom<T>(T option1, T option2)
+    {
+        List<T> list = new List<T>();
+        list.Add(option1);
+        list.Add(option2);
+
+        return list.GetRandom();
+    }
+
+    public static T GetRandom<T>(T option1, T option2, T option3)
+    {
+        List<T> list = new List<T>();
+        list.Add(option1);
+        list.Add(option2);
+        list.Add(option3);
+
+        return list.GetRandom();
+    }
+
+    public static T GetRandom<T>(T option1, T option2, T option3, T option4)
+    {
+        List<T> list = new List<T>();
+        list.Add(option1);
+        list.Add(option2);
+        list.Add(option3);
+        list.Add(option4);
+
+        return list.GetRandom();
+    }
+
+    public static T GetRandom<T>(T option1, T option2, T option3, T option4, T option5)
+    {
+        List<T> list = new List<T>();
+        list.Add(option1);
+        list.Add(option2);
+        list.Add(option3);
+        list.Add(option4);
+        list.Add(option5);
+
+        return list.GetRandom();
+    }
+
+    #endregion // Get Random
 
     #region Gizmos
+
+    public static void DrawPoint(Vector3 position, Color color, float radius)
+    {
+        Gizmos.color = color;
+        Gizmos.DrawSphere(position, radius);
+    }
+
+    public static void DrawLine(Vector3 origin, Vector3 target, Color color)
+    {
+        Gizmos.color = color;
+        Gizmos.DrawLine(origin, target);
+    }
+
+    public static void DrawRay(Vector3 origin, Vector3 direction, Color color)
+    {
+        Gizmos.color = color;
+        Gizmos.DrawRay(origin, direction);
+    }
 
     public static void DrawCube(Vector3 position, Vector3 scale, Quaternion rotation)
     {
@@ -184,7 +559,9 @@ public static class Utilities
         Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
         Gizmos.matrix = oldGizmosMatrix;
     }
+    #endregion // gizmos
 
+#if UNITY_EDITOR
     public static void DrawString(string text, Vector3 worldPos, Color? color = null)
     {
         Handles.BeginGUI();
@@ -195,7 +572,6 @@ public static class Utilities
         GUI.Label(new Rect(screenPos.x - (size.x / 2), -screenPos.y + view.position.height + 4, size.x, size.y), text);
         Handles.EndGUI();
     }
-    #endregion // gizmos
 
     #region Instantiate Prefabs
 #if UNITY_EDITOR
