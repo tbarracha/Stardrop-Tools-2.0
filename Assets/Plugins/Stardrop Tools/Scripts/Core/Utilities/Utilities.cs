@@ -5,6 +5,8 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 using StardropTools;
+using System.Security;
+using Unity.VisualScripting;
 
 /// <summary>
 /// Class that contains miscellanious static utilities
@@ -12,6 +14,10 @@ using StardropTools;
 public static class Utilities
 {
     static Camera camera;
+
+    public static readonly int[] OneAndNegativeOne = { 1, -1 };
+
+    //public static int RandomOneOrNegativeOne => OneAndNegativeOne.GetRandom();
 
     #region Debug & Log
     public const string DebugAlert = "<color=orange>Debug: </color>";
@@ -57,10 +63,18 @@ public static class Utilities
 
     public static bool RandomTrueOrFalse() => ConvertIntToBool(Random.Range(0, 2));
 
-    public static int RandomPositiveOrNegativeOne()
+    public static int RandomOneOrNegativeOne() => OneAndNegativeOne.GetRandom();
+
+    public static int GetNextIndex<T>(T[] array, int currentIndex)
     {
-        int[] ints = { -1, 1 };
-        return ints.GetRandom();
+        if (array == null || array.Length == 0)
+        {
+            Debug.LogError("Array is null or empty!");
+            return -1; // Return an invalid index value
+        }
+
+        int nextIndex = (currentIndex + 1) % array.Length;
+        return nextIndex;
     }
 
     /// <summary>
@@ -271,6 +285,19 @@ public static class Utilities
         line.SetPositions(points);
     }
 
+
+    /// <summary>
+    /// Sets line point count and points from an array
+    /// </summary>
+    public static void SetLinePointsWithHeightOffset(this LineRenderer line, Vector3[] points, float heightOffset)
+    {
+        line.positionCount = points.Length;
+        for (int i = 0; i < points.Length; i++)
+            points[i].y = heightOffset;
+
+        line.SetPositions(points);
+    }
+
     /// <summary>
     /// Sets line point count and points from a list
     /// </summary>
@@ -300,7 +327,7 @@ public static class Utilities
     }
 
     /// <summary>
-    /// Removes all points from each Trail Tenderer
+    /// Removes all points from each Trail Renderer
     /// </summary>
     public static void ClearTrails(TrailRenderer[] trailRenderers)
     {
@@ -321,6 +348,56 @@ public static class Utilities
 
         for (int i = 0; i < particleSystems.Length; i++)
             particleSystems[i].Clear();
+    }
+
+    /// <summary>
+    /// Starts the particles for each Particle System
+    /// </summary>
+    public static void PlayParticles(ParticleSystem[] particleSystems)
+    {
+        if (particleSystems.Exists() == false)
+            return;
+
+        for (int i = 0; i < particleSystems.Length; i++)
+            particleSystems[i].Play();
+    }
+
+    /// <summary>
+    /// Stops the particles for each Particle System
+    /// </summary>
+    public static void StopParticles(ParticleSystem[] particleSystems)
+    {
+        if (particleSystems.Exists() == false)
+            return;
+
+        for (int i = 0; i < particleSystems.Length; i++)
+            particleSystems[i].Stop();
+    }
+
+
+
+    /// <summary>
+    /// Enabled each Trail Renderer
+    /// </summary>
+    public static void PlayTrails(TrailRenderer[] trailRenderers)
+    {
+        if (trailRenderers.Exists() == false)
+            return;
+
+        for (int i = 0; i < trailRenderers.Length; i++)
+            trailRenderers[i].enabled = true;
+    }
+
+    /// <summary>
+    /// Disables each Trail Renderer
+    /// </summary>
+    public static void StopTrails(TrailRenderer[] trailRenderers)
+    {
+        if (trailRenderers.Exists() == false)
+            return;
+
+        for (int i = 0; i < trailRenderers.Length; i++)
+            trailRenderers[i].enabled = false;
     }
 
 
@@ -474,6 +551,12 @@ public static class Utilities
             images[i].pixelsPerUnitMultiplier = pixelsPerUnit;
     }
 
+    public static void SetTextMeshArrayColor(TMPro.TextMeshProUGUI[] textMeshes, Color color)
+    {
+        for (int i = 0; i < textMeshes.Length; i++)
+            textMeshes[i].color = color;
+    }
+
     public static bool SimpleWait(float waitTime)
     {
         float t = 0;
@@ -560,22 +643,34 @@ public static class Utilities
         Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
         Gizmos.matrix = oldGizmosMatrix;
     }
-    #endregion // gizmos
 
-#if UNITY_EDITOR
-    public static void DrawString(string text, Vector3 worldPos, Color? color = null)
+    public static void DrawArrow(Vector3 arrowPosition, Vector3 arrowDirection, float arrowLength = 1f, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20f)
     {
-        Handles.BeginGUI();
-        if (color.HasValue) GUI.color = color.Value;
-        var view = UnityEditor.SceneView.currentDrawingSceneView;
-        Vector3 screenPos = view.camera.WorldToScreenPoint(worldPos);
-        Vector2 size = GUI.skin.label.CalcSize(new GUIContent(text));
-        GUI.Label(new Rect(screenPos.x - (size.x / 2), -screenPos.y + view.position.height + 4, size.x, size.y), text);
-        Handles.EndGUI();
+        Vector3 arrowEnd = arrowPosition + arrowDirection.normalized * arrowLength;
+
+        // Draw arrow body
+        Gizmos.DrawLine(arrowPosition, arrowEnd);
+
+        // Draw arrow head
+        Vector3 right = Quaternion.LookRotation(arrowDirection) * Quaternion.Euler(0, -arrowHeadAngle, 0) * Vector3.forward;
+        Vector3 left = Quaternion.LookRotation(arrowDirection) * Quaternion.Euler(0, arrowHeadAngle, 0) * Vector3.forward;
+
+        Gizmos.DrawLine(arrowEnd, arrowEnd - (right * arrowHeadLength));
+        Gizmos.DrawLine(arrowEnd, arrowEnd - (left * arrowHeadLength));
     }
 
-    #region Instantiate Prefabs
+    public static void DrawString(string text, Vector3 position, Color color)
+    {
+        GUIStyle style = new GUIStyle();
+        style.normal.textColor = color;
+
+        Handles.Label(position, text, style);
+    }
+    #endregion // gizmos
+
+
 #if UNITY_EDITOR
+    #region Instantiate Prefabs
     public static GameObject CreatePrefab(GameObject prefab)
         => PrefabUtility.InstantiatePrefab(prefab) as GameObject;
 
@@ -621,7 +716,6 @@ public static class Utilities
         obj.transform.parent = parent;
         return obj.GetComponent<T>();
     }
-#endif
     #endregion // instantiate prefabs
 #endif
 }

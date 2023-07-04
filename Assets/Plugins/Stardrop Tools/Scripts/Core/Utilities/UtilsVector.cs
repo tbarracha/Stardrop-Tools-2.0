@@ -121,6 +121,8 @@ public static class UtilsVector
     }
 
 
+    // Set Rotation
+    // =========================================================================
 
     public static Quaternion LookAtMouse2D(Transform target, float offset = 0)
     {
@@ -160,6 +162,27 @@ public static class UtilsVector
         => Mathf.Atan2(direction.z, direction.x) * Mathf.Rad2Deg + offset;
 
 
+    /// <summary>
+    /// Returns the Direction from ObserverPos TO TargetPos
+    /// </summary>
+    public static Vector3 DirectionTo(Vector3 observerPos, Vector3 targetPos) => targetPos - observerPos;
+
+    /// <summary>
+    /// Returns the Direction from this Observers position TO Target Transform
+    /// </summary>
+    public static Vector3 DirectionTo(Transform observer, Transform target) => target.position - observer.position;
+
+    /// <summary>
+    /// Returns the Direction FROM Target Position to the Observers Position
+    /// </summary>
+    public static Vector3 DirectionFrom(Vector3 targetPos, Vector3 observerPos) => observerPos - targetPos;
+
+    /// <summary>
+    /// Returns the Direction FROM target Transform to the Observers Transform
+    /// </summary>
+    public static Vector3 DirectionFrom(Transform target, Transform observer) => observer.position - target.position;
+
+
     public static Vector3 GetMidPoint(Vector3 vectorOne, Vector3 vectorTwo)
         => (vectorOne + vectorTwo) * .5f;
 
@@ -193,20 +216,41 @@ public static class UtilsVector
     public static Vector3 GetVelocity(Vector3 currentPosition, Vector3 lastPosition)
         => (currentPosition - lastPosition) / Time.deltaTime;
 
-    public static Quaternion SmoothLookAt(Transform target, Vector3 direction, float lookSpeed, bool lockX = true, bool lockY = false, bool lockZ = true)
+    public static Vector3 GetIntersectionPoint(Vector3 observerPosition, Vector3 targetPosition, Vector3 targetVelocity, float observerSpeed)
+    {
+        // Calculate the distance between the ball and the enemy
+        float distance = Vector3.Distance(targetPosition, observerPosition);
+
+        // Calculate the time it will take for the enemy to reach the ball
+        float timeToIntercept = distance / observerSpeed;
+
+        // Calculate the expected ball position at the time of interception
+        Vector3 ballIntersectionPosition = targetPosition + (targetVelocity * timeToIntercept);
+
+        return ballIntersectionPosition;
+    }
+
+
+    public static Quaternion SmoothLookAt(Transform rotator, Vector3 direction, float lookSpeed, bool lockX = true, bool lockY = false, bool lockZ = true)
     {
         if (direction == Vector3.zero)
             return Quaternion.identity;
 
         Quaternion lookRot = Quaternion.LookRotation(direction);
-        Quaternion targetRot = Quaternion.Slerp(target.rotation, lookRot, Time.deltaTime * lookSpeed);
+        Quaternion targetRot = Quaternion.Slerp(rotator.rotation, lookRot, Time.deltaTime * lookSpeed);
 
         if (lockX) lookRot.x = 0;
         if (lockY) lookRot.y = 0;
         if (lockZ) lookRot.z = 0;
 
-        target.rotation = targetRot;
+        rotator.rotation = targetRot;
         return targetRot;
+    }
+
+    public static Quaternion SmoothLookAt(Transform observer, Transform target, float lookSpeed, bool lockX = true, bool lockY = false, bool lockZ = true)
+    {
+        Vector3 direction = DirectionTo(observer, target);
+        return SmoothLookAt(observer, direction, lookSpeed, lockX, lockY, lockZ);
     }
 
 
@@ -277,6 +321,33 @@ public static class UtilsVector
             return null;
         }
     }
+
+
+
+    /// <summary>
+    /// Creates a smooth Bezier that passes through all control points (At least 3 points needed)
+    /// </summary>
+    public static Vector3[] GenerateBezierCurve(Vector3[] controlPoints, float smoothness)
+    {
+        int curvedLength = (controlPoints.Length * Mathf.RoundToInt(smoothness)) - 1;
+        Vector3[] bezierPoints = new Vector3[curvedLength];
+
+        Vector3 A = controlPoints[0];
+        Vector3 B = controlPoints[1];
+        Vector3 C = controlPoints[2];
+
+        Vector3 adjustedB = 2 * B - 0.5f * A - 0.5f * C;
+
+        for (int i = 0; i < curvedLength; i++)
+        {
+            float t = (float)i / (float)(curvedLength - 1);
+            Vector3 pointOnCurve = Mathf.Pow(1 - t, 2) * A + 2 * (1 - t) * t * adjustedB + Mathf.Pow(t, 2) * C;
+            bezierPoints[i] = pointOnCurve;
+        }
+
+        return bezierPoints;
+    }
+
 
 
     /// <summary>

@@ -26,9 +26,9 @@ namespace StardropTools
 
         #endregion
 
-        static List<IUpdate>        updateList;
-        static List<IFixedUpdate>   fixedUpdateList;
-        static List<ILateUpdate>    lateUpdateList;
+        static List<IUpdateable>        updateList;
+        static List<IFixedUpdateable>   fixedUpdateList;
+        static List<ILateUpdateable>    lateUpdateList;
 
 
         public void Initialize()
@@ -36,9 +36,9 @@ namespace StardropTools
             if (IsInitialized)
                 return;
 
-            updateList      = new List<IUpdate>();
-            fixedUpdateList = new List<IFixedUpdate>();
-            lateUpdateList  = new List<ILateUpdate>();
+            updateList      = new List<IUpdateable>();
+            fixedUpdateList = new List<IFixedUpdateable>();
+            lateUpdateList  = new List<ILateUpdateable>();
 
             OnFrameworkInitialized?.Invoke();
             IsInitialized = true;
@@ -96,12 +96,12 @@ namespace StardropTools
         /// <summary>
         /// Adds item to the Update List 
         /// </summary>
-        public static void AddToUpdate(IUpdate updateable) => updateList.Add(updateable);
+        public static void AddToUpdate(IUpdateable updateable) => updateList.Add(updateable);
 
         /// <summary>
         /// If list doesn't contain the item, we add it
         /// </summary>
-        public static void AddToUpdateSafe(IUpdate updateable)
+        public static void AddToUpdateSafe(IUpdateable updateable)
         {
             if (updateList.Contains(updateable) == false)
                 updateList.Add(updateable);
@@ -111,12 +111,12 @@ namespace StardropTools
         /// <summary>
         /// Remove item from the Update list
         /// </summary>
-        public static void RemoveFromUpdate(IUpdate updateable) => updateList.Remove(updateable);
+        public static void RemoveFromUpdate(IUpdateable updateable) => updateList.Remove(updateable);
 
         /// <summary>
         /// If list contains the item, we REMOVE it
         /// </summary>
-        public static void RemoveFromUpdateSafe(IUpdate updateable)
+        public static void RemoveFromUpdateSafe(IUpdateable updateable)
         {
             if (updateList.Contains(updateable))
                 updateList.Remove(updateable);
@@ -127,12 +127,12 @@ namespace StardropTools
         /// <summary>
         /// Adds item to the Update List 
         /// </summary>
-        public static void AddToFixedUpdate(IFixedUpdate updateable) => fixedUpdateList.Add(updateable);
+        public static void AddToFixedUpdate(IFixedUpdateable updateable) => fixedUpdateList.Add(updateable);
 
         /// <summary>
         /// If list doesn't contain the item, we add it
         /// </summary>
-        public static void AddToFixedUpdateSafe(IFixedUpdate updateable)
+        public static void AddToFixedUpdateSafe(IFixedUpdateable updateable)
         {
             if (fixedUpdateList.Contains(updateable) == false)
                 fixedUpdateList.Add(updateable);
@@ -142,12 +142,12 @@ namespace StardropTools
         /// <summary>
         /// Remove item from the Update list
         /// </summary>
-        public static void RemoveFromFixedUpdate(IFixedUpdate updateable) => fixedUpdateList.Remove(updateable);
+        public static void RemoveFromFixedUpdate(IFixedUpdateable updateable) => fixedUpdateList.Remove(updateable);
 
         /// <summary>
         /// If list contains the item, we REMOVE it
         /// </summary>
-        public static void RemoveFromFixedUpdateSafe(IFixedUpdate updateable)
+        public static void RemoveFromFixedUpdateSafe(IFixedUpdateable updateable)
         {
             if (fixedUpdateList.Contains(updateable))
                 fixedUpdateList.Remove(updateable);
@@ -158,12 +158,12 @@ namespace StardropTools
         /// <summary>
         /// Adds item to the Update List 
         /// </summary>
-        public static void AddToLateUpdate(ILateUpdate updateable) => lateUpdateList.Add(updateable);
+        public static void AddToLateUpdate(ILateUpdateable updateable) => lateUpdateList.Add(updateable);
 
         /// <summary>
         /// If list doesn't contain the item, we add it
         /// </summary>
-        public static void AddToLateUpdateSafe(ILateUpdate updateable)
+        public static void AddToLateUpdateSafe(ILateUpdateable updateable)
         {
             if (lateUpdateList.Contains(updateable) == false)
                 lateUpdateList.Add(updateable);
@@ -173,12 +173,12 @@ namespace StardropTools
         /// <summary>
         /// Remove item from the Update list
         /// </summary>
-        public static void RemoveFromLateUpdate(ILateUpdate updateable) => lateUpdateList.Remove(updateable);
+        public static void RemoveFromLateUpdate(ILateUpdateable updateable) => lateUpdateList.Remove(updateable);
 
         /// <summary>
         /// If list contains the item, we REMOVE it
         /// </summary>
-        public static void RemoveFromLateUpdateSafe(ILateUpdate updateable)
+        public static void RemoveFromLateUpdateSafe(ILateUpdateable updateable)
         {
             if (lateUpdateList.Contains(updateable))
                 lateUpdateList.Remove(updateable);

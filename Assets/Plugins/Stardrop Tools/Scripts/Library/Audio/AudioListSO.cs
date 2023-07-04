@@ -12,8 +12,6 @@ namespace StardropTools.Audio
         [SerializeField] System.Collections.Generic.List<AudioClip> clips;
         [SerializeField] float minPitch = 1;
         [SerializeField] float maxPitch = 1.2f;
-        [Space]
-        [SerializeField] bool clearClips;
 
         // public System.Collections.Generic.List<AudioClip> Clips { get => clips; }
 
@@ -66,13 +64,10 @@ namespace StardropTools.Audio
         public float GetRandomPitch() => Random.Range(minPitch, maxPitch);
 
 
-        protected virtual void OnValidate()
+        [NaughtyAttributes.Button("Clear Clips")]
+        public void ClearClips()
         {
-            if (clearClips)
-            {
-                clips = new System.Collections.Generic.List<AudioClip>();
-                clearClips = false;
-            }
+            clips = new System.Collections.Generic.List<AudioClip>();
         }
     }
 }

@@ -5,7 +5,7 @@ using StardropTools;
 /// <summary>
 /// Input Class focused on user swipe input (pc or mobile)
 /// </summary>
-public class SwipeManager : Singleton<SwipeManager>, IUpdate
+public class SwipeManager : Singleton<SwipeManager>, IUpdateable
 {
     public enum SwipeDirection
     {

@@ -14,18 +14,21 @@ namespace StardropTools.Pool
 
         public Coroutine lifetimeCR;
 
-        public GameObject ItemGameObject => itemObject;
-        public Transform ItemTransform => itemTransform;
+        public GameObject ItemGameObject    => itemObject;
+        public Transform ItemTransform      => itemTransform;
         public bool IsActive { get; private set; }
 
         public PoolItem(GameObject prefab, Pool pool)
         {
-            this.pool = pool;
+            this.pool       = pool;
 
-            itemObject = prefab;
-            itemTransform = prefab.transform;
+            itemObject      = prefab;
+            itemTransform   = prefab.transform;
 
-            poolable = prefab.GetComponent<IPoolable>();
+            poolable        = prefab.GetComponent<IPoolable>();
+
+            IsActive        = false;
+            prefab.SetActive(IsActive);
 
             if (poolable != null)
                 poolable.SetPoolItem(this);
@@ -52,10 +55,10 @@ namespace StardropTools.Pool
             IsActive = value;
         }
 
-        public void SetPosition(Vector3 position) => ItemTransform.position = position;
-        public void SetRotation(Quaternion rotation) => ItemTransform.rotation = rotation;
+        public void SetPosition(Vector3 position)       => ItemTransform.position = position;
+        public void SetRotation(Quaternion rotation)    => ItemTransform.rotation = rotation;
 
-        public void SetParent(Transform parent) => itemTransform.parent = parent;
+        public void SetParent(Transform parent)         => itemTransform.parent = parent;
 
         public void SetPositionRotationAndParent(Vector3 position, Quaternion rotation, Transform parent)
         {
@@ -68,7 +71,6 @@ namespace StardropTools.Pool
         {
             if (targetPool.name == pool.name)
                 return true;
-
             else
                 return false;
         }

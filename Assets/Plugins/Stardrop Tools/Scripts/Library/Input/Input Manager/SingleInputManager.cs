@@ -6,7 +6,7 @@ using StardropTools;
 /// <summary>
 /// Input Class focused on single finger/mouse input. Designed for mobile usage
 /// </summary>
-public class SingleInputManager : Singleton<SingleInputManager>, IUpdate
+public class SingleInputManager : Singleton<SingleInputManager>, IUpdateable
 {
     /// <summary>
     /// 0-joystick center is finger input point, 1-screen center only applies to Horizontal, 2-screen center only applies to Vertical, 3-screen center is dead center

@@ -1,10 +1,9 @@
 ﻿
+using System.Collections.Generic;
+using UnityEngine;
+
 namespace StardropTools.Pool
 {
-
-    using System.Collections.Generic;
-    using UnityEngine;
-
     public class Pool : MonoBehaviour
     {
         [NaughtyAttributes.ShowAssetPreview] [SerializeField] GameObject prefab;
@@ -19,6 +18,7 @@ namespace StardropTools.Pool
 
         Transform self;
         bool isPopulated;
+        Coroutine clearCR;
 
         public GameObject Prefab => prefab;
         public int PoolCount => pool.Count;
@@ -73,9 +73,22 @@ namespace StardropTools.Pool
         PoolItem CreateItem()
         {
             if (prefab.Equals(null))
+            {
+                if (debug)
+                    Debug.Log($"<color=orange>Prefab is null!</color>");
                 return null;
+            }
 
-            GameObject obj = Instantiate(prefab, self);
+            GameObject obj = null;
+
+            if (Application.isPlaying == true)
+                obj = Instantiate(prefab, self);
+
+#if UNITY_EDITOR
+            if (Application.isPlaying == false)
+                obj = Utilities.CreatePrefab(prefab, self);
+#endif
+
             obj.name += $" - {pool.Count}";
 
             PoolItem item = new PoolItem(obj, this);
@@ -103,7 +116,7 @@ namespace StardropTools.Pool
             // we must create more!
             return CreateItem();
         }
-
+        
         public PoolItem Spawn(Vector3 position, Quaternion rotation, Transform parent, float lifetime = 0)
         {
             PoolItem item = FindInnactiveItem();
@@ -130,6 +143,7 @@ namespace StardropTools.Pool
             {
                 item.OnDespawn();
                 item.SetActive(false);
+                item.SetParent(self);
                 activeCache.Remove(item);
 
                 return true;
@@ -143,11 +157,40 @@ namespace StardropTools.Pool
             }
         }
 
-        public void DespawnAll()
+        [NaughtyAttributes.Button("Despawn All")]
+        public void ClearPool(bool useCoroutine = false)
         {
-            for (int i = 0; i < activeCache.Count; i++)
-                Despawn(activeCache[i]);
-            //activeCache[i].Despawn();
+            if (useCoroutine == false)
+            {
+                for (int i = 0; i < activeCache.Count; i++)
+                {
+                    PoolItem item = activeCache[i];
+                    Despawn(item);
+                    activeCache.Remove(item);
+                }
+
+                if (activeCache.Count > 0)
+                    ClearPool(useCoroutine);
+            }
+            
+            else
+            {
+                if (clearCR != null)
+                    return;
+
+                clearCR = StartCoroutine(ClearPoolCR(activeCache));
+            }
+        }
+
+        System.Collections.IEnumerator ClearPoolCR(List<PoolItem> poolItems)
+        {
+            while (poolItems.Count > 0)
+            {
+                for (int i = 0; i < poolItems.Count; i++)
+                    poolItems[i].Despawn();
+
+                yield return null;
+            }
         }
 
 
@@ -158,5 +201,32 @@ namespace StardropTools.Pool
         }
 
         public void StopItemLifetimeCoroutine(Coroutine lifetimeCR) => StopCoroutine(lifetimeCR);
+
+
+
+        public static void DespawnIPoolables(IPoolable[] pooledArray)
+        {
+            for (int i = 0; i < pooledArray.Length; i++)
+                pooledArray[i].Despawn();
+        }
+
+        public static void DespawnIPoolables(List<IPoolable> pooledList)
+        {
+            for (int i = 0; i < pooledList.Count; i++)
+                pooledList[i].Despawn();
+        }
+
+
+        public static void DespawnPoolItems(PoolItem[] pooledArray)
+        {
+            for (int i = 0; i < pooledArray.Length; i++)
+                pooledArray[i].Despawn();
+        }
+
+        public static void DespawnPoolItems(List<PoolItem> pooledList)
+        {
+            for (int i = 0; i < pooledList.Count; i++)
+                pooledList[i].Despawn();
+        }
     }
 }

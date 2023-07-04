@@ -32,4 +32,12 @@ public class HealthyObject : BaseObject, IDamageable
     public void Revive() => healthComponent.Revive();
 
     protected virtual void Death() { }
+
+    protected override void OnValidate()
+    {
+        base.OnValidate();
+
+        if (healthComponent == null)
+            healthComponent = GetComponent<HealthComponent>();
+    }
 }

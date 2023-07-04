@@ -1,7 +1,7 @@
 ﻿
 namespace StardropTools
 {
-
+    using UnityEditor.Rendering;
     using UnityEngine;
 
     /// <summary>
@@ -13,7 +13,7 @@ namespace StardropTools
         [NaughtyAttributes.ReadOnly]
         [SerializeField] protected Transform selfTransform;
 
-        public Transform SelfTransform => selfTransform;
+        public Transform Transform => selfTransform;
         public Transform Parent => selfTransform.parent;
 
         public Vector3 Position { get => selfTransform.position; set => selfTransform.position = value; }
@@ -63,7 +63,7 @@ namespace StardropTools
         /// <summary>
         /// Set the current world position of this object
         /// </summary>
-        public void SetWorldPosition(Vector3 position) => Position = position;
+        public void SetPosition(Vector3 position) => Position = position;
 
         /// <summary>
         /// Set the current local position of this object
@@ -78,12 +78,20 @@ namespace StardropTools
         public void SetLocalPositionY(float y) => LocalPosition = UtilsVector.SetVectorY(Position, y);
         public void SetLocalPositionZ(float z) => LocalPosition = UtilsVector.SetVectorZ(Position, z);
 
+        public void ResetPosition() => Position = Vector3.zero;
+        public void ResetLocalPosition() => LocalPosition = Vector3.zero;
         #endregion // position
 
 
         #region Rotation
         public Quaternion LocalRotation { get => selfTransform.localRotation; set => selfTransform.localRotation = value; }
         public Vector3 LocalEulerAngles { get => selfTransform.localEulerAngles; set => selfTransform.localEulerAngles = value; }
+
+        public void SetRotation(Quaternion rotation) => Rotation = rotation;
+        public void SetLocalRotation(Quaternion localRotation) => LocalRotation = localRotation;
+
+        public void SetEulerAngles(Vector3 eulerAngles) => EulerAngles = eulerAngles;
+        public void SetLocalEulerAngles(Vector3 localEulerAngles) => LocalEulerAngles = localEulerAngles;
 
         public void SetEulerX(float x) => EulerAngles = UtilsVector.SetVectorX(EulerAngles, x);
         public void SetEulerY(float y) => EulerAngles = UtilsVector.SetVectorY(EulerAngles, y);
@@ -92,14 +100,23 @@ namespace StardropTools
         public void SetLocalEulerX(float x) => LocalEulerAngles = UtilsVector.SetVectorX(LocalEulerAngles, x);
         public void SetLocalEulerY(float y) => LocalEulerAngles = UtilsVector.SetVectorY(LocalEulerAngles, y);
         public void SetLocalEulerZ(float z) => LocalEulerAngles = UtilsVector.SetVectorZ(LocalEulerAngles, z);
+
+        public void ResetRotation() => Rotation = Quaternion.identity;
+        public void ResetLocalRotation() => LocalRotation = Quaternion.identity;
         #endregion // Rotation
 
 
         #region Scale
+        public void SetScale(Vector3 scale) => LocalScale = scale;
+
         public void SetScaleX(float x) => LocalScale = UtilsVector.SetVectorX(LocalScale, x);
         public void SetScaleY(float y) => LocalScale = UtilsVector.SetVectorY(LocalScale, y);
         public void SetScaleZ(float z) => LocalScale = UtilsVector.SetVectorZ(LocalScale, z);
+
+        public void ResetScale() => LocalScale = Vector3.one;
         #endregion // Scale
+
+
 
         #region Events
 
@@ -123,6 +140,12 @@ namespace StardropTools
             if (selfTransform == null)
                 selfTransform = transform;
         }
+
+
+        /// <summary>
+        /// Sets parent as Null
+        /// </summary>
+        public void ClearParent() => SetParent(null);
 
 
         /// <summary>

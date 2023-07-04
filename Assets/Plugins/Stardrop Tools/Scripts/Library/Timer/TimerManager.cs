@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace StardropTools
 {
-    public class TimerManager : Singleton<TimerManager>, IUpdate
+    public class TimerManager : Singleton<TimerManager>, IUpdateable
     {
         [SerializeField] List<Timer> timers;
         [SerializeField] bool isUpdating;

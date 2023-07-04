@@ -7,7 +7,7 @@ namespace StardropTools.Pool
         public void OnDespawn();
         public void Despawn();
         public void SetPoolItem(PoolItem poolItem);
-        
+
         /*
         #region Poolable
         PoolItem poolItem;
@@ -16,15 +16,16 @@ namespace StardropTools.Pool
 
         public void Despawn() => poolItem.Despawn();
 
-        public void OnDespawn()
+        public virtual void OnSpawn()
         {
 
         }
 
-        public void OnSpawn()
+        public virtual void OnDespawn()
         {
 
         }
+
         #endregion // Poolable
         */
     }

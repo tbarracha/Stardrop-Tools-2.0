@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace StardropTools.Tween
 {
-    public class TweenManager : Singleton<TweenManager>, IUpdate
+    public class TweenManager : Singleton<TweenManager>, IUpdateable
     {
         [SerializeField] int tweenCount;
         List<Tween> tweens = new List<Tween>();
@@ -48,12 +48,6 @@ namespace StardropTools.Tween
         /// </summary>
         void FilterTween(int tweenID, TweenType tweenType)
         {
-            //for (int i = tweens.Count - 1; i >= 0; i--)
-            //{
-            //    if (tweens[i].TweenID == tweenID && tweens[i].TweenType == tweenType)
-            //        tweens[i].Stop();
-            //}
-
             if (tweens.Exists() == false)
                 return;
 

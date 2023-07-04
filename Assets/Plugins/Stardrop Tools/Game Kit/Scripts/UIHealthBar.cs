@@ -22,7 +22,6 @@ public class UIHealthBar : BaseComponent
     [Space]
     [Range(0, 1)][SerializeField] float percent;
 
-#if UNITY_EDITOR
     [Header("Graphic Style")]
     [SerializeField] UnityEngine.UI.Image[] imagesToColor;
     [SerializeField] Color mainColor = Color.red;
@@ -32,7 +31,6 @@ public class UIHealthBar : BaseComponent
     [Space]
     [SerializeField] UnityEngine.UI.Image[] pixelPerUnitImagesToUpdate;
     [SerializeField] float pixelsPerUnit = 32f;
-#endif
 
     [Header("Animation")]
     [SerializeField] EaseType easeType;

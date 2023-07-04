@@ -101,25 +101,22 @@ public static class UtilsArray
 
 
 
-    public static List<T> GetRandomNonRepeat<T>(this T[] array, int amount, float divisionIfExceed = 2)
+    public static List<T> GetRandomNonRepeat<T>(this T[] array, int amount)
     {
-        if (array.Length <= amount)
-            amount = Mathf.RoundToInt(array.Length / divisionIfExceed);
-
-        List<T> randList = new List<T>();
+        amount = Mathf.Clamp(amount, 0, array.Length - 1);
+        List<T> randList = new List<T>(array);
 
         for (int i = 0; i < amount; i++)
         {
-            T rand = GetRandom(array);
-
-            while (randList.Contains(rand))
-                rand = GetRandom(array);
-
-            randList.Add(rand);
+            int randomIndex = Random.Range(i, array.Length);
+            T temp = randList[i];
+            randList[i] = randList[randomIndex];
+            randList[randomIndex] = temp;
         }
 
-        return randList;
+        return randList.GetRange(0, amount);
     }
+
 
     /// <summary>
     /// Get Random Elemements from array as a list, from "minAmount" to Array full length
@@ -129,6 +126,19 @@ public static class UtilsArray
         int amount = Random.Range(minAmount, array.Length);
         return GetRandomNonRepeat(array, amount);
     }
+
+    public static int GetNextIndex<T>(this T[] array, int currentIndex)
+    {
+        if (array == null || array.Length == 0)
+        {
+            Debug.LogError("Array is null or empty!");
+            return -1; // Return an invalid index value
+        }
+
+        int nextIndex = (currentIndex + 1) % array.Length;
+        return nextIndex;
+    }
+
     #endregion // arrays
 
 

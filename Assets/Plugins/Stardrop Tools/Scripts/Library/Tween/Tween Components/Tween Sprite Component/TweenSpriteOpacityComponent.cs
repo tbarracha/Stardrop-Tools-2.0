@@ -22,7 +22,7 @@ namespace StardropTools.Tween
             return tween;
         }
 
-        [NaughtyAttributes.Button("Get Start Opaicty")]
+        [NaughtyAttributes.Button("Get Start Opacity")]
         private void GetStart()
         {
             startOpacity = target.color.a;

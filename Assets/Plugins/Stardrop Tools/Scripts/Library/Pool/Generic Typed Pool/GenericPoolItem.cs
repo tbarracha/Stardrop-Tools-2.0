@@ -3,24 +3,24 @@ using UnityEngine;
 
 namespace StardropTools.Pool.Generic
 {
-    public struct TPoolItem<T> where T : Component
+    public struct GenericPoolItem<T> where T : Component
     {
         public int InstanceID { get; private set; }
-        public TPool<T> OriginPool { get; private set; }
+        public GenericPool<T> OriginPool { get; private set; }
         public T Component { get; private set; }
-        public ITPoolable<T> Poolable { get; private set; }
+        public IGenericPoolable<T> Poolable { get; private set; }
         public GameObject GameObject { get; private set; }
         public Transform Transform { get; private set; }
 
         public bool IsActive => GameObject.activeInHierarchy;
 
-        public TPoolItem(TPool<T> pool, GameObject instance, int instanceID)
+        public GenericPoolItem(GenericPool<T> pool, GameObject instance, int instanceID)
         {
             OriginPool = pool;
             InstanceID = instanceID;
 
             Component = instance.GetComponent<T>();
-            Poolable = instance.GetComponent<ITPoolable<T>>();
+            Poolable = instance.GetComponent<IGenericPoolable<T>>();
 
             GameObject = Component.gameObject;
             Transform = Component.transform;

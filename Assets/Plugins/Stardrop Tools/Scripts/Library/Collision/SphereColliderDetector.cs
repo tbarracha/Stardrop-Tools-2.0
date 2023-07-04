@@ -28,7 +28,7 @@ namespace StardropTools
                 return;
 
             Gizmos.color = gizmoColor;
-            Gizmos.DrawSphere(Position, radius);
+            Gizmos.DrawWireSphere(Position, radius);
         }
 
 #endif

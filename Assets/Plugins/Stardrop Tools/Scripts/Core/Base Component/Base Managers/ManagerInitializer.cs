@@ -26,5 +26,10 @@ namespace StardropTools
         }
 
         protected virtual void UpdateManagers() => Utilities.UpdateManagers(updatableManagers);
+
+        public override void HandleUpdate()
+        {
+            UpdateManagers();
+        }
     }
 }

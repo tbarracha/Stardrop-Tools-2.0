@@ -1,5 +1,5 @@
 ﻿
-public interface IFixedUpdate
+public interface IFixedUpdateable
 {
     /// <summary>
     /// Adds object to the FixedUpdate list in the FrameworkManager

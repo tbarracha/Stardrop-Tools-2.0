@@ -174,6 +174,14 @@ namespace StardropTools
                 Debug.Log(targetState.StateName);
         }
 
+        public void SetCurrentAnimationTime(float animTime)
+        {
+            AnimState targetState = animStates[currentAnimID];
+            AnimatorStateInfo currentAnimatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
+            float targetTime = animTime * currentAnimatorStateInfo.length;
+            animator.Play(targetState.StateHash, 0, targetTime);
+        }
+
         public void ResetTrigger()
             => animator.ResetTrigger(currentAnimID);
 

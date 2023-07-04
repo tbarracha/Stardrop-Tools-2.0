@@ -1,7 +1,7 @@
 ﻿
 namespace StardropTools
 {
-    public interface IUpdate
+    public interface IUpdateable
     {
         /// <summary>
         /// Adds object to the Update list in the FrameworkManager

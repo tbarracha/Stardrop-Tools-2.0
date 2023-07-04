@@ -1,18 +1,15 @@
 ﻿
+using System.Collections.Generic;
+using UnityEngine;
+
 namespace StardropTools.Pool
 {
-
-    using System.Collections.Generic;
-    using UnityEngine;
-
     public class PoolCluster : MonoBehaviour
     {
 #if UNITY_EDITOR
         [TextArea(1, 5)] [SerializeField] string description;
         [SerializeField] List<GameObject> prefabsToPool;
-        [SerializeField] bool createPoolsFromPrefabs;
         [Space]
-        [SerializeField] bool getPools;
 #endif
 
         [SerializeField] List<Pool> pools;
@@ -42,11 +39,22 @@ namespace StardropTools.Pool
         public bool DespawnToPool(int poolIndex, PoolItem item) => pools[poolIndex].Despawn(item);
 
 
-        public void DespawnAllPools()
+        public void ClearPools()
         {
             for (int i = 0; i < pools.Count; i++)
-                pools[i].DespawnAll();
+                pools[i].ClearPool();
         }
+
+        public void ClearPools(bool useCorountine = false)
+        {
+            for (int i = 0; i < pools.Count; i++)
+                pools[i].ClearPool(useCorountine);
+        }
+
+
+        public void ClearPool(int poolIndex) => pools[poolIndex].ClearPool();
+
+        public void ClearPool(int poolIndex, bool useCorountine = false) => pools[poolIndex].ClearPool(useCorountine);
 
 
         public void CreatePool(GameObject prefab)
@@ -57,10 +65,16 @@ namespace StardropTools.Pool
         }
 
 
-
+        [NaughtyAttributes.Button("Get Child Pools")]
         void GetPools()
         {
             Pool[] childPools = GetComponentsInChildren<Pool>();
+            if (childPools.Exists() == false)
+            {
+                Debug.Log($"<color=yellow>No pool children found in:</color> <color=white>{name}</color>");
+                return;
+            }
+
             pools = new List<Pool>();
 
             for (int i = 0; i < childPools.Length; i++)
@@ -69,25 +83,14 @@ namespace StardropTools.Pool
 
 
 #if UNITY_EDITOR
-        private void OnValidate()
-        {
-            if (getPools)
-            {
-                GetPools();
-                getPools = false;
-            }
-
-            if (createPoolsFromPrefabs)
-            {
-                CreatePoolsFromPrefabs();
-                createPoolsFromPrefabs = false;
-            }
-        }
-
+        [NaughtyAttributes.Button("Create Pools from Prefabs")]
         void CreatePoolsFromPrefabs()
         {
             if (prefabsToPool.Count == 0)
+            {
+                Debug.Log($"<color=cyan>No prefabs to pool in:</color> <color=white>{name}</color>");
                 return;
+            }
 
             bool exists = false;
             for (int i = 0; i < prefabsToPool.Count; i++)
@@ -96,7 +99,7 @@ namespace StardropTools.Pool
 
                 for (int j = 0; j < pools.Count; j++)
                 {
-                    if (prefab.name == pools[i].Prefab.name)
+                    if (prefab.name == pools[j].Prefab.name)
                     {
                         exists = true;
                         break;

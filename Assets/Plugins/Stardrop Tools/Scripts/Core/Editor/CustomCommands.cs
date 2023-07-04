@@ -500,7 +500,7 @@ namespace StardropTools.CustomCommands
         }
 
 
-        [MenuItem("Custom Commands/Delete Object Children %#DEL")] // Ctrl + Shift + Del
+        [MenuItem("Custom Commands/Delete Object Children %#d")] // Ctrl + Shift + Del
         static void DeleteChildrenOfSelecteddObject()
         {
             if (Selection.activeTransform != null && _cmdsActive)
@@ -541,7 +541,7 @@ namespace StardropTools.CustomCommands
             }
         }
 
-        [MenuItem("Custom Commands/Toggle Inspector Debug #%d")] // shift + ctlr + d
+        [MenuItem("Custom Commands/Toggle Inspector Debug #%e")] // shift + ctlr + e
         static void ToggleDebugMode()
         {
             EditorWindow inspectorToBeDebugged = EditorWindow.mouseOverWindow; // "EditorWindow.focusedWindow" can be used instead

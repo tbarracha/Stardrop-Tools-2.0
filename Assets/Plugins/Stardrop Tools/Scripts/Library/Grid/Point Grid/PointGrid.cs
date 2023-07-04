@@ -11,7 +11,6 @@ namespace StardropTools.Grid
     {
         [Header("Generate")]
         [SerializeField] bool validate;
-        [SerializeField] bool generateGrid;
         
         [Header("Grid Parameters")]
         [SerializeField] GridType gridType = GridType.XZ;
@@ -157,6 +156,7 @@ namespace StardropTools.Grid
 
         // 1) Get Grid Origin
         // 2) Generate Points
+        [NaughtyAttributes.Button("Generate Grid")]
         public void GenerateGrid() //List<Vector3>
         {
             GetGridOrigin();
@@ -300,18 +300,28 @@ namespace StardropTools.Grid
                 showBounds = false;
         }
 
+        public void CreateGridTransformPoints(Transform parent)
+        {
+            if (parent == null && gridPoints.Exists() == false)
+                return;
+
+            for (int i = 0; i < gridPoints.Count; i++)
+                Utilities.CreateEmpty("Grid Point - " + i, gridPoints[i], parent);
+        }
+
+        [NaughtyAttributes.Button("Create Grid Points")]
+        void CreateGridTransformPoints()
+        {
+            Transform parent = transform;
+            CreateGridTransformPoints(parent);
+        }
+
         private void OnValidate()
         {
             RefreshShowBounds();
 
             if (validate)
                 GenerateGrid();
-
-            if (generateGrid == true)
-            {
-                GenerateGrid();
-                generateGrid = false;
-            }
         }
     }
 }

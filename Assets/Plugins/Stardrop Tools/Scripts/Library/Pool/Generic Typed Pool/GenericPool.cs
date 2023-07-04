@@ -9,7 +9,7 @@ namespace StardropTools.Pool.Generic
     /// Generic Type Pool
     /// </summary>
     [System.Serializable]
-    public class TPool<T> where T : Component
+    public class GenericPool<T> where T : Component
     {
         const int overflowedID = -1;
 
@@ -22,8 +22,8 @@ namespace StardropTools.Pool.Generic
         [SerializeField] int capacity;
         [SerializeField] bool canOverflow;
 
-        Queue<TPoolItem<T>> itemQueue;   // items waiting to be activated
-        List<TPoolItem<T>> itemCache;    // active items
+        Queue<GenericPoolItem<T>> itemQueue;   // items waiting to be activated
+        List<GenericPoolItem<T>> itemCache;    // active items
 
         public bool IsPopulated { get; private set; }
 
@@ -40,7 +40,7 @@ namespace StardropTools.Pool.Generic
 
         #region Constructors
 
-        public TPool(GameObject prefab, int capacity, Transform parent, bool populate = true)
+        public GenericPool(GameObject prefab, int capacity, Transform parent, bool populate = true)
         {
             poolName = "Pool - " + prefab.name;
             poolID = prefab.GetInstanceID();
@@ -54,7 +54,7 @@ namespace StardropTools.Pool.Generic
                 Populate();
         }
 
-        public TPool(GameObject prefab, int capacity, Transform parent, bool canOverflow, bool populate = true)
+        public GenericPool(GameObject prefab, int capacity, Transform parent, bool canOverflow, bool populate = true)
         {
             poolName = "Pool - " + prefab.name;
             poolID = prefab.GetInstanceID();
@@ -68,7 +68,7 @@ namespace StardropTools.Pool.Generic
                 Populate();
         }
 
-        public TPool(string poolName, int poolID, GameObject prefab, int capacity, Transform parent, bool canOverflow, bool populate = false)
+        public GenericPool(string poolName, int poolID, GameObject prefab, int capacity, Transform parent, bool canOverflow, bool populate = false)
         {
             this.poolName = poolName;
             this.poolID = poolID;
@@ -100,12 +100,12 @@ namespace StardropTools.Pool.Generic
             if (IsPopulated)
                 return;
 
-            itemQueue = new Queue<TPoolItem<T>>();
-            itemCache = new List<TPoolItem<T>>();
+            itemQueue = new Queue<GenericPoolItem<T>>();
+            itemCache = new List<GenericPoolItem<T>>();
 
             for (int i = 0; i < capacity; i++)
             {
-                TPoolItem<T> item = CreateInstance(prefab, parent, i);
+                GenericPoolItem<T> item = CreateInstance(prefab, parent, i);
                 itemQueue.Enqueue(item);
                 itemCache.Add(item);
             }
@@ -116,7 +116,7 @@ namespace StardropTools.Pool.Generic
         /// <summary>
         /// -1 Id, is used to itentify Overflowed items
         /// </summary>
-        TPoolItem<T> CreateInstance(GameObject prefab, Transform parent, int instanceID)
+        GenericPoolItem<T> CreateInstance(GameObject prefab, Transform parent, int instanceID)
         {
             // Game Object
             GameObject instance = Object.Instantiate(prefab, parent);
@@ -124,15 +124,15 @@ namespace StardropTools.Pool.Generic
             instance.transform.position = parent.position;
             instance.name = prefab.name + " - " + instanceID;
 
-            return new TPoolItem<T>(this, instance, instanceID);
+            return new GenericPoolItem<T>(this, instance, instanceID);
         }
 
-        private TPoolItem<T> GetItem()
+        private GenericPoolItem<T> GetItem()
         {
             // get from queue
             if (itemQueue.Count > 0)
             {
-                TPoolItem<T> item = itemQueue.Dequeue();
+                GenericPoolItem<T> item = itemQueue.Dequeue();
 
                 // make sure we take a deactivated item
                 if (parent != null)
@@ -156,7 +156,7 @@ namespace StardropTools.Pool.Generic
             // create new instance / overflowed instance
             else
             {
-                TPoolItem<T> item = CreateInstance(prefab, parent, overflowedID);
+                GenericPoolItem<T> item = CreateInstance(prefab, parent, overflowedID);
                 itemCache.Add(item);
 
                 return item;
@@ -168,7 +168,7 @@ namespace StardropTools.Pool.Generic
         /// </summary>
         public T Spawn()
         {
-            TPoolItem<T> item = GetItem();
+            GenericPoolItem<T> item = GetItem();
 
             item.SetParent(null);
             item.SetActive(true);
@@ -187,7 +187,7 @@ namespace StardropTools.Pool.Generic
         /// </summary>
         public T Spawn(Vector3 position, Quaternion rotation, Transform parent)
         {
-            TPoolItem<T> item = GetItem();
+            GenericPoolItem<T> item = GetItem();
             item.SetTransforms(position, rotation, parent);
 
             item.SetActive(true);
@@ -216,7 +216,7 @@ namespace StardropTools.Pool.Generic
         /// <summary>
         /// Deactivates object and places back on Item Queue
         /// </summary>
-        public void Despawn(TPoolItem<T> item)
+        public void Despawn(GenericPoolItem<T> item)
         {
             if (itemCache.Contains(item) == false)
             {
@@ -294,7 +294,7 @@ namespace StardropTools.Pool.Generic
                     }
                 }
 
-                itemQueue = new Queue<TPoolItem<T>>();
+                itemQueue = new Queue<GenericPoolItem<T>>();
             }
 
             for (int i = 0; i < itemCache.Count; i++)

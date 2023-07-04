@@ -48,6 +48,10 @@ namespace StardropTools.UI
         [SerializeField] bool removeScrollRects;
 #endif
 
+        [Header("Enable or Disable at Index")]
+        [SerializeField] System.Collections.Generic.List<UIScrollSnapEnableAtIndex> enableAtIndex;
+        [SerializeField] System.Collections.Generic.List<UIScrollSnapEnableAtIndex> disableAtIndex;
+
         Coroutine animCR;
         int direction;
         System.Guid uniqueID;
@@ -59,6 +63,8 @@ namespace StardropTools.UI
         public readonly EventHandler OnMoveStart    = new EventHandler();
         public readonly EventHandler OnMoving       = new EventHandler();
         public readonly EventHandler OnMoveComplete = new EventHandler();
+
+        public readonly EventHandler<int> OnIndexChanged = new EventHandler<int>();
 
 
         protected override void Start()
@@ -192,7 +198,20 @@ namespace StardropTools.UI
         }
 
         void SetCurrentIndex(int index)
-            => currentIndex = Mathf.Clamp(index, 0, elements.Count - 1);
+        {
+            currentIndex = Mathf.Clamp(index, 0, elements.Count - 1);
+            OnIndexChanged?.Invoke(currentIndex);
+
+            if (enableAtIndex.Exists())
+                for (int i = 0; i < enableAtIndex.Count; i++)
+                    if (enableAtIndex[i].Index == index)
+                        enableAtIndex[i].gameObject.SetActive(true);
+
+            if (disableAtIndex.Exists())
+                for (int i = 0; i < disableAtIndex.Count; i++)
+                    if (disableAtIndex[i].Index == index)
+                        disableAtIndex[i].gameObject.SetActive(false);
+        }
 
         public void MoveToIndex(int index)
             => MoveToIndex(index, false);
@@ -266,7 +285,7 @@ namespace StardropTools.UI
                 elementToShow.SetAnchoredPosition(showPos);
             }
 
-            if (elementToShow.SelfObject.activeInHierarchy == false)
+            if (elementToShow.GameObject.activeInHierarchy == false)
                 elementToShow.SetActive(true);
 
             if (debug)
@@ -389,6 +408,44 @@ namespace StardropTools.UI
 
             selectedScrollRect = selected;
         }
+
+
+        public void AddToEnableAtIndex(int index, GameObject gameObject)
+        {
+            for (int i = 0; i < enableAtIndex.Count; i++)
+                if (enableAtIndex[i].gameObject == gameObject)
+                    return;
+
+            UIScrollSnapEnableAtIndex enable = new UIScrollSnapEnableAtIndex(index, gameObject);
+            enableAtIndex.Add(enable);
+        }
+
+        public void RemoveEnableAtIndex(GameObject gameObject)
+        {
+            for (int i = 0; i < enableAtIndex.Count; i++)
+                if (enableAtIndex[i].gameObject == gameObject)
+                    enableAtIndex.Remove(enableAtIndex[i]);
+        }
+
+
+
+        public void AddToDisableAtIndex(int index, GameObject gameObject)
+        {
+            for (int i = 0; i < disableAtIndex.Count; i++)
+                if (disableAtIndex[i].gameObject == gameObject)
+                    return;
+
+            UIScrollSnapEnableAtIndex enable = new UIScrollSnapEnableAtIndex(index, gameObject);
+            disableAtIndex.Add(enable);
+        }
+
+        public void RemoveDisableAtIndex(GameObject gameObject)
+        {
+            for (int i = 0; i < disableAtIndex.Count; i++)
+                if (disableAtIndex[i].gameObject == gameObject)
+                    disableAtIndex.Remove(disableAtIndex[i]);
+        }
+
 
 #if UNITY_EDITOR
         void GetElements()

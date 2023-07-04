@@ -8,7 +8,7 @@ namespace StardropTools.Pool.Generic
     /// <para> Useful when spawning derived/inherited components of the main Component. Ex: enemies, bullets, spells </para>
     /// </summary>
     [System.Serializable]
-    public class TPoolCluster<T> where T : Component
+    public class GenericPoolCluster<T> where T : Component
     {
         [Header("Objects To Pool")]
         [SerializeField] GameObject[] objectsToPool;
@@ -16,19 +16,19 @@ namespace StardropTools.Pool.Generic
 
         [Header("Pool")]
         [SerializeField] Transform parent;
-        [SerializeField] List<TPool<T>> pools;
+        [SerializeField] List<GenericPool<T>> pools;
 
         bool isPopulated;
 
-        public TPoolCluster(Transform parent, GameObject[] prefabs, int capacity, bool populate = true)
+        public GenericPoolCluster(Transform parent, GameObject[] prefabs, int capacity, bool populate = true)
         {
-            pools = new List<TPool<T>>();
+            pools = new List<GenericPool<T>>();
             this.parent = parent;
 
             for (int i = 0; i < prefabs.Length; i++)
             {
                 Transform poolParent = Utilities.CreateEmpty("Pool - " + prefabs[i].name, Vector3.zero, parent);
-                TPool<T> pool = new TPool<T>(prefabs[i], capacity, poolParent, false);
+                GenericPool<T> pool = new GenericPool<T>(prefabs[i], capacity, poolParent, false);
 
                 pools.Add(pool);
             }
@@ -107,7 +107,7 @@ namespace StardropTools.Pool.Generic
                 bool exists = false;
 
                 // check if there already exists a pool with prefab
-                foreach (TPool<T> pool in pools)
+                foreach (GenericPool<T> pool in pools)
                     if (pool.Prefab.name == objectsToPool[i].name)
                     {
                         exists = true;
@@ -128,7 +128,7 @@ namespace StardropTools.Pool.Generic
             foreach (GameObject prefab in prefabs)
             {
                 //Pool<T> pool = new Pool<T>(prefab, 0, parents[count], false);
-                TPool<T> pool = new TPool<T>(prefab, 0, parent, false);
+                GenericPool<T> pool = new GenericPool<T>(prefab, 0, parent, false);
                 pool.poolName = prefab.name;
 
                 pools.Add(pool);

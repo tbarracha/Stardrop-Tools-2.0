@@ -1,5 +1,5 @@
 ﻿
-public interface ILateUpdate
+public interface ILateUpdateable
 {
     /// <summary>
     /// Adds object to the LateUpdate list in the FrameworkManager

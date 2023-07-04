@@ -5,7 +5,7 @@ namespace StardropTools
     /// <summary>
     /// Base class for all Initializable MonoBehaviours
     /// </summary>
-    public class BaseComponent : MonoBehaviour, IInitialize, ILateInitialize, IUpdate
+    public class BaseComponent : MonoBehaviour, IInitialize, ILateInitialize, IUpdateable
     {
         [Header("Initialization")]
         [SerializeField] protected InitializeAt initializeAt;
@@ -17,7 +17,7 @@ namespace StardropTools
 
         public bool IsInitialized { get; protected set; }
         public bool IsLateInitialized { get; protected set; }
-        public GameObject SelfObject => selfObject;
+        public GameObject GameObject => selfObject;
 
 
         protected virtual void Awake()
@@ -65,11 +65,11 @@ namespace StardropTools
 
         public virtual void StopUpdate() => LoopManager.RemoveFromUpdate(this);
 
-        public virtual void HandleUpdate()
-        {
+        public virtual void HandleUpdate() { }
 
-        }
+        public virtual void ResetComponentPublic() { }
 
+        protected virtual void ResetComponent() { }
 
 
         protected virtual void OnValidate()
