@@ -1,1 +1,1 @@
-﻿Only take package if you have the Unity Legacy Ads package installed!
+﻿Only install package if you have the Unity Legacy Ads package installed!
