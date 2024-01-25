@@ -7,9 +7,9 @@ namespace StardropTools.Tween
     {
         protected Vector3 start;
         protected Vector3 end;
-        protected Vector3 lerped;
+        protected Vector3 lerped { get; protected private set; }
 
-        public readonly EventHandler<Vector3> OnTweenVector3 = new EventHandler<Vector3>();
+        public readonly CustomEvent<Vector3> OnTweenVector3 = new CustomEvent<Vector3>();
 
         protected override void SetEssentials()
         {
@@ -20,6 +20,21 @@ namespace StardropTools.Tween
         {
             SetEssentials();
         }
+
+        public TweenVector3(Vector3 end)
+        {
+            SetEssentials();
+            this.end = end;
+        }
+
+        public TweenVector3(Vector3 start, Vector3 end)
+        {
+            SetEssentials();
+            this.start = start;
+            this.end = end;
+        }
+
+
 
         public TweenVector3 SetStart(Vector3 start)
         {
@@ -54,6 +69,7 @@ namespace StardropTools.Tween
 
         protected override void Loop()
         {
+            LoopIncrement();
             ResetRuntime();
             ChangeState(TweenState.Running);
         }
@@ -64,6 +80,7 @@ namespace StardropTools.Tween
             start = end;
             end = temp;
 
+            LoopIncrement();
             ResetRuntime();
             ChangeState(TweenState.Running);
         }

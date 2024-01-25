@@ -1,29 +1,43 @@
 
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace StardropTools.UI
 {
-    public class UIButton : BaseUIObject
+    [RequireComponent(typeof(Image), typeof(UIPointerEvent))]
+    public class UIButton : BaseRectTransform
     {
         public int ButtonID;
-        [SerializeField] protected UnityEngine.UI.Button button;
+        [SerializeField] protected Button button;
+        [SerializeField] protected UIPointerEvent pointerEvent;
+        [SerializeField] protected bool useButton = true;
 
-        public UnityEngine.UI.Button Button => button;
+        public Button Button => button;
         public bool Interactible { get => button.interactable; set => button.interactable = value; }
 
-        public UnityEngine.Events.UnityEvent OnClick => button.onClick;
-        public readonly EventHandler<int> OnClickID = new EventHandler<int>();
+        public readonly CustomEvent OnClick         = new CustomEvent();
+        public readonly CustomEvent<int> OnClickID  = new CustomEvent<int>();
 
         public override void Initialize()
         {
             base.Initialize();
 
-            OnClick.AddListener(() => OnClickID?.Invoke(ButtonID));
+            if (useButton)
+                button.onClick.AddListener(OnPressed);
+            else
+                pointerEvent.OnPointerUpEvent.AddListener(OnPressed);
         }
 
-        public void SetInteractible(bool value) => button.interactable = value;
+        protected virtual void OnPressed()
+        {
+            OnClick?.Invoke();
+            OnClickID?.Invoke(ButtonID);
+        }
 
-
+        public void SetInteractible(bool value)
+        {
+            button.interactable = value;
+        }
 
         protected override void OnValidate()
         {
@@ -34,6 +48,12 @@ namespace StardropTools.UI
 
             if (button == null)
                 button = GetComponentInParent<UnityEngine.UI.Button>();
+
+            if (pointerEvent == null)
+                pointerEvent = GetComponent<UIPointerEvent>();
+
+            if (pointerEvent == null)
+                pointerEvent = GetComponentInParent<UIPointerEvent>();
         }
     }
 }

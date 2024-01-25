@@ -4,11 +4,11 @@ using UnityEngine;
 namespace StardropTools.Tween
 {
     /// <summary>
-    /// Set Intensity before all else
+    /// Set Intensity before play
     /// </summary>
     public class TweenShakeInt : TweenInt
     {
-        protected int intensity;
+        protected float intensity;
 
         protected override void SetEssentials()
         {
@@ -20,7 +20,13 @@ namespace StardropTools.Tween
             SetEssentials();
         }
 
-        public TweenShakeInt SetIntensity(int intensity)
+        public TweenShakeInt(float intensity)
+        {
+            SetEssentials();
+            this.intensity = intensity;
+        }
+
+        public TweenShakeInt SetIntensity(float intensity)
         {
             this.intensity = intensity;
             return this;
@@ -34,7 +40,7 @@ namespace StardropTools.Tween
             percent = 1 - percent;
 
             float amount = intensity * Ease(percent);
-            lerped = (int)(start + Random.Range(-amount, amount));
+            lerped = Mathf.CeilToInt(start + Random.Range(-amount, amount));
         }
     }
 }

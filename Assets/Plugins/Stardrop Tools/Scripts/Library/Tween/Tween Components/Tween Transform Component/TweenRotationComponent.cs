@@ -5,30 +5,30 @@ namespace StardropTools.Tween
 {
     public class TweenRotationComponent : TweenTransformComponent
     {
-        public Vector3 startRot;
-        public Vector3 endRot;
+        public Vector3 startRotation;
+        public Vector3 endRotation;
 
-        public override Tween StartTween()
+        public override Tween Play()
         {
             if (simulationSpace == SimulationSpace.WorldSpace)
             {
                 if (hasStart)
-                    tween = new TweenEulerRotation(target, startRot, endRot);
+                    tween = new TweenEulerRotation(target, startRotation, endRotation);
                 else
-                    tween = new TweenEulerRotation(target, endRot);
+                    tween = new TweenEulerRotation(target, endRotation);
             }
 
             if (simulationSpace == SimulationSpace.LocalSpace)
             {
                 if (hasStart)
-                    tween = new TweenLocalEulerRotation(target, startRot, endRot);
+                    tween = new TweenLocalEulerRotation(target, startRotation, endRotation);
                 else
-                    tween = new TweenLocalEulerRotation(target, endRot);
+                    tween = new TweenLocalEulerRotation(target, endRotation);
             }
 
             SetTweenEssentials();
-            tween.SetID(target.GetHashCode()).Initialize();
-            StartSequence();
+            tween.SetLoopType(loopType);
+            tween.Play();
 
             return tween;
         }
@@ -37,22 +37,9 @@ namespace StardropTools.Tween
         private void GetStart()
         {
             if (simulationSpace == SimulationSpace.WorldSpace)
-                startRot = target.eulerAngles;
+                startRotation = target.eulerAngles;
             else
-                startRot = target.localEulerAngles;
-        }
-
-        [NaughtyAttributes.Button("Start Tween")]
-        private void TweenStart()
-        {
-            if (Application.isPlaying)
-                StartTween();
-        }
-
-
-        protected override void OnValidate()
-        {
-            base.OnValidate();
+                startRotation = target.localEulerAngles;
         }
     }
 }

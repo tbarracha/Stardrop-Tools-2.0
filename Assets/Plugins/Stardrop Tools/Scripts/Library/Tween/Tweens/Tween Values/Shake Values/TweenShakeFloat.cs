@@ -4,7 +4,7 @@ using UnityEngine;
 namespace StardropTools.Tween
 {
     /// <summary>
-    /// Set Intensity before all else
+    /// Set Intensity before play
     /// </summary>
     public class TweenShakeFloat : TweenFloat
     {
@@ -19,6 +19,14 @@ namespace StardropTools.Tween
         {
             SetEssentials();
         }
+
+        public TweenShakeFloat(float intensity)
+        {
+            SetEssentials();
+            this.intensity = end;
+        }
+
+
 
         public TweenShakeFloat SetIntensity(float intensity)
         {

@@ -2,7 +2,7 @@
 using UnityEngine;
 using StardropTools;
 
-public class TestPosition : BaseObject
+public class TestPosition : BaseTransform
 {
     public float positionX;
     public float eulerX;

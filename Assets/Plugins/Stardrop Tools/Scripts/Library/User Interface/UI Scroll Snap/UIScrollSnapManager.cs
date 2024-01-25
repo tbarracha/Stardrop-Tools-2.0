@@ -16,6 +16,9 @@ namespace StardropTools.UI
         /// </summary>
         public void MoveNext(UIScrollSnap snap, int direction)
         {
+            if (scrollSnaps == null)
+                return;
+
             int nextIndex = snap.index + direction;
             if (nextIndex < 0 || nextIndex >= scrollSnaps.Count)
                 return;

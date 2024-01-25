@@ -8,7 +8,7 @@ namespace StardropTools
     /// Base class for objects that use Animator Handlers
     /// </summary>
     [RequireComponent(typeof(AnimatorHandler))]
-    public class AnimatedObject : BaseObject
+    public class AnimatedObject : BaseTransform
     {
         [SerializeField] protected AnimatorHandler animator;
 

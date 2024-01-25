@@ -25,15 +25,15 @@ namespace StardropTools.FiniteStateMachine
         public int GetStateID() => stateID;
 
 
-        public readonly EventHandler<BaseState> OnStateEnter = new EventHandler<BaseState>();
-        public readonly EventHandler<BaseState> OnStateExit = new EventHandler<BaseState>();
-        public readonly EventHandler<BaseState> OnStateUpdate = new EventHandler<BaseState>();
-        public readonly EventHandler<BaseState> OnStateInput = new EventHandler<BaseState>();
+        public readonly CustomEvent<BaseState> OnStateEnter = new CustomEvent<BaseState>();
+        public readonly CustomEvent<BaseState> OnStateExit = new CustomEvent<BaseState>();
+        public readonly CustomEvent<BaseState> OnStateUpdate = new CustomEvent<BaseState>();
+        public readonly CustomEvent<BaseState> OnStateInput = new CustomEvent<BaseState>();
 
-        public readonly EventHandler OnEnter = new EventHandler();
-        public readonly EventHandler OnExit = new EventHandler();
-        public readonly EventHandler OnUpdate = new EventHandler();
-        public readonly EventHandler OnInput = new EventHandler();
+        public readonly CustomEvent OnEnter = new CustomEvent();
+        public readonly CustomEvent OnExit = new CustomEvent();
+        public readonly CustomEvent OnUpdate = new CustomEvent();
+        public readonly CustomEvent OnInput = new CustomEvent();
 
 
         #region Constructor

@@ -104,6 +104,6 @@ public class ButtonCustomizer : MonoBehaviour
         RefreshGraphics();
 
         if (pixelPerUnitImages.Exists())
-            Utilities.SetImagePixelsPerUnit(pixelPerUnitImages, pixelsPerUnit);
+            Utilities.SetImagesPixelsPerUnit(pixelPerUnitImages, pixelsPerUnit);
     }
 }

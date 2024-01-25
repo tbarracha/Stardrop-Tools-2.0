@@ -1,7 +1,7 @@
 
 using UnityEngine;
 
-public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
+public abstract class Singleton<T> : MonoBehaviour, ISingleton<T> where T : MonoBehaviour
 {
 	/// <summary>
 	/// The instance.
@@ -31,7 +31,7 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 		}
 	}
 
-	public void SingletonInitialization()
+    public void SingletonInitialization()
 	{
 		if (instance == null)
 		{

@@ -3,11 +3,14 @@ using UnityEngine;
 
 namespace StardropTools.Tween
 {
+    /// <summary>
+    /// 0 = transparent, 1 = opaque
+    /// </summary>
     public class TweenColorOpacity : TweenFloat
     {
         public Color color;
 
-        public readonly EventHandler<Color> OnTweenColorOpacity = new EventHandler<Color>();
+        public readonly CustomEvent<Color> OnTweenColorOpacity = new CustomEvent<Color>();
              
         protected override void SetEssentials()
         {

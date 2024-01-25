@@ -1,7 +1,7 @@
 ﻿
 namespace StardropTools.UI
 {
-    public class UIScrollSnapElement : BaseUIObject
+    public class UIScrollSnapElement : BaseRectTransform
     {
         public int index;
         [UnityEngine.Space]

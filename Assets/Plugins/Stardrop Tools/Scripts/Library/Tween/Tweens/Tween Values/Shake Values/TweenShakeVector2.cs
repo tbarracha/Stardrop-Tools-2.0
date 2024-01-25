@@ -4,11 +4,11 @@ using UnityEngine;
 namespace StardropTools.Tween
 {
     /// <summary>
-    /// Set Intensity before all else
+    /// Set Intensity before play
     /// </summary>
     public class TweenShakeVector2 : TweenVector2
     {
-        protected Vector2 intensity;
+        protected Vector2 intensityVector2;
 
         protected override void SetEssentials()
         {
@@ -20,15 +20,29 @@ namespace StardropTools.Tween
             SetEssentials();
         }
 
+        public TweenShakeVector2(float intensity)
+        {
+            SetEssentials();
+            SetIntensity(intensity);
+        }
+
+        public TweenShakeVector2(Vector2 intensityVector)
+        {
+            SetEssentials();
+            SetIntensity(intensityVector);
+        }
+
+
+
         public TweenShakeVector2 SetIntensity(Vector2 intensity)
         {
-            this.intensity = intensity;
+            this.intensityVector2 = intensity;
             return this;
         }
 
         public TweenShakeVector2 SetIntensity(float intensityMultiplier)
         {
-            intensity = Vector2.one * intensityMultiplier;
+            intensityVector2 = Vector2.one * intensityMultiplier;
             return this;
         }
 
@@ -39,7 +53,7 @@ namespace StardropTools.Tween
 
             percent = 1 - percent;
 
-            Vector2 amount = intensity * Ease(percent);
+            Vector2 amount = intensityVector2 * Ease(percent);
             amount.x = Random.Range(-amount.x, amount.x);
             amount.y = Random.Range(-amount.y, amount.y);
 

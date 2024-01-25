@@ -7,14 +7,14 @@ namespace StardropTools
 
         public bool Bool { get => value; set => SetBool(value); }
 
-        public readonly EventHandler<bool> OnValueChanged;
+        public readonly CustomEvent<bool> OnValueChanged;
 
 
         public BoolValue(bool value)
         {
             this.value = value;
 
-            OnValueChanged = new EventHandler<bool>();
+            OnValueChanged = new CustomEvent<bool>();
         }
 
         public void InvokeEvents(bool invoke)

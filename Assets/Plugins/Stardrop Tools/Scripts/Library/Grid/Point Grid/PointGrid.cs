@@ -9,26 +9,25 @@ namespace StardropTools.Grid
     /// </summary>
     public class PointGrid : MonoBehaviour
     {
-        [Header("Generate")]
-        [SerializeField] bool validate;
+        [Header("Renderer")]
+        [SerializeField] PointGridRenderer gridRenderer;
         
         [Header("Grid Parameters")]
-        [SerializeField] GridType gridType = GridType.XZ;
+        [SerializeField] GridType gridType          = GridType.XZ;
         [SerializeField] GridTransformRelation transformRelation = GridTransformRelation.TransformIsCenter;
-        [SerializeField] GridFit gridFit = GridFit.Free;
+        [SerializeField] GridFit gridFit            = GridFit.Free;
         [Space]
-        [SerializeField] Vector2Int iterations =     new Vector2Int(5, 5);
-        [SerializeField] Vector2 distances =         new Vector2(1, 1);
+        [SerializeField] Vector2Int iterations      = new Vector2Int(5, 5);
+        [SerializeField] Vector2    distances       = new Vector2(1, 1);
 
         [NaughtyAttributes.ShowIf("showBounds")]
-        [SerializeField] Vector2 bounds =            new Vector2(2, 2);
+        [SerializeField] Vector2 bounds             = new Vector2(2, 2);
         
         [Header("Points")]
-        [SerializeField] List<Vector3> gridPoints =  new List<Vector3>();
-        [SerializeField] List<Vector3> gridCorners = new List<Vector3>();
+        [SerializeField] List<Vector3> gridPoints   = new List<Vector3>();
+        [SerializeField] List<Vector3> gridCorners  = new List<Vector3>();
 
         Vector3 gridOrigin;
-        bool showBounds;
 
         float xDimensions;
         float yDimensions;
@@ -292,14 +291,6 @@ namespace StardropTools.Grid
             }
         }
 
-        void RefreshShowBounds()
-        {
-            if (gridFit == GridFit.FitInsideBounds)
-                showBounds = true;
-            else
-                showBounds = false;
-        }
-
         public void CreateGridTransformPoints(Transform parent)
         {
             if (parent == null && gridPoints.Exists() == false)
@@ -318,10 +309,34 @@ namespace StardropTools.Grid
 
         private void OnValidate()
         {
-            RefreshShowBounds();
+            if (gridRenderer != null && gridRenderer.RenderPoints)
+                return;
 
-            if (validate)
+            GenerateGrid();
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (gridRenderer.RenderPoints || gridRenderer.RenderCorners)
+            {
                 GenerateGrid();
+            }
+
+            if (gridRenderer.RenderPoints)
+            {
+                Gizmos.color = gridRenderer.PointColor;
+
+                for (int i = 0; i < gridPoints.Count; i++)
+                    Gizmos.DrawSphere(gridPoints[i], gridRenderer.PointRadius);
+            }
+
+            if (gridRenderer.RenderCorners)
+            {
+                Gizmos.color = gridRenderer.CornerColor;
+
+                for (int i = 0; i < gridCorners.Count; i++)
+                    Gizmos.DrawSphere(gridCorners[i], gridRenderer.CornerRadius);
+            }
         }
     }
 }

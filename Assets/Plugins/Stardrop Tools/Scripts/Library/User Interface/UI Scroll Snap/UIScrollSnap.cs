@@ -1,13 +1,15 @@
 
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace StardropTools.UI
 {
-    public class UIScrollSnap : BaseUIObject, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
+    public class UIScrollSnap : BaseRectTransform, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
     {
         [Header("Properties")]
         [SerializeField] bool isButtonOnly;
+        [SerializeField] bool reorderOnInitialization;
         [Space]
         public int index    = 0;
         public int priority = 1;
@@ -35,7 +37,7 @@ namespace StardropTools.UI
 
         [Header("Buttons")]
         [SerializeField] Transform parentButtons;
-        [SerializeField] System.Collections.Generic.List<UIToggleButton> buttons;
+        [SerializeField] System.Collections.Generic.List<UIScrollSnapButton> buttons;
 #if UNITY_EDITOR
         [SerializeField] bool getButtons;
 #endif
@@ -57,14 +59,16 @@ namespace StardropTools.UI
         System.Guid uniqueID;
 
         public System.Guid UniqueID { get => uniqueID; }
+        public int LastIndex => elements.Count - 1;
 
-        public readonly EventHandler SwipeToNextPriority = new EventHandler();
 
-        public readonly EventHandler OnMoveStart    = new EventHandler();
-        public readonly EventHandler OnMoving       = new EventHandler();
-        public readonly EventHandler OnMoveComplete = new EventHandler();
+        public readonly CustomEvent SwipeToNextPriority = new CustomEvent();
 
-        public readonly EventHandler<int> OnIndexChanged = new EventHandler<int>();
+        public readonly CustomEvent OnMoveStart         = new CustomEvent();
+        public readonly CustomEvent OnMoving            = new CustomEvent();
+        public readonly CustomEvent OnMoveComplete      = new CustomEvent();
+
+        public readonly CustomEvent<int> OnIndexChanged = new CustomEvent<int>();
 
 
         protected override void Start()
@@ -78,6 +82,9 @@ namespace StardropTools.UI
         {
             base.Initialize();
 
+            if (reorderOnInitialization)
+                ReorderElements();
+
             uniqueID = System.Guid.NewGuid();
 
             if (buttons != null && buttons.Count > 0)
@@ -87,6 +94,7 @@ namespace StardropTools.UI
                     buttons[i].ButtonID = i;
                     buttons[i].Initialize();
                     buttons[i].OnClickID.AddListener(MoveToIndex);
+                    buttons[i].SetScrollSnap(this);
                     buttons[i].Toggle(false);
                 }
 
@@ -450,7 +458,7 @@ namespace StardropTools.UI
 #if UNITY_EDITOR
         void GetElements()
         {
-            var children = Utilities.GetListComponentsInChildren<RectTransform>(transform);
+            var children = Utilities.GetComponentListInChildren<RectTransform>(transform);
             var copyElements = new System.Collections.Generic.List<RectTransform>();
             elements = new System.Collections.Generic.List<UIScrollSnapElement>();
 
@@ -475,7 +483,7 @@ namespace StardropTools.UI
             elements.GetFirst().isFirst = true;
             elements.GetLast().isLast   = true;
 
-            UtilitiesUI.CopySizeRects(RectTransform, copyElements);
+            UIUtils.CopySizeRects(RectTransform, copyElements);
         }
 
         void GetButtons()
@@ -483,10 +491,29 @@ namespace StardropTools.UI
             if (parentButtons == null)
                 return;
 
-            buttons = parentButtons.GetComponentsInChildren<UIToggleButton>().ToList();
+            buttons = parentButtons.GetComponentsInChildren<UIScrollSnapButton>().ToList();
+
+            if (buttons != null && buttons.Count < parentButtons.childCount)
+            {
+                buttons = new System.Collections.Generic.List<UIScrollSnapButton>();
+                var uiButtons = parentButtons.GetComponentsInChildren<UnityEngine.UI.Button>();
+
+                for (int i = 0; i < uiButtons.Length; i++)
+                {
+                    var scrollSnapButton = uiButtons[i].GetComponent<UIScrollSnapButton>();
+                    if (scrollSnapButton == null)
+                    {
+                        scrollSnapButton = uiButtons[i].AddComponent<UIScrollSnapButton>();
+                        buttons.Add(scrollSnapButton);
+                    }
+                }
+            }
 
             for (int i = 0; i < buttons.Count; i++)
+            {
                 buttons[i].ButtonID = i;
+                buttons[i].SetScrollSnap(this);
+            }
         }
 
         protected override void OnValidate()

@@ -7,8 +7,9 @@ namespace StardropTools.Tween
     {
         public Vector3 startScale;
         public Vector3 endScale;
+        [SerializeField] bool uniform;
 
-        public override Tween StartTween()
+        public override Tween Play()
         {
             if (hasStart)
                 tween = new TweenLocalScale(target, startScale, endScale);
@@ -16,8 +17,7 @@ namespace StardropTools.Tween
                 tween = new TweenLocalScale(target, endScale);
 
             SetTweenEssentials();
-            tween.SetID(target.GetHashCode()).Initialize();
-            StartSequence();
+            tween.SetID(this).Play();
 
             return tween;
         }
@@ -28,20 +28,17 @@ namespace StardropTools.Tween
             startScale = target.localScale;
         }
 
-        [NaughtyAttributes.Button("Start Tween")]
-        private void TweenStart()
-        {
-            if (Application.isPlaying)
-                StartTween();
-        }
-
-
+#if UNITY_EDITOR
         protected override void OnValidate()
         {
             base.OnValidate();
 
             if (simulationSpace != SimulationSpace.LocalSpace)
                 simulationSpace = SimulationSpace.LocalSpace;
+
+            if (uniform)
+                endScale = new Vector3(endScale.x, endScale.x, endScale.x);
         }
+#endif
     }
 }

@@ -67,8 +67,8 @@ namespace StardropTools.UI
                 float targetSize = remainingSize * item.Percent;
                 remainingSize -= targetSize;
 
-                UtilitiesUI.SetRectTransformAnchor(item.RectTransform, UIAnchor.TopLeft);
-                UtilitiesUI.SetRectTransformPivot(item.RectTransform, UIPivot.TopLeft);
+                UIUtils.SetRectTransformAnchor(item.RectTransform, UIAnchor.TopLeft);
+                UIUtils.SetRectTransformPivot(item.RectTransform, UIPivot.TopLeft);
 
                 UIFlexItem prevItem = flexItems[Mathf.Clamp(i - 1, 0, flexItems.Length - 1)];
 
@@ -127,8 +127,8 @@ namespace StardropTools.UI
                     continue;
 
                 UIFlexItem item = new UIFlexItem(rect, percent);
-                UtilitiesUI.SetRectTransformAnchor(item.RectTransform, UIAnchor.TopLeft);
-                UtilitiesUI.SetRectTransformPivot(item.RectTransform, UIPivot.TopLeft);
+                UIUtils.SetRectTransformAnchor(item.RectTransform, UIAnchor.TopLeft);
+                UIUtils.SetRectTransformPivot(item.RectTransform, UIPivot.TopLeft);
 
                 flexList.Add(item);
             }

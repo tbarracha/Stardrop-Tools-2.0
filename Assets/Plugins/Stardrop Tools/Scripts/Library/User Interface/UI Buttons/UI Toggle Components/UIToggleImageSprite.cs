@@ -9,7 +9,7 @@ namespace StardropTools.UI
         [Tooltip("0-false, 1-true")]
         public Sprite[] sprites;
 
-        public override void Toggle(bool value)
+        public override void SetToggle(bool value)
         {
             int index = Utilities.ConvertBoolToInt(value);
             image.sprite = sprites[index];

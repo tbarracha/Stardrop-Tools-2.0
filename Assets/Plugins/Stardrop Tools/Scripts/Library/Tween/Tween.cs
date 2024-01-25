@@ -4,7 +4,8 @@ using UnityEngine;
 namespace StardropTools.Tween
 {
     /// <summary>
-    /// For a tween to start, it MUST always end with .Initialize();
+    /// Start   =>  tween.Play(); <para>
+    /// Stop    =>  tween.Stop(); </para>
     /// </summary>
     public abstract class Tween
     {
@@ -26,6 +27,7 @@ namespace StardropTools.Tween
         protected TweenState tweenState;
         protected float runtime;
         protected bool isValid;
+        protected int loops;
 
         public bool isInManagerList;
 
@@ -33,6 +35,7 @@ namespace StardropTools.Tween
 
         public int TweenID => tweenID;
         public TweenType TweenType => tweenType;
+        public TweenState TweenState => tweenState;
 
         public float Duration => duration;
         public float Delay => delay;
@@ -43,35 +46,45 @@ namespace StardropTools.Tween
 
         #region Events
 
-        public readonly EventHandler OnTweenStart = new EventHandler();
-        public readonly EventHandler OnTweenComplete = new EventHandler();
-        public readonly EventHandler OnTweenTick = new EventHandler();
-        public readonly EventHandler OnTweenPaused = new EventHandler();
-        public readonly EventHandler OnTweenCanceled = new EventHandler();
+        public readonly CustomEvent OnTweenStarted      = new CustomEvent();
+        public readonly CustomEvent OnTweenCompleted    = new CustomEvent();
+        public readonly CustomEvent OnTweenTick         = new CustomEvent();
+        public readonly CustomEvent OnTweenPaused       = new CustomEvent();
+        public readonly CustomEvent OnTweenCanceled     = new CustomEvent();
 
-        public readonly EventHandler OnDelayStart = new EventHandler();
-        public readonly EventHandler OnDelayComplete = new EventHandler();
+        public readonly CustomEvent OnDelayStarted      = new CustomEvent();
+        public readonly CustomEvent OnDelayCompleted    = new CustomEvent();
 
-        public readonly EventHandler<float> OnTweenPercent = new EventHandler<float>();
+        public readonly CustomEvent<float> OnTweenPercentDuration = new CustomEvent<float>();
 
         #endregion // Events
+
 
         #region Get Tween Type
 
         // Values
-        public TweenInt asInt => this as TweenInt;
-        public TweenFloat asFloat => this as TweenFloat;
-        public TweenVector2 asVector2 => this as TweenVector2;
-        public TweenVector3 asVector3 => this as TweenVector3;
-        public TweenVector4 asVector4 => this as TweenVector4;
-        public TweenQuaternion asQuaternion => this as TweenQuaternion;
+        public TweenInt             asInt           => this as TweenInt;
+        public TweenFloat           asFloat         => this as TweenFloat;
+        public TweenVector2         asVector2       => this as TweenVector2;
+        public TweenVector3         asVector3       => this as TweenVector3;
+        public TweenVector4         asVector4       => this as TweenVector4;
+        public TweenQuaternion      asQuaternion    => this as TweenQuaternion;
+        public TweenColor           asColor         => this as TweenColor;
+        public TweenColorOpacity    asColorOpacity  => this as TweenColorOpacity;
+
 
         // Shake Values
-        public TweenShakeInt asShakeInt => this as TweenShakeInt;
-        public TweenShakeFloat asShakeFloat => this as TweenShakeFloat;
-        public TweenShakeVector2 asShakeVector2 => this as TweenShakeVector2;
-        public TweenShakeVector3 asShakeVector3 => this as TweenShakeVector3;
-        public TweenShakeVector4 asShakeVector4 => this as TweenShakeVector4;
+        public TweenShakeInt        asShakeInt      => this as TweenShakeInt;
+        public TweenShakeFloat      asShakeFloat    => this as TweenShakeFloat;
+        public TweenShakeVector2    asShakeVector2  => this as TweenShakeVector2;
+        public TweenShakeVector3    asShakeVector3  => this as TweenShakeVector3;
+        public TweenShakeVector4    asShakeVector4  => this as TweenShakeVector4;
+
+
+        // Components
+        public TweenImageColor asImageColor         => this as TweenImageColor;
+        public TweenMaterialColor asMaterialColor   => this as TweenMaterialColor;
+        public TweenMaterialColorOpacity asMaterialColorOpacity => this as TweenMaterialColorOpacity;
 
         #endregion // Get tween type
 
@@ -89,6 +102,9 @@ namespace StardropTools.Tween
             tweenID = uniqueObject.GetInstanceID();
             return this;
         }
+
+        public Tween SetID<T>(T component) where T : Component
+            => SetID(component.GetInstanceID());
 
         public Tween SetType(TweenType tweenType)
         {
@@ -163,7 +179,8 @@ namespace StardropTools.Tween
 
         #endregion // Setters
 
-        public Tween Initialize()
+
+        public Tween Play()
         {
             ResetRuntime();
 
@@ -175,7 +192,7 @@ namespace StardropTools.Tween
             isValid = TweenManager.Instance.ProcessTween(this);
 
             if (isValid == true)
-                OnTweenStart?.Invoke();
+                OnTweenStarted?.Invoke();
 
             return this;
         }
@@ -216,15 +233,15 @@ namespace StardropTools.Tween
 
             // to delay
             if (nextState == TweenState.Waiting)
-                OnDelayStart?.Invoke();
+                OnDelayStarted?.Invoke();
 
             // from delay to running
             if (tweenState == TweenState.Waiting && nextState == TweenState.Running)
-                OnDelayComplete?.Invoke();
+                OnDelayCompleted?.Invoke();
 
             // to complete
             if (nextState == TweenState.Complete)
-                OnTweenComplete?.Invoke();
+                OnTweenCompleted?.Invoke();
             
             // to pause
             if (nextState == TweenState.Paused)
@@ -260,7 +277,7 @@ namespace StardropTools.Tween
             percent = Mathf.Min(runtime / duration, 1);
 
             TweenUpdate(percent);
-            OnTweenPercent?.Invoke(percent);
+            OnTweenPercentDuration?.Invoke(percent);
 
             if (percent >= 1)
                 ChangeState(TweenState.Complete);
@@ -288,14 +305,14 @@ namespace StardropTools.Tween
         protected float Ease(float percent)
         {
             if (easeType != EaseType.AnimationCurve)
-                return TweenEase.Ease(easeType, percent);
+                return EaseValue.Ease(easeType, percent);
 
             else
             {
                 if (easeCurve.keys.Exists(2) == false)
                 {
                     Debug.Log("Tween Animation Curve needs more keys!");
-                    return TweenEase.Ease(EaseType.Linear, percent);
+                    return EaseValue.Ease(EaseType.Linear, percent);
                 }
 
                 return easeCurve.Evaluate(percent);
@@ -307,15 +324,28 @@ namespace StardropTools.Tween
         protected abstract void Loop();
         protected abstract void PingPong();
 
+        protected void ResetLoopCount() => loops = 0;
+
+        protected void LoopIncrement()
+        {
+            loops++;
+            
+            if (loopCount > 0 && loops >= loopCount)
+            {
+                ResetLoopCount();
+                Stop();
+            }
+        }
+
         protected void RemoveFromManagerList()
         {
-            OnTweenStart.ClearAllListeners();
-            OnTweenTick.ClearAllListeners();
-            OnTweenComplete.ClearAllListeners();
-            OnTweenPaused.ClearAllListeners();
-            OnTweenCanceled.ClearAllListeners();
-            OnDelayStart.ClearAllListeners();
-            OnDelayComplete.ClearAllListeners();
+            OnTweenStarted      ?.ClearAllListeners();
+            OnTweenTick         ?.ClearAllListeners();
+            OnTweenCompleted    ?.ClearAllListeners();
+            OnTweenPaused       ?.ClearAllListeners();
+            OnTweenCanceled     ?.ClearAllListeners();
+            OnDelayStarted      ?.ClearAllListeners();
+            OnDelayCompleted    ?.ClearAllListeners();
 
             TweenManager.Instance.RemoveTween(this);
         }

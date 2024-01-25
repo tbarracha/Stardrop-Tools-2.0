@@ -59,7 +59,7 @@ public static class AnimUtilities
         if (clearExistingParams)
             controller.parameters = null;
 
-        string paramName = "";
+        string paramName = string.Empty;
         for (int i = 0; i < states.Length; i++)
         {
             paramName = states[i].state.name;
@@ -123,11 +123,13 @@ public static class AnimUtilities
 
         // find state to transition to
         for (int i = 0; i < states.Length; i++)
+        {
             if (states[i].state.name == stateName)
             {
                 state = states[i].state;
                 break;
             }
+        }
 
         if (CheckIfParamExists(controller, transitionParameterName) == false)
             controller.AddParameter(transitionParameterName, AnimatorControllerParameterType.Trigger);

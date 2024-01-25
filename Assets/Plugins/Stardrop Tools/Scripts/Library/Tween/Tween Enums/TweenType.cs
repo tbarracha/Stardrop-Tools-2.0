@@ -5,7 +5,7 @@ namespace StardropTools.Tween
     {
         // Values
         Float,
-        Int,
+        Int,    
         Vector2,
         Vector3,
         Vector4,

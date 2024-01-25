@@ -13,13 +13,13 @@ namespace StardropTools
         public float ValueZ => vector.z;
 
 
-        public readonly EventHandler<Vector3> OnValueChanged;
+        public readonly CustomEvent<Vector3> OnValueChanged;
 
 
         public Vector3Value(Vector3 value)
         {
             this.vector = value;
-            OnValueChanged = new EventHandler<Vector3>();
+            OnValueChanged = new CustomEvent<Vector3>();
         }
 
         public void InvokeEvents(bool invoke)

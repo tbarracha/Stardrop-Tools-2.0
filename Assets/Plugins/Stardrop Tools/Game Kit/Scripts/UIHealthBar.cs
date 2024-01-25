@@ -51,8 +51,8 @@ public class UIHealthBar : BaseComponent
 
     public bool IsOpened { get; private set; }
 
-    public readonly EventHandler OnChanged = new EventHandler();
-    public readonly EventHandler<float> OnPercentChanged = new EventHandler<float>();
+    public readonly CustomEvent OnChanged = new CustomEvent();
+    public readonly CustomEvent<float> OnPercentChanged = new CustomEvent<float>();
 
     public override void Initialize()
     {
@@ -151,13 +151,13 @@ public class UIHealthBar : BaseComponent
                         .SetDuration(duration)
                         .SetEaseType(easeType)
                         .SetID(valueRect.GetHashCode())
-                        .Initialize();
+                        .Play();
 
             delayedTween = new TweenSizeDelta(delayedRect, targetSize)
                         .SetDurationAndDelay(duration, delay)
                         .SetEaseType(easeType)
                         .SetID(delayedRect.GetHashCode())
-                        .Initialize();
+                        .Play();
         }
     }
 
@@ -198,7 +198,7 @@ public class UIHealthBar : BaseComponent
 
         // initialize tweens
         foreach (Tween tween in imageTweens)
-            tween.Initialize();
+            tween.Play();
     }
 
     public void Open()
@@ -213,7 +213,7 @@ public class UIHealthBar : BaseComponent
             .SetDuration(.3f)
             .SetEaseType(EaseType.EaseOutBack)
             .SetID(GetHashCode())
-            .Initialize();
+            .Play();
 
         if (pixelPerUnitImagesToUpdate[0].color.a < 1)
             ImageTweens(1);
@@ -247,7 +247,7 @@ public class UIHealthBar : BaseComponent
 
 #if UNITY_EDITOR
         if (pixelPerUnitImagesToUpdate.Exists())
-            UtilitiesUI.SetImagesPixelsPerUnitMultiplier(pixelPerUnitImagesToUpdate, pixelsPerUnit);
+            UIUtils.SetImagesPixelsPerUnitMultiplier(pixelPerUnitImagesToUpdate, pixelsPerUnit);
 
         if (imagesToColor.Exists())
         {

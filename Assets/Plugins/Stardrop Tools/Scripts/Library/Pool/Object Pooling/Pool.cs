@@ -4,229 +4,157 @@ using UnityEngine;
 
 namespace StardropTools.Pool
 {
-    public class Pool : MonoBehaviour
+    public class Pool : MonoBehaviour, IPool
     {
-        [NaughtyAttributes.ShowAssetPreview] [SerializeField] GameObject prefab;
+        [NaughtyAttributes.ShowAssetPreview]
+        [SerializeField] GameObject prefab;
         [SerializeField] int capacity = 0;
         [SerializeField] bool debug;
-        [Space]
-        [Tooltip("List of all instantiated items")]
-        [SerializeField] List<PoolItem> pool;
-
-        [Tooltip("List of all spawned items")]
-        [SerializeField] List<PoolItem> activeCache;
 
         Transform self;
-        bool isPopulated;
-        Coroutine clearCR;
+        bool isPopulated = false;
+        bool isTrimming = false;
+
+        private readonly HashSet<PoolItem> activeCache = new HashSet<PoolItem>();
+        private readonly Queue<PoolItem> pool = new Queue<PoolItem>();
 
         public GameObject Prefab => prefab;
+
+        [NaughtyAttributes.ShowNativeProperty]
         public int PoolCount => pool.Count;
+        [NaughtyAttributes.ShowNativeProperty]
         public int ActiveCount => activeCache.Count;
 
-
-        public void SetPrefab(GameObject prefab) => this.prefab = prefab;
-        public void SetCapacity(int capacity) => this.capacity = capacity;
-
-
-        public void SetPool(GameObject prefab, int capacity, bool shouldPopulate)
+        public void SetPoolData(GameObject prefab, int capacity, bool shouldInitialize)
         {
             isPopulated = false;
+            this.prefab = prefab;
+            this.capacity = capacity;
 
-            SetPrefab(prefab);
-            SetCapacity(capacity);
-
-            if (shouldPopulate)
+            if (shouldInitialize)
                 Populate();
         }
-
-
-        /// <summary>
-        /// Create as many items as set in "capacity" and stores them in a list
-        /// </summary>
+        
         public void Populate()
         {
-            if (isPopulated)
+            if (isPopulated || prefab == null)
                 return;
 
-            if (prefab.Equals(null))
-                Debug.Log($"Pool: {name}, <color=red>NO PREFAB</color>");
-
-            if (capacity <= 0)
-                Debug.Log($"Pool: {name}, <color=orange>NO CAPACITY</color>");
-
             self = transform;
-
-            pool = new List<PoolItem>();
-            activeCache = new List<PoolItem>();
+            pool.Clear();
+            activeCache.Clear();
 
             for (int i = 0; i < capacity; i++)
-                CreateItem();
+                pool.Enqueue(CreateItem());
 
             isPopulated = true;
         }
 
-        /// <summary>
-        /// Creates a PoolItem obj and sotres it into cache
-        /// </summary>
-        /// <returns></returns>
         PoolItem CreateItem()
         {
-            if (prefab.Equals(null))
+            if (prefab == null)
             {
                 if (debug)
                     Debug.Log($"<color=orange>Prefab is null!</color>");
                 return null;
             }
 
-            GameObject obj = null;
-
-            if (Application.isPlaying == true)
-                obj = Instantiate(prefab, self);
-
-#if UNITY_EDITOR
-            if (Application.isPlaying == false)
-                obj = Utilities.CreatePrefab(prefab, self);
-#endif
-
+            GameObject obj = Instantiate(prefab, self);
             obj.name += $" - {pool.Count}";
+            obj.SetActive(false);
 
-            PoolItem item = new PoolItem(obj, this);
-            item.SetActive(false);
-
-            pool.Add(item);
-
-            return item;
+            return new PoolItem(obj, this);
         }
 
-
-        /// <summary>
-        /// Loops through instantiated items and tries to find an Innactive one. If not found, creates a new one and adds it to Pool list
-        /// </summary>
-        /// <returns></returns>
-        PoolItem FindInnactiveItem()
-        {
-            for (int i = 0; i < pool.Count; i++)
-            {
-                if (pool[i].IsActive == false)
-                    return pool[i];
-            }
-
-            // if we get here, All items in pool are active
-            // we must create more!
-            return CreateItem();
-        }
-        
         public PoolItem Spawn(Vector3 position, Quaternion rotation, Transform parent, float lifetime = 0)
         {
-            PoolItem item = FindInnactiveItem();
+            PoolItem item = pool.Count > 0 ? pool.Dequeue() : CreateItem();
+
             item.SetPositionRotationAndParent(position, rotation, parent);
             item.SetActive(true);
             activeCache.Add(item);
 
             if (lifetime > 0)
-                SetItemLifetime(item, lifetime);
+            {
+                item.StartLifetimeTimer(lifetime);
+            }
 
             item.OnSpawn();
             return item;
         }
 
-        public T Spawn<T>(Vector3 position, Quaternion rotation, Transform parent, float lifetime = 0)
+        public TComponent Spawn<TComponent>(Vector3 position, Quaternion rotation, Transform parent, float lifetime = 0) where TComponent : MonoBehaviour
         {
-            T item = Spawn(position, rotation, parent, lifetime).ItemGameObject.GetComponent<T>();
-            return item;
+            PoolItem poolItem = Spawn(position, rotation, parent, lifetime);
+            return poolItem.GetComponent<TComponent>();
         }
+
+        public TComponent Spawn<TComponent>(Vector3 position, Transform parent, float lifetime = 0) where TComponent : MonoBehaviour
+            => Spawn<TComponent>(position, Quaternion.identity, parent, lifetime);
+
+        public TComponent Spawn<TComponent>(Vector3 position, float lifetime = 0) where TComponent : MonoBehaviour
+            => Spawn<TComponent>(position, Quaternion.identity, null, lifetime);
+
+        public TComponent Spawn<TComponent>(Transform parent, float lifetime = 0) where TComponent : MonoBehaviour
+            => Spawn<TComponent>(Vector3.zero, Quaternion.identity, parent, lifetime);
+
+        public TComponent Spawn<TComponent>(float lifetime = 0) where TComponent : MonoBehaviour
+            => Spawn<TComponent>(Vector3.zero, Quaternion.identity, null, lifetime);
 
         public bool Despawn(PoolItem item)
         {
-            if (item.IsFromPool(this) && activeCache.Contains(item))
+            if (item.IsFromPool(this) && activeCache.Remove(item))
             {
                 item.OnDespawn();
                 item.SetActive(false);
                 item.SetParent(self);
-                activeCache.Remove(item);
-
+                pool.Enqueue(item);
                 return true;
             }
 
-            else
+            if (debug)
+                Debug.Log($"Object: {item.ItemGameObject.name}, didn't come from pool: {name}");
+            return false;
+        }
+
+        public void DespawnAll()
+        {
+            if (isTrimming)
+                return;
+
+            var itemsToDespawn = new List<PoolItem>(activeCache);
+
+            foreach (var item in itemsToDespawn)
             {
-                if (debug)
-                    Debug.Log($"Object: {item.ItemGameObject.name}, didn't come from pool: {name}");
-                return false;
+                Despawn(item);
+            }
+
+            if (ActiveCount > 0)
+            {
+                DespawnAll();
             }
         }
 
-        [NaughtyAttributes.Button("Despawn All")]
-        public void ClearPool(bool useCoroutine = false)
+        public void TrimPool()
         {
-            if (useCoroutine == false)
+            isTrimming = true;
+            DespawnAll();
+
+            while (pool.Count > capacity)
             {
-                for (int i = 0; i < activeCache.Count; i++)
-                {
-                    PoolItem item = activeCache[i];
-                    Despawn(item);
-                    activeCache.Remove(item);
-                }
-
-                if (activeCache.Count > 0)
-                    ClearPool(useCoroutine);
+                var item = pool.Dequeue();
+                Destroy(item.ItemGameObject);
             }
-            
-            else
+
+            isTrimming = false;
+        }
+
+        public static void DespawnIPoolables<T>(IEnumerable<T> pooledItems) where T : IPoolable
+        {
+            foreach (var item in pooledItems)
             {
-                if (clearCR != null)
-                    return;
-
-                clearCR = StartCoroutine(ClearPoolCR(activeCache));
+                item.Despawn();
             }
-        }
-
-        System.Collections.IEnumerator ClearPoolCR(List<PoolItem> poolItems)
-        {
-            while (poolItems.Count > 0)
-            {
-                for (int i = 0; i < poolItems.Count; i++)
-                    poolItems[i].Despawn();
-
-                yield return null;
-            }
-        }
-
-
-        void SetItemLifetime(PoolItem item, float lifetime)
-        {
-            Coroutine lifetimeCR = StartCoroutine(item.LifetimeCR(lifetime));
-            item.SetLifetimeCoroutine(lifetimeCR);
-        }
-
-        public void StopItemLifetimeCoroutine(Coroutine lifetimeCR) => StopCoroutine(lifetimeCR);
-
-
-
-        public static void DespawnIPoolables(IPoolable[] pooledArray)
-        {
-            for (int i = 0; i < pooledArray.Length; i++)
-                pooledArray[i].Despawn();
-        }
-
-        public static void DespawnIPoolables(List<IPoolable> pooledList)
-        {
-            for (int i = 0; i < pooledList.Count; i++)
-                pooledList[i].Despawn();
-        }
-
-
-        public static void DespawnPoolItems(PoolItem[] pooledArray)
-        {
-            for (int i = 0; i < pooledArray.Length; i++)
-                pooledArray[i].Despawn();
-        }
-
-        public static void DespawnPoolItems(List<PoolItem> pooledList)
-        {
-            for (int i = 0; i < pooledList.Count; i++)
-                pooledList[i].Despawn();
         }
     }
 }

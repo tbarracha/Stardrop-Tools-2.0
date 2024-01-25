@@ -3,17 +3,11 @@ using UnityEngine;
 
 namespace StardropTools.UI
 {
-    public abstract class UIToggleButtonComponent : MonoBehaviour
+    public abstract class UIToggleButtonComponent : BaseComponent
     {
         [SerializeField] protected UIToggleButton targetToggleButton;
 
-        public void Initialize()
-        {
-            targetToggleButton.OnToggleValue.AddListener(Toggle);
-        }
-
-
-        public abstract void Toggle(bool value);
+        public abstract void SetToggle(bool value);
 
 
 

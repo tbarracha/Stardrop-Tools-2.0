@@ -23,8 +23,8 @@ namespace StardropTools
         public int Health => health;
         public float PercentHealth => percent;
 
-        public readonly EventHandler<int> OnHealthChanged = new EventHandler<int>();
-        public readonly EventHandler<float> OnHealthPercentChanged = new EventHandler<float>();
+        public readonly CustomEvent<int> OnHealthChanged = new CustomEvent<int>();
+        public readonly CustomEvent<float> OnHealthPercentChanged = new CustomEvent<float>();
         
         public void SetHealth(int health)
         {

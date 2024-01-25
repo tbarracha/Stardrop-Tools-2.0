@@ -8,7 +8,7 @@ namespace StardropTools.Pool.Generic
     /// Class used for poolable objects with limited lifetime, like Particle Effects or Effects in general
     /// </summary>
     [RequireComponent(typeof(EffectClearer))]
-    public class GenericPooledEffect : BaseObject, IGenericPoolable<GenericPooledEffect>
+    public class GenericPooledEffect : BaseTransform, IGenericPoolable<GenericPooledEffect>
     {
         [SerializeField] protected float lifetime = 0;
         [SerializeField] protected bool resetOnSpawn = true;
@@ -30,7 +30,7 @@ namespace StardropTools.Pool.Generic
             if (resetOnSpawn)
                 effectClearer.Clear();
 
-            TweenManager.StartTweenComponents(tweenComponents);
+            TweenManager.PlayTweenComponents(tweenComponents);
         }
 
         public virtual void OnDespawn() { }

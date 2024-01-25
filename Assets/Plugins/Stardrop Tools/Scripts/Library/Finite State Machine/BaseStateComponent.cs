@@ -21,10 +21,10 @@ namespace StardropTools.FiniteStateMachine
         public int GetStateID() => stateID;
 
 
-        public readonly EventHandler<BaseStateComponent> OnStateEnter = new EventHandler<BaseStateComponent>();
-        public readonly EventHandler<BaseStateComponent> OnStateExit = new EventHandler<BaseStateComponent>();
-        public readonly EventHandler<BaseStateComponent> OnStateUpdate = new EventHandler<BaseStateComponent>();
-        public readonly EventHandler<BaseStateComponent> OnStateInput = new EventHandler<BaseStateComponent>();
+        public readonly CustomEvent<BaseStateComponent> OnStateEnter = new CustomEvent<BaseStateComponent>();
+        public readonly CustomEvent<BaseStateComponent> OnStateExit = new CustomEvent<BaseStateComponent>();
+        public readonly CustomEvent<BaseStateComponent> OnStateUpdate = new CustomEvent<BaseStateComponent>();
+        public readonly CustomEvent<BaseStateComponent> OnStateInput = new CustomEvent<BaseStateComponent>();
 
 
         public virtual void Initialize(FiniteStateMachine stateMachine, int stateID)

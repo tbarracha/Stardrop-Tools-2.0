@@ -34,6 +34,7 @@ namespace StardropTools.Tween
         protected override void TweenUpdate(float percent)
         {
             base.TweenUpdate(percent);
+
             target.eulerAngles = lerped;
         }
     }

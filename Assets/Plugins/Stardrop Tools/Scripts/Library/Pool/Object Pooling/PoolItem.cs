@@ -1,5 +1,4 @@
-﻿
-namespace StardropTools.Pool
+﻿namespace StardropTools.Pool
 {
     using System.Collections;
     using UnityEngine;
@@ -7,28 +6,24 @@ namespace StardropTools.Pool
     [System.Serializable]
     public class PoolItem
     {
-        [SerializeField] Pool pool;
-        [SerializeField] GameObject itemObject;
-        [SerializeField] Transform itemTransform;
-        IPoolable poolable;
+        [SerializeField] private Pool pool;
+        [SerializeField] private GameObject itemObject;
 
-        public Coroutine lifetimeCR;
+        private IPoolable poolable;
+        private MonoBehaviour cachedComponent;
+        private Timer lifetimeTimer;
 
-        public GameObject ItemGameObject    => itemObject;
-        public Transform ItemTransform      => itemTransform;
+        public GameObject ItemGameObject => itemObject;
+        public Transform ItemTransform => itemObject.transform;
         public bool IsActive { get; private set; }
 
         public PoolItem(GameObject prefab, Pool pool)
         {
-            this.pool       = pool;
-
-            itemObject      = prefab;
-            itemTransform   = prefab.transform;
-
-            poolable        = prefab.GetComponent<IPoolable>();
-
-            IsActive        = false;
-            prefab.SetActive(IsActive);
+            this.pool = pool;
+            itemObject = prefab;
+            poolable = prefab.GetComponent<IPoolable>();
+            IsActive = false;
+            prefab.SetActive(false);
 
             if (poolable != null)
                 poolable.SetPoolItem(this);
@@ -45,8 +40,13 @@ namespace StardropTools.Pool
             if (poolable != null)
                 poolable.OnDespawn();
 
-            if (lifetimeCR != null)
-                pool.StopItemLifetimeCoroutine(lifetimeCR);
+            StopLifetimeTimer();
+        }
+
+        public void Despawn()
+        {
+            if (pool != null)
+                pool.Despawn(this);
         }
 
         public void SetActive(bool value)
@@ -55,10 +55,20 @@ namespace StardropTools.Pool
             IsActive = value;
         }
 
-        public void SetPosition(Vector3 position)       => ItemTransform.position = position;
-        public void SetRotation(Quaternion rotation)    => ItemTransform.rotation = rotation;
+        public void SetPosition(Vector3 position)
+        {
+            ItemTransform.position = position;
+        }
 
-        public void SetParent(Transform parent)         => itemTransform.parent = parent;
+        public void SetRotation(Quaternion rotation)
+        {
+            ItemTransform.rotation = rotation;
+        }
+
+        public void SetParent(Transform parent)
+        {
+            ItemTransform.SetParent(parent);
+        }
 
         public void SetPositionRotationAndParent(Vector3 position, Quaternion rotation, Transform parent)
         {
@@ -67,38 +77,31 @@ namespace StardropTools.Pool
             SetParent(parent);
         }
 
-        public bool IsFromPool(Pool targetPool)
+        public TComponent GetComponent<TComponent>() where TComponent : MonoBehaviour
         {
-            if (targetPool.name == pool.name)
-                return true;
-            else
-                return false;
-        }
-
-
-
-        public void SetLifetimeCoroutine(Coroutine lifetimeCR)
-        {
-            this.lifetimeCR = lifetimeCR;
-        }
-
-        public IEnumerator LifetimeCR(float lifetime)
-        {
-            float t = 0;
-
-            while (t < lifetime)
+            if (cachedComponent == null || cachedComponent is not TComponent)
             {
-                t += Time.deltaTime;
-                yield return null;
+                cachedComponent = itemObject.GetComponent<TComponent>();
             }
 
-            Despawn();
+            return cachedComponent as TComponent;
         }
 
-        public void Despawn()
+        public bool IsFromPool(Pool targetPool)
         {
-            if (pool != null)
-                pool.Despawn(this);
+            return pool == targetPool;
+        }
+
+        private void StopLifetimeTimer()
+        {
+            lifetimeTimer?.Stop();
+            lifetimeTimer = null;
+        }
+
+        public void StartLifetimeTimer(float lifetime)
+        {
+            StopLifetimeTimer();
+            lifetimeTimer = new Timer(lifetime).Play(Despawn);
         }
     }
 }

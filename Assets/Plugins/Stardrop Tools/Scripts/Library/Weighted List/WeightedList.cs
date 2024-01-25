@@ -1,12 +1,12 @@
 ﻿
 using System.Collections.Generic;
-using NaughtyAttributes;
 
 namespace StardropTools
 {
     /// <summary>
-    /// General Type List where each element has a Weight(int), allowing for Weighted Randomization
-    /// <para>Ex (ignore synthax): WeightedList(EnemyType) { Basic(type), 5(weight); Rate(type), 2(weight) }</para>
+    /// The WeightedList class, provides a versatile solution for creating and managing lists of elements with associated weights, allowing for weighted randomization.
+    /// <para>Example (pseudo code synthax):</para> 
+    /// <para>WeightedList(EnemyType): {Type=basic, weight=5; Type=rare, weight=2 }</para>
     /// </summary>
     [System.Serializable]
     public class WeightedList<T>
@@ -18,6 +18,57 @@ namespace StardropTools
 
         public int Count { get => list.Count; }
         public T RandomValue { get => GetRandom(); }
+
+
+
+        #region Constructors
+        
+        public WeightedList() { }
+
+        public WeightedList(List<WeightedItem<T>> itemList)
+            => list = itemList;
+
+        public WeightedList(WeightedItem<T>[] itemArray)
+            => list = itemArray.ToList();
+
+        public WeightedList(T[] items)
+        {
+            list = new List<WeightedItem<T>>();
+
+            int weight = items.Length;
+            for (int i = 0; i < items.Length; i++)
+            {
+                if (items[i] != null)
+                {
+                    list.Add(new WeightedItem<T>(items[i], weight));
+                    weight--;
+                }
+            }
+        }
+
+        public WeightedList(T[] items, int[] weights)
+        {
+            list = new List<WeightedItem<T>>();
+
+            for (int i = 0; i < items.Length; i++)
+            {
+                if (items[i] != null && weights[i] != null)
+                {
+                    list.Add(new WeightedItem<T>(items[i], weights[i]));
+                }
+
+                else
+                {
+                    UnityEngine.Debug.Log($"WeightedList of type: {typeof(T)} has Item or Weight is null at index: {i}");
+                    break;
+                }
+            }
+        }
+
+        #endregion // Constructors
+
+
+        public WeightedItem<T> GetAtIndex(int index) => list[index];
 
         public void Add(T item, int weight)
             => list.Add(new WeightedItem<T>(item, weight));
@@ -45,7 +96,7 @@ namespace StardropTools
             float totalWeight = 0;
 
             foreach (WeightedItem<T> item in list)
-                totalWeight += item.weight;            
+                totalWeight += item.Weight;            
 
             float value = UnityEngine.Random.value * totalWeight;
 
@@ -53,10 +104,10 @@ namespace StardropTools
 
             foreach (WeightedItem<T> item in list)
             {
-                sumWeight += item.weight;
+                sumWeight += item.Weight;
 
                 if (sumWeight >= value)
-                    return item.item;
+                    return item.Item;
             }
 
             return default(T);

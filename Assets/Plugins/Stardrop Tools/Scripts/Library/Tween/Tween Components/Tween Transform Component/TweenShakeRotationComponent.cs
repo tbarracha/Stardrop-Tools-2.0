@@ -5,7 +5,7 @@ namespace StardropTools.Tween
 {
     public class TweenShakeRotationComponent : TweenShakeTransformComponent
     {
-        public override Tween StartTween()
+        public override Tween Play()
         {
             if (simulationSpace == SimulationSpace.WorldSpace)
                 tween = new TweenShakeEulerRotation(target, target.eulerAngles);
@@ -14,23 +14,9 @@ namespace StardropTools.Tween
                 tween = new TweenShakeLocalEulerRotation(target, target.localEulerAngles);
 
             SetTweenEssentials();
-            tween.SetID(target.GetHashCode()).Initialize();
-            StartSequence();
+            tween.Play();
 
             return tween;
-        }
-
-        [NaughtyAttributes.Button("Start Tween")]
-        private void TweenStart()
-        {
-            if (Application.isPlaying)
-                StartTween();
-        }
-
-
-        protected override void OnValidate()
-        {
-            base.OnValidate();
         }
     }
 }

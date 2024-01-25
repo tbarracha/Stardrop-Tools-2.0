@@ -13,9 +13,9 @@ namespace StardropTools
         [NaughtyAttributes.ShowNonSerializedField] string stringEvent = "AnimEventSTRING";
         [SerializeField] bool debug;
 
-        public readonly EventHandler<int> OnAnimEventINT = new EventHandler<int>();
-        public readonly EventHandler<float> OnAnimEventFLOAT = new EventHandler<float>();
-        public readonly EventHandler<string> OnAnimEventSTRING = new EventHandler<string>();
+        public readonly CustomEvent<int> OnAnimEventINT = new CustomEvent<int>();
+        public readonly CustomEvent<float> OnAnimEventFLOAT = new CustomEvent<float>();
+        public readonly CustomEvent<string> OnAnimEventSTRING = new CustomEvent<string>();
 
         public void AnimEventINT(int eventID)
         {

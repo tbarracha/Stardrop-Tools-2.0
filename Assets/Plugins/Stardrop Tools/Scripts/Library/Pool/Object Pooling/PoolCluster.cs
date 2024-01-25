@@ -12,7 +12,7 @@ namespace StardropTools.Pool
         [Space]
 #endif
 
-        [SerializeField] List<Pool> pools;
+        [SerializeField] List<IPool> pools;
 
         public void Populate()
         {
@@ -25,14 +25,23 @@ namespace StardropTools.Pool
 
 
         public PoolItem SpawnFromPool(int poolIndex, Vector3 position, Quaternion rotation, Transform parent, float lifetime = 0)
-        {
-            PoolItem item = pools[poolIndex].Spawn(position, rotation, parent, lifetime);
-            return item;
-        }
+            => pools[poolIndex].Spawn(position, rotation, parent, lifetime);
 
 
-        public T SpawnFromPool<T>(int poolIndex, Vector3 position, Quaternion rotation, Transform parent, float lifetime = 0)
-            => pools[poolIndex].Spawn<T>(position, rotation, parent, lifetime);
+        public TComponent SpawnFromPool<TComponent>(int poolIndex, Vector3 position, Quaternion rotation, Transform parent, float lifetime = 0) where TComponent : MonoBehaviour
+            => pools[poolIndex].Spawn<TComponent>(position, rotation, parent, lifetime);
+
+        public TComponent SpawnFromPool<TComponent>(int poolIndex, Vector3 position, Transform parent, float lifetime = 0) where TComponent : MonoBehaviour
+            => pools[poolIndex].Spawn<TComponent>(position, Quaternion.identity, parent, lifetime);
+
+        public TComponent SpawnFromPool<TComponent>(int poolIndex, Vector3 position, float lifetime = 0) where TComponent : MonoBehaviour
+            => pools[poolIndex].Spawn<TComponent>(position, Quaternion.identity, null, lifetime);
+
+        public TComponent SpawnFromPool<TComponent>(int poolIndex, Transform parent, float lifetime = 0) where TComponent : MonoBehaviour
+            => pools[poolIndex].Spawn<TComponent>(Vector3.zero, Quaternion.identity, parent, lifetime);
+
+        public TComponent SpawnFromPool<TComponent>(int poolIndex, float lifetime = 0) where TComponent : MonoBehaviour
+            => pools[poolIndex].Spawn<TComponent>(Vector3.zero, Quaternion.identity, null, lifetime);
 
 
 
@@ -42,26 +51,18 @@ namespace StardropTools.Pool
         public void ClearPools()
         {
             for (int i = 0; i < pools.Count; i++)
-                pools[i].ClearPool();
-        }
-
-        public void ClearPools(bool useCorountine = false)
-        {
-            for (int i = 0; i < pools.Count; i++)
-                pools[i].ClearPool(useCorountine);
+                pools[i].DespawnAll();
         }
 
 
-        public void ClearPool(int poolIndex) => pools[poolIndex].ClearPool();
-
-        public void ClearPool(int poolIndex, bool useCorountine = false) => pools[poolIndex].ClearPool(useCorountine);
+        public void ClearPool(int poolIndex) => pools[poolIndex].DespawnAll();
 
 
         public void CreatePool(GameObject prefab)
         {
             GameObject poolObj = Utilities.CreateEmpty("Pool - " + prefab.name, Vector3.zero, transform).gameObject;
             Pool pool = poolObj.AddComponent<Pool>();
-            pool.SetPool(prefab, 1, false);
+            pool.SetPoolData(prefab, 1, false);
         }
 
 
@@ -75,7 +76,7 @@ namespace StardropTools.Pool
                 return;
             }
 
-            pools = new List<Pool>();
+            pools = new List<IPool>();
 
             for (int i = 0; i < childPools.Length; i++)
                 pools.Add(childPools[i]);
@@ -106,7 +107,7 @@ namespace StardropTools.Pool
                     }
                 }
 
-                if (exists == false)
+                if (!exists)
                     CreatePool(prefab);
             }
 

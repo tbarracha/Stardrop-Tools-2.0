@@ -5,28 +5,14 @@ namespace StardropTools.Tween
 {
     public class TweenShakeScaleComponent : TweenShakeTransformComponent
     {
-        public override Tween StartTween()
+        public override Tween Play()
         {
             tween = new TweenShakeLocalScale(target, target.localScale);
 
             SetTweenEssentials();
-            tween.SetID(target.GetHashCode()).Initialize();
-            StartSequence();
+            tween.Play();
 
             return tween;
-        }
-
-        [NaughtyAttributes.Button("Start Tween")]
-        private void TweenStart()
-        {
-            if (Application.isPlaying)
-                StartTween();
-        }
-
-
-        protected override void OnValidate()
-        {
-            base.OnValidate();
         }
     }
 }

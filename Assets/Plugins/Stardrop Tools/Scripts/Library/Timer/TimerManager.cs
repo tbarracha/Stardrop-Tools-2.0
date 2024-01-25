@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,7 +19,7 @@ namespace StardropTools
         public void AddTimer(Timer timer)
         {
             timers.Add(timer);
-            CheckIfCanUpdate();
+            CheckIfShouldUpdate();
         }
 
         public void RemoveTimer(Timer timer)
@@ -28,7 +27,7 @@ namespace StardropTools
             if (timers.Contains(timer))
             {
                 timers.Remove(timer);
-                CheckIfCanUpdate();
+                CheckIfShouldUpdate();
             }
         }
 
@@ -39,7 +38,7 @@ namespace StardropTools
                     timers[i].Tick();
         }
 
-        void CheckIfCanUpdate()
+        void CheckIfShouldUpdate()
         {
             if (timers.Count > 0 && isUpdating == false)
             {

@@ -54,23 +54,23 @@ public class SwipeManager : Singleton<SwipeManager>, IUpdateable
 
     #region Events
 
-    public static readonly EventHandler<SwipeData> OnSwipe = new EventHandler<SwipeData>();
-    public static readonly EventHandler<SwipeDirection> OnSwipeDirection = new EventHandler<SwipeDirection>();
+    public static readonly CustomEvent<SwipeData> OnSwipe = new CustomEvent<SwipeData>();
+    public static readonly CustomEvent<SwipeDirection> OnSwipeDirection = new CustomEvent<SwipeDirection>();
 
-    public static readonly EventHandler<int> OnSwipeHorizontal = new EventHandler<int>();
-    public static readonly EventHandler<int> OnSwipeVertical = new EventHandler<int>();
+    public static readonly CustomEvent<int> OnSwipeHorizontal = new CustomEvent<int>();
+    public static readonly CustomEvent<int> OnSwipeVertical = new CustomEvent<int>();
 
-    public static readonly EventHandler OnSwipeUp = new EventHandler();
-    public static readonly EventHandler OnSwipeDown = new EventHandler();
+    public static readonly CustomEvent OnSwipeUp = new CustomEvent();
+    public static readonly CustomEvent OnSwipeDown = new CustomEvent();
 
-    public static readonly EventHandler OnSwipeLeft = new EventHandler();
-    public static readonly EventHandler OnSwipeRight = new EventHandler();
+    public static readonly CustomEvent OnSwipeLeft = new CustomEvent();
+    public static readonly CustomEvent OnSwipeRight = new CustomEvent();
 
-    public static readonly EventHandler OnSwipeUpLeft = new EventHandler();
-    public static readonly EventHandler OnSwipeUpRight = new EventHandler();
+    public static readonly CustomEvent OnSwipeUpLeft = new CustomEvent();
+    public static readonly CustomEvent OnSwipeUpRight = new CustomEvent();
 
-    public static readonly EventHandler OnSwipeDownLeft = new EventHandler();
-    public static readonly EventHandler OnSwipeDownRight = new EventHandler();
+    public static readonly CustomEvent OnSwipeDownLeft = new CustomEvent();
+    public static readonly CustomEvent OnSwipeDownRight = new CustomEvent();
 
     #endregion // events
 

@@ -12,7 +12,7 @@ namespace StardropTools.Tween
         {
             base.SetTweenEssentials();
 
-            tween.SetID(target.GetHashCode());
+            tween.SetID(target);
         }
     }
 }

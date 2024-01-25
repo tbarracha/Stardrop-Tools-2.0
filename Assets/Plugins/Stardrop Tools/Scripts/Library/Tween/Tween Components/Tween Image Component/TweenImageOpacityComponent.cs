@@ -5,19 +5,29 @@ namespace StardropTools.Tween
 {
     public class TweenImageOpacityComponent : TweenImageComponent
     {
+        [Tooltip("0 = transparent, 1 = opaque")]
         [Range(0, 1)] public float startOpacity;
+        [Tooltip("0 = transparent, 1 = opaque")]
         [Range(0, 1)] public float endOpacity;
 
-        public override Tween StartTween()
+        public override Tween Play()
         {
-            if (hasStart)
-                tween = new TweenImageOpacity(target, startOpacity, endOpacity);
-            else
-                tween = new TweenImageOpacity(target, endOpacity);
+            for (int i = 0; i < targets.Length; i++)
+            {
+                var target = targets[i];
+                Tween tempTween;
 
-            SetTweenEssentials();
-            tween.SetID(target.GetHashCode()).Initialize();
-            StartSequence();
+                if (hasStart)
+                    tempTween = new TweenImageOpacity(target, startOpacity, endOpacity);
+                else
+                    tempTween = new TweenImageOpacity(target, endOpacity);
+
+                if (i == 0)
+                    tween = tempTween;
+                SetTweenEssentials();
+
+                tempTween.SetID(target.GetHashCode()).Play();
+            }
 
             return tween;
         }
@@ -25,20 +35,7 @@ namespace StardropTools.Tween
         [NaughtyAttributes.Button("Get Start Opaicty")]
         private void GetStart()
         {
-            startOpacity = target.color.a;
-        }
-
-        [NaughtyAttributes.Button("Start Tween")]
-        private void TweenStart()
-        {
-            if (Application.isPlaying)
-                StartTween();
-        }
-
-
-        protected override void OnValidate()
-        {
-            base.OnValidate();
+            startOpacity = targets[0].color.a;
         }
     }
 }

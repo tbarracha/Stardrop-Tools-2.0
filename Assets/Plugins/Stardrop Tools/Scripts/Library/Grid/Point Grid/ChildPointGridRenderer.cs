@@ -29,7 +29,7 @@ namespace StardropTools.Grid
         private void OnValidate()
         {
             if (parentGrid != null && children == null || children.Length != parentGrid.childCount)
-                children = Utilities.GetChildren(parentGrid).ToArray();
+                children = Utilities.GetChildrenList(parentGrid).ToArray();
         }
     }
 }

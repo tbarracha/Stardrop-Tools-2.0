@@ -7,9 +7,9 @@ namespace StardropTools.Tween
     {
         protected Quaternion start;
         protected Quaternion end;
-        protected Quaternion lerped;
+        protected Quaternion lerped { get; protected private set; }
 
-        public readonly EventHandler<Quaternion> OnTweenQuaternion = new EventHandler<Quaternion>();
+        public readonly CustomEvent<Quaternion> OnTweenQuaternion = new CustomEvent<Quaternion>();
 
         protected override void SetEssentials()
         {
@@ -54,6 +54,7 @@ namespace StardropTools.Tween
 
         protected override void Loop()
         {
+            LoopIncrement();
             ResetRuntime();
             ChangeState(TweenState.Running);
         }
@@ -64,6 +65,7 @@ namespace StardropTools.Tween
             start = end;
             end = temp;
 
+            LoopIncrement();
             ResetRuntime();
             ChangeState(TweenState.Running);
         }

@@ -31,11 +31,11 @@ namespace StardropTools.Pool.Generic
         public int Capacity { get => capacity; }
         public bool CanOverflow { get => canOverflow; }
 
-        public readonly EventHandler OnSpawn = new EventHandler();
-        public readonly EventHandler OnDespawn = new EventHandler();
+        public readonly CustomEvent OnSpawn = new CustomEvent();
+        public readonly CustomEvent OnDespawn = new CustomEvent();
 
-        public readonly EventHandler<T> OnSpawnObject = new EventHandler<T>();
-        public readonly EventHandler<T> OnDespawnObject = new EventHandler<T>();
+        public readonly CustomEvent<T> OnSpawnObject = new CustomEvent<T>();
+        public readonly CustomEvent<T> OnDespawnObject = new CustomEvent<T>();
 
 
         #region Constructors

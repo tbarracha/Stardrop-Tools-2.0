@@ -18,12 +18,12 @@ namespace StardropTools
         public bool IsEmpty => isEmpty;
         
 
-        public EventHandler<int> OnRemoved = new EventHandler<int>();
-        public EventHandler<int> OnAdded = new EventHandler<int>();
+        public readonly CustomEvent<int> OnDecremented = new CustomEvent<int>();
+        public readonly CustomEvent<int> OnIncremented = new CustomEvent<int>();
 
-        public EventHandler<int> OnValueChanged = new EventHandler<int>();
-        public EventHandler<float> OnPercentChanged = new EventHandler<float>();
-        public EventHandler OnValueEmpty = new EventHandler();
+        public readonly CustomEvent<int> OnValueChanged = new CustomEvent<int>();
+        public readonly CustomEvent<float> OnPercentChanged = new CustomEvent<float>();
+        public readonly CustomEvent OnValueEmpty = new CustomEvent();
 
 
         #region Constructors
@@ -34,7 +34,7 @@ namespace StardropTools
             this.maxValue = maxHealth;
             value = startHealth;
 
-            GetPercent();
+            CalculatePercent();
             OnValueChanged?.Invoke(value);
         }
 
@@ -44,13 +44,13 @@ namespace StardropTools
             this.maxValue = maxHealth;
             this.value = health;
 
-            GetPercent();
+            CalculatePercent();
             OnValueChanged?.Invoke(value);
         }
 
         #endregion // Constructos
 
-        float GetPercent()
+        float CalculatePercent()
         {
             percent = Mathf.Clamp(value / maxValue, 0, 1);
             OnPercentChanged?.Invoke(percent);
@@ -58,20 +58,19 @@ namespace StardropTools
             return percent;
         }
 
-        public int RemoveValue(int amountToRemove)
+
+
+        public int IncrementValue(int amount)
         {
             if (isEmpty)
                 return 0;
 
-            value = Mathf.Clamp(value - amountToRemove, 0, maxValue);
+            value = Mathf.Clamp(value + amount, 0, maxValue);
 
-            if (value == 0 && isEmpty == false)
-            {
-                isEmpty = true;
-                OnValueEmpty?.Invoke();
-            }
+            if (value > 0 && isEmpty == true)
+                isEmpty = false;
 
-            GetPercent();
+            CalculatePercent();
             OnValueChanged?.Invoke(value);
             return value;
         }
@@ -79,42 +78,48 @@ namespace StardropTools
         /// <summary>
         /// Value from 0 to 1
         /// </summary>
-        public int RemovePercentValue(float percent, bool fromMaxValue)
-        {
-            if (isEmpty)
-                return 0;
-
-            int damage = fromMaxValue ? Mathf.CeilToInt(percent * maxValue) : Mathf.CeilToInt(percent * value);
-            GetPercent();
-
-            return RemoveValue(damage);
-        }
-
-
-
-        public int AddValue(int amountToAdd)
-        {
-            if (isEmpty)
-                return 0;
-
-            value = Mathf.Clamp(value + amountToAdd, 0, maxValue);
-
-            if (value > 0 && isEmpty == true)
-                isEmpty = false;
-
-            GetPercent();
-            OnValueChanged?.Invoke(value);
-            return value;
-        }
-
-        public int AddPercentValue(float percent, bool fromMaxValue)
+        public int IncrementPercentValue(float percent, bool fromMaxValue)
         {
             if (isEmpty)
                 return 0;
 
             int heal = fromMaxValue ? Mathf.CeilToInt(percent * maxValue) : Mathf.CeilToInt(percent * value);
 
-            return AddValue(heal);
+            return IncrementValue(heal);
+        }
+
+
+
+        public int DecrementValue(int amount)
+        {
+            if (isEmpty)
+                return 0;
+
+            value = Mathf.Clamp(value - amount, 0, maxValue);
+
+            if (value == 0 && isEmpty == false)
+            {
+                isEmpty = true;
+                OnValueEmpty?.Invoke();
+            }
+
+            CalculatePercent();
+            OnValueChanged?.Invoke(value);
+            return value;
+        }
+
+        /// <summary>
+        /// Value from 0 to 1
+        /// </summary>
+        public int DecrementPercentValue(float percent, bool fromMaxValue)
+        {
+            if (isEmpty)
+                return 0;
+
+            int damage = fromMaxValue ? Mathf.CeilToInt(percent * maxValue) : Mathf.CeilToInt(percent * value);
+            CalculatePercent();
+
+            return DecrementValue(damage);
         }
 
 
@@ -124,25 +129,25 @@ namespace StardropTools
             isEmpty = false;
             value = maxValue;
 
-            GetPercent();
+            CalculatePercent();
             OnValueChanged?.Invoke(value);
         }
 
-        public void ResetValue(int resetValue)
+        public void ResetValue(int targetValue)
         {
             isEmpty = false;
-            value = resetValue;
+            value = targetValue;
 
-            GetPercent();
+            CalculatePercent();
             OnValueChanged?.Invoke(value);
         }
 
-        public void ResetValue(float percentMaxValue)
+        public void ResetValue(float targetPercent)
         {
             isEmpty = false;
-            value = Mathf.CeilToInt(percentMaxValue * maxValue);
+            value = Mathf.CeilToInt(targetPercent * maxValue);
 
-            GetPercent();
+            CalculatePercent();
             OnValueChanged?.Invoke(value);
         }
     }

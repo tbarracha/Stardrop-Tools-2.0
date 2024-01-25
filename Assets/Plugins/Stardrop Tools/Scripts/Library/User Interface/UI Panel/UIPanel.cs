@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace StardropTools.UI
 {
-    public class UIPanel : BaseUIObject
+    public class UIPanel : BaseRectTransform
     {
         [Header("Panel")]
         [SerializeField] UIPanelData panelData;

@@ -8,7 +8,7 @@ namespace StardropTools.Tween
         public Vector2 startPos;
         public Vector2 endPos;
 
-        public override Tween StartTween()
+        public override Tween Play()
         {
             if (hasStart)
                 tween = new TweenAnchoredPosition(target, startPos, endPos);
@@ -16,8 +16,7 @@ namespace StardropTools.Tween
                 tween = new TweenAnchoredPosition(target, endPos);
 
             SetTweenEssentials();
-            tween.SetID(target.GetHashCode()).Initialize();
-            StartSequence();
+            tween.SetID(this).Play();
 
             return tween;
         }
@@ -26,19 +25,6 @@ namespace StardropTools.Tween
         private void GetStart()
         {
             startPos = target.anchoredPosition;
-        }
-
-        [NaughtyAttributes.Button("Start Tween")]
-        private void TweenStart()
-        {
-            if (Application.isPlaying)
-                StartTween();
-        }
-
-
-        protected override void OnValidate()
-        {
-            base.OnValidate();
         }
     }
 }

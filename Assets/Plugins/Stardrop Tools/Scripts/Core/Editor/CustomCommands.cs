@@ -460,7 +460,7 @@ namespace StardropTools.CustomCommands
                 foreach (GameObject go in objs)
                 {
                     Undo.RecordObject(go.transform, "Inverse Axis");
-                    go.transform.position = UtilsVector.InverseVector3Axis(go.transform.position, 0);
+                    go.transform.position = VecUtils.InverseVector3Axis(go.transform.position, 0);
                 }
             }
         }
@@ -477,7 +477,7 @@ namespace StardropTools.CustomCommands
                 foreach (GameObject go in objs)
                 {
                     Undo.RecordObject(go.transform, "Inverse Axis");
-                    go.transform.position = UtilsVector.InverseVector3Axis(go.transform.position, 1);
+                    go.transform.position = VecUtils.InverseVector3Axis(go.transform.position, 1);
                 }
             }
         }
@@ -494,7 +494,7 @@ namespace StardropTools.CustomCommands
                 foreach (GameObject go in objs)
                 {
                     Undo.RecordObject(go.transform, "Inverse Axis");
-                    go.transform.position = UtilsVector.InverseVector3Axis(go.transform.position, 2);
+                    go.transform.position = VecUtils.InverseVector3Axis(go.transform.position, 2);
                 }
             }
         }
@@ -512,7 +512,7 @@ namespace StardropTools.CustomCommands
                 {
                     Undo.RecordObject(go.transform, "Delete Children");
 
-                    var children = Utilities.GetChildren(go.transform);
+                    var children = Utilities.GetChildrenList(go.transform);
 
                     foreach (Transform child in children)
                         GameObject.DestroyImmediate(child.gameObject);

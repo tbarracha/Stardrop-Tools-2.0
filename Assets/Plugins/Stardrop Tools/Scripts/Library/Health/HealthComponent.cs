@@ -34,20 +34,20 @@ namespace StardropTools
         bool showMaxHeal => (healthContainer == null && syncType != HealthContainerSyncType.FromContainer);
         #endregion
 
-        public EventHandler OnDamaged = new EventHandler();
-        public EventHandler OnHealed = new EventHandler();
+        public CustomEvent OnDamaged = new CustomEvent();
+        public CustomEvent OnHealed = new CustomEvent();
 
-        public EventHandler<int> OnDamagedAmount = new EventHandler<int>();
-        public EventHandler<int> OnHealedAmount = new EventHandler<int>();
+        public CustomEvent<int> OnDamagedAmount = new CustomEvent<int>();
+        public CustomEvent<int> OnHealedAmount = new CustomEvent<int>();
 
-        public EventHandler<float> OnPercentDamaged = new EventHandler<float>();
-        public EventHandler<float> OnPercentHealed = new EventHandler<float>();
+        public CustomEvent<float> OnPercentDamaged = new CustomEvent<float>();
+        public CustomEvent<float> OnPercentHealed = new CustomEvent<float>();
 
-        public EventHandler<int> OnHealthChanged = new EventHandler<int>();
-        public EventHandler<float> OnHealthPercentChanged = new EventHandler<float>();
+        public CustomEvent<int> OnHealthChanged = new CustomEvent<int>();
+        public CustomEvent<float> OnHealthPercentChanged = new CustomEvent<float>();
 
-        public EventHandler OnDeath = new EventHandler();
-        public EventHandler OnRevived = new EventHandler();
+        public CustomEvent OnDeath = new CustomEvent();
+        public CustomEvent OnRevived = new CustomEvent();
 
 
         public void SetHealth(int health)

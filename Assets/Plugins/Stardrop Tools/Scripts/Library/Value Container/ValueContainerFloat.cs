@@ -18,12 +18,12 @@ namespace StardropTools
         public bool IsEmpty => isEmpty;
         
 
-        public EventHandler<float> OnRemoved = new EventHandler<float>();
-        public EventHandler<float> OnAdded = new EventHandler<float>();
+        public readonly CustomEvent<float> OnDecremented = new CustomEvent<float>();
+        public readonly CustomEvent<float> OnIncremented = new CustomEvent<float>();
 
-        public EventHandler<float> OnValueChanged = new EventHandler<float>();
-        public EventHandler<float> OnPercentChanged = new EventHandler<float>();
-        public EventHandler OnValueEmpty = new EventHandler();
+        public readonly CustomEvent<float> OnValueChanged = new CustomEvent<float>();
+        public readonly CustomEvent<float> OnPercentChanged = new CustomEvent<float>();
+        public readonly CustomEvent OnValueEmpty = new CustomEvent();
 
 
         #region Setters
@@ -59,12 +59,42 @@ namespace StardropTools
         }
 
 
-        public float RemoveValue(int amountToRemove)
+
+        public float IncrementValue(int amount)
         {
             if (isEmpty)
                 return 0;
 
-            value = Mathf.Clamp(value - amountToRemove, 0, maxValue);
+            value = Mathf.Clamp(value + amount, 0, maxValue);
+
+            if (value > 0 && isEmpty == true)
+                isEmpty = false;
+
+            GetPercent();
+            OnValueChanged?.Invoke(value);
+            return value;
+        }
+
+        /// <summary>
+        /// Value from 0 to 1
+        /// </summary>
+        public float IncrementPercentValue(float percent, bool fromMaxValue)
+        {
+            if (isEmpty)
+                return 0;
+
+            int increment = fromMaxValue ? Mathf.CeilToInt(percent * maxValue) : Mathf.CeilToInt(percent * value);
+            return IncrementValue(increment);
+        }
+
+
+
+        public float DecrementValue(int amount)
+        {
+            if (isEmpty)
+                return 0;
+
+            value = Mathf.Clamp(value - amount, 0, maxValue);
 
             if (value == 0 && isEmpty == false)
             {
@@ -80,39 +110,13 @@ namespace StardropTools
         /// <summary>
         /// Value from 0 to 1
         /// </summary>
-        public float RemovePercentValue(float percent, bool fromMaxValue)
+        public float DecrementPercentValue(float percent, bool fromMaxValue)
         {
             if (isEmpty)
                 return 0;
 
-            int damage = fromMaxValue ? Mathf.CeilToInt(percent * maxValue) : Mathf.CeilToInt(percent * value);
-            return RemoveValue(damage);
-        }
-
-
-
-        public float AddValue(int amountToAdd)
-        {
-            if (isEmpty)
-                return 0;
-
-            value = Mathf.Clamp(value + amountToAdd, 0, maxValue);
-
-            if (value > 0 && isEmpty == true)
-                isEmpty = false;
-
-            GetPercent();
-            OnValueChanged?.Invoke(value);
-            return value;
-        }
-
-        public float AddPercentValue(float percent, bool fromMaxValue)
-        {
-            if (isEmpty)
-                return 0;
-
-            int heal = fromMaxValue ? Mathf.CeilToInt(percent * maxValue) : Mathf.CeilToInt(percent * value);
-            return AddValue(heal);
+            int decrement = fromMaxValue ? Mathf.CeilToInt(percent * maxValue) : Mathf.CeilToInt(percent * value);
+            return DecrementValue(decrement);
         }
 
 
@@ -126,19 +130,19 @@ namespace StardropTools
             OnValueChanged?.Invoke(value);
         }
 
-        public void ResetValue(int resetValue)
+        public void ResetValue(int targetValue)
         {
             isEmpty = false;
-            value = resetValue;
+            value = targetValue;
 
             GetPercent();
             OnValueChanged?.Invoke(value);
         }
 
-        public void ResetValue(float percentMaxValue)
+        public void ResetValue(float targetPercent)
         {
             isEmpty = false;
-            value = Mathf.CeilToInt(percentMaxValue * maxValue);
+            value = Mathf.CeilToInt(targetPercent * maxValue);
 
             GetPercent();
             OnValueChanged?.Invoke(value);

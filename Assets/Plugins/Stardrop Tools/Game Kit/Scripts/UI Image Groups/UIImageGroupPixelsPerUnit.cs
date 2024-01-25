@@ -15,7 +15,7 @@ namespace StardropTools
                 return;
 
             this.pixelsPerUnit = pixelsPerUnit;
-            Utilities.SetImagePixelsPerUnit(images, pixelsPerUnit);
+            Utilities.SetImagesPixelsPerUnit(images, pixelsPerUnit);
         }
 
         private void OnValidate()

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace StardropTools.UI
 {
-    public class UIRootCanvas : BaseUIObject
+    public class UIRootCanvas : BaseRectTransform
     {
         [Header("Root Canvas")]
         [SerializeField] List<RectTransform> rectsToCopy;
@@ -33,7 +33,7 @@ namespace StardropTools.UI
                 rectsToCopy.Remove(rectTransform);
         }
 
-        public void CopySizes() => UtilitiesUI.CopySizeDeltas(RectTransform, rectsToCopy.ToArray());
+        public void CopySizes() => UIUtils.CopySizeDeltas(RectTransform, rectsToCopy.ToArray());
 
 
 
@@ -43,7 +43,7 @@ namespace StardropTools.UI
 
             if (getRects)
             {
-                rectsToCopy = Utilities.GetListComponentsInChildren<RectTransform>(RectTransform);
+                rectsToCopy = Utilities.GetComponentListInChildren<RectTransform>(RectTransform);
                 getRects = false;
             }
 

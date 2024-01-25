@@ -3,18 +3,26 @@ using UnityEngine;
 
 namespace StardropTools.Pool
 {
-    public class PooledEffect : BaseObject, IPoolable
+    public class PooledEffect : BaseTransform, IPoolable
     {
         [SerializeField] float lifeTime = 0;
         [SerializeField] ParticleSystem[]   particles;
         [SerializeField] TrailRenderer[]    trails;
 
+
         #region Poolable
-        PoolItem poolItem;
 
-        public void SetPoolItem(PoolItem poolItem) => this.poolItem = poolItem;
+        public PoolItem PoolItem { get; protected set; }
 
-        public void Despawn() => poolItem.Despawn();
+        public void SetPoolItem(PoolItem poolItem) => this.PoolItem = poolItem;
+
+        public void Despawn()
+        {
+            if (PoolItem != null)
+                PoolItem.Despawn();
+            else
+                Destroy(thisObject);
+        }
 
         public void OnSpawn()
         {
@@ -32,5 +40,13 @@ namespace StardropTools.Pool
         }
 
         #endregion // Poolable
+
+
+        [NaughtyAttributes.Button("Get Components")]
+        void GetComponents()
+        {
+            particles = GetComponentsInChildren<ParticleSystem>();
+            trails = GetComponentsInChildren<TrailRenderer>();
+        }
     }
 }

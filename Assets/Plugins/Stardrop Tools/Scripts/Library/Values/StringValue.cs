@@ -7,13 +7,13 @@ namespace StardropTools
 
         public string String { get => value; set => SetString(value); }
 
-        public readonly EventHandler<string> OnValueChanged;
+        public readonly CustomEvent<string> OnValueChanged;
 
 
         public StringValue(string value)
         {
             this.value = value;
-            OnValueChanged = new EventHandler<string>();
+            OnValueChanged = new CustomEvent<string>();
         }
 
         public void InvokeEvents(bool invoke)

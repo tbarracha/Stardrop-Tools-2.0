@@ -2,67 +2,73 @@
 using System.IO;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "New Enum Maker", menuName = "Stardrop / Tools / Enum Maker")]
-public class EnumMakerSO : ScriptableObject
+namespace StardropTools.Tools
 {
-    [SerializeField] string enumName;
-    [SerializeField] string[] enumsToCreate;
-    [Space]
-    [SerializeField] bool create;
-
-    public void CreateEnums()
+    [CreateAssetMenu(fileName = "New Enum Maker", menuName = "Stardrop / Tools / Enum Maker")]
+    public class EnumMakerSO : ScriptableObject
     {
-        // Don't do anything if array is empty
-        if (enumsToCreate.Exists() == false)
+        [SerializeField] EnumContainer[] enumContainers;
+
+        [NaughtyAttributes.Button("Create Enums")]
+        public void CreateEnumsFromContainers()
         {
-            Debug.Log("Enum array is empty!");
-            return;
+            for (int i = 0; i < enumContainers.Length; i++)
+                enumContainers[i].CreateEnums();
         }
-
-        // Convert to list and check for empty & duplicate values
-        else
-        {
-            var enumList = UtilsArray.ToList(enumsToCreate);
-
-            UtilsArray.RemoveEmpty(enumList);
-            UtilsArray.RemoveDuplicates(enumList);
-
-            enumsToCreate = enumList.ToArray();
-
-            Debug.Log("Enums filtered");
-        }
-
-        // Create data path
-        string path = Application.streamingAssetsPath + "/Enums/";
-        Directory.CreateDirectory(path);
-
-        // Create enum class file
-        string enumClass = enumName + ".cs";
-        string content =
-            "\n" +
-            "public enum " + enumName + "\n" +
-            "{\n";
-
-        // loop through array and add enums
-        for (int i = 0; i < enumsToCreate.Length; i++)
-            content += "    " + enumsToCreate[i] + ",\n";
-
-        // close class
-        content += "}";
-
-        if (File.Exists(path + enumClass))
-            File.Delete(path + enumClass);
-
-        File.WriteAllText(path + enumClass, content);
-        Debug.Log("Enums created! Minimize editor and reenter to view changes!");
     }
 
-    private void OnValidate()
+    [System.Serializable]
+    internal class EnumContainer
     {
-        if (create)
+        [SerializeField] string savePath;
+        [SerializeField] string enumName;
+        [SerializeField] string[] enums;
+
+        public void CreateEnums()
         {
-            CreateEnums();
-            create = false;
+            // Don't do anything if array is empty
+            if (enums.Exists() == false)
+            {
+                Debug.Log("Enum array is empty!");
+                return;
+            }
+
+            // Convert to list and check for empty & duplicate values
+            else
+            {
+                var enumList = Utilities.ToList(enums);
+
+                Utilities.RemoveEmpty(enumList);
+                Utilities.RemoveDuplicates(enumList);
+
+                enums = enumList.ToArray();
+
+                Debug.Log("Enums filtered");
+            }
+
+            // Create data path
+            string path = savePath == string.Empty ? Application.streamingAssetsPath + "/Enums/" : savePath;
+            Directory.CreateDirectory(path);
+
+            // Create enum class file
+            string enumClass = enumName + ".cs";
+            string content =
+                "\n" +
+                "public enum " + enumName + "\n" +
+                "{\n";
+
+            // loop through array and add enums
+            for (int i = 0; i < enums.Length; i++)
+                content += "    " + enums[i] + ",\n";
+
+            // close class
+            content += "}";
+
+            if (File.Exists(path + enumClass))
+                File.Delete(path + enumClass);
+
+            File.WriteAllText(path + enumClass, content);
+            Debug.Log("Enums created! Minimize editor and reenter to view changes!");
         }
     }
 }

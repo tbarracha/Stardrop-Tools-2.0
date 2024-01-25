@@ -8,7 +8,7 @@ namespace StardropTools.Tween
         public Vector2 startRectSize;
         public Vector2 endRectSize;
 
-        public override Tween StartTween()
+        public override Tween Play()
         {
             if (hasStart)
                 tween = new TweenRectSize(target, startRectSize, endRectSize);
@@ -16,8 +16,7 @@ namespace StardropTools.Tween
                 tween = new TweenRectSize(target, endRectSize);
 
             SetTweenEssentials();
-            tween.SetID(target.GetHashCode()).Initialize();
-            StartSequence();
+            tween.SetID(this).Play();
 
             return tween;
         }
@@ -26,19 +25,6 @@ namespace StardropTools.Tween
         private void GetStart()
         {
             startRectSize = target.rect.size;
-        }
-
-        [NaughtyAttributes.Button("Start Tween")]
-        private void TweenStart()
-        {
-            if (Application.isPlaying)
-                StartTween();
-        }
-
-
-        protected override void OnValidate()
-        {
-            base.OnValidate();
         }
     }
 }

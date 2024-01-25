@@ -7,9 +7,9 @@ namespace StardropTools.Tween
     {
         public float start;
         public float end;
-        public float lerped;
+        public float lerped { get; protected private set; }
 
-        public readonly EventHandler<float> OnTweenFloat = new EventHandler<float>();
+        public readonly CustomEvent<float> OnTweenFloat = new CustomEvent<float>();
 
         protected override void SetEssentials()
         {
@@ -20,6 +20,27 @@ namespace StardropTools.Tween
         {
             SetEssentials();
         }
+
+        public TweenFloat(int id)
+        {
+            SetEssentials();
+            SetID(id);
+        }
+
+        public TweenFloat(float end)
+        {
+            SetEssentials();
+            this.end = end;
+        }
+
+        public TweenFloat(float start, float end)
+        {
+            SetEssentials();
+            this.start = start;
+            this.end = end;
+        }
+
+
 
         public TweenFloat SetStart(float start)
         {
@@ -54,6 +75,7 @@ namespace StardropTools.Tween
 
         protected override void Loop()
         {
+            LoopIncrement();
             ResetRuntime();
             ChangeState(TweenState.Running);
         }
@@ -64,6 +86,7 @@ namespace StardropTools.Tween
             start = end;
             end = temp;
 
+            LoopIncrement();
             ResetRuntime();
             ChangeState(TweenState.Running);
         }

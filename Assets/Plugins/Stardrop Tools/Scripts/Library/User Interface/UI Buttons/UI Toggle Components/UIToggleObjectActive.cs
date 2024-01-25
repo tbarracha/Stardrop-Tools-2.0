@@ -10,7 +10,7 @@ namespace StardropTools.UI
         /// </summary>
         [SerializeField] GameObject[] objects;
 
-        public override void Toggle(bool value)
+        public override void SetToggle(bool value)
         {
             if (value == true)
             {

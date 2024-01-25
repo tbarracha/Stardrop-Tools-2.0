@@ -8,37 +8,45 @@ namespace StardropTools.Tween
         public Color startColor;
         public Color endColor;
 
-        public override Tween StartTween()
+        public override Tween Play()
         {
-            if (hasStart)
-                tween = new TweenImageColor(target, startColor, endColor);
-            else
-                tween = new TweenImageColor(target, endColor);
+            if (targets.Length == 0)
+            {
+                print("No targets to tween!");
+                return null;
+            }
+
+            for (int i = 0; i < targets.Length; i++)
+            {
+                var target = targets[i];
+                Tween tempTween;
+
+                if (hasStart)
+                    tempTween = new TweenImageColor(target, startColor, endColor);
+                else
+                    tempTween = new TweenImageColor(target, endColor);
+
+                tempTween.SetID(target.GetHashCode())
+                         .SetDurationAndDelay(duration, delay)
+                         .SetEaseType(easeType);
+
+                if (easeType == EaseType.AnimationCurve)
+                    tempTween.SetAnimationCurve(curve);
+
+                tempTween.Play();
+
+                if (i == 0)
+                    tween = tempTween;
+            }
 
             SetTweenEssentials();
-            tween.SetID(target.GetHashCode()).Initialize();
-            StartSequence();
-
             return tween;
         }
 
         [NaughtyAttributes.Button("Get Start Image Color")]
         private void GetStart()
         {
-            startColor = target.color;
-        }
-
-        [NaughtyAttributes.Button("Start Tween")]
-        private void TweenStart()
-        {
-            if (Application.isPlaying)
-                StartTween();
-        }
-
-
-        protected override void OnValidate()
-        {
-            base.OnValidate();
+            startColor = targets[0].color;
         }
     }
 }

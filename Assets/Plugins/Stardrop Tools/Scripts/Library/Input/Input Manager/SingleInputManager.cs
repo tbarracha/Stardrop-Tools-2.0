@@ -36,7 +36,7 @@ public class SingleInputManager : Singleton<SingleInputManager>, IUpdateable
     [SerializeField] float distance;
 
     [Header("Raycast")]
-    [SerializeField] UnityEngine.EventSystems.EventSystem eventSystem;
+    [SerializeField] EventSystem eventSystem;
     [SerializeField] new Camera camera;
     [SerializeField] LayerMask maskPick;
     [SerializeField] LayerMask maskGround;
@@ -46,12 +46,12 @@ public class SingleInputManager : Singleton<SingleInputManager>, IUpdateable
     
     private Ray ray;
     RaycastHit hit;
-    public System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult> raycastList;
+    public System.Collections.Generic.List<RaycastResult> raycastList;
 
 
     #region Parameters
     public bool HasInput { get => hasInput; }
-    public bool IsOverUI { get => isOverUI; }
+    public bool IsOverUI => CheckIfOverUI();
 
     public float Horizontal { get => horizontal; }
     public float Vertical { get => vertical; }
@@ -67,17 +67,17 @@ public class SingleInputManager : Singleton<SingleInputManager>, IUpdateable
     #region Events
 
     // ---------- !! ADD EVENTS FOR VALUES: HORIZONTAL, VERTICAL, INPUTSTART, ETC
-    public static readonly EventHandler OnInputStart = new EventHandler();
-    public static readonly EventHandler OnInputEnd = new EventHandler();
-    public static readonly EventHandler OnInput = new EventHandler();
+    public static readonly CustomEvent OnInputStart = new CustomEvent();
+    public static readonly CustomEvent OnInputEnd = new CustomEvent();
+    public static readonly CustomEvent OnInput = new CustomEvent();
 
-    public static readonly EventHandler OnInputStartUI = new EventHandler();
-    public static readonly EventHandler OnInputEndUI = new EventHandler();
+    public static readonly CustomEvent OnInputStartUI = new CustomEvent();
+    public static readonly CustomEvent OnInputEndUI = new CustomEvent();
 
-    public static readonly EventHandler<float> OnInputHorizontal = new EventHandler<float>();
-    public static readonly EventHandler<float> OnInputVertical = new EventHandler<float>();
+    public static readonly CustomEvent<float> OnInputHorizontal = new CustomEvent<float>();
+    public static readonly CustomEvent<float> OnInputVertical = new CustomEvent<float>();
 
-    public static readonly EventHandler<float> OnInputDistance = new EventHandler<float>();
+    public static readonly CustomEvent<float> OnInputDistance = new CustomEvent<float>();
     #endregion // events
 
     protected override void Awake()
@@ -93,10 +93,21 @@ public class SingleInputManager : Singleton<SingleInputManager>, IUpdateable
         StartUpdate();
     }
 
+    public void SetInputCenter(InputCenter inputCenter)
+    {
+        if (inputCenter == this.inputCenter)
+            return;
+
+        this.inputCenter = inputCenter;
+    }
+
     public void UserInput()
     {
         if (camera == null)
             camera = Camera.main;
+
+        if (eventSystem == null)
+            eventSystem = EventSystem.current;
 
         // Input start
         if (Input.GetMouseButtonDown(0))
@@ -182,22 +193,22 @@ public class SingleInputManager : Singleton<SingleInputManager>, IUpdateable
             // Center only for Horizontal
             if (inputCenter == InputCenter.screenCenterHorizontal)
             {
-                horizontal = (inputCurrent.x / Screen.width) * 2 - 1;
-                vertical = Mathf.Clamp(distanceY / maxScreenDistance, -1, 1);
+                horizontal  = (inputCurrent.x / Screen.width) * 2 - 1;
+                vertical    = Mathf.Clamp(distanceY / maxScreenDistance, -1, 1);
             }
 
             // Center only for Vertical
             else if (inputCenter == InputCenter.screenCenterVertical)
             {
-                horizontal = Mathf.Clamp(distanceX / maxScreenDistance, -1, 1);
-                vertical = (inputCurrent.y / Screen.height) * 2 - 1;
+                horizontal  = Mathf.Clamp(distanceX / maxScreenDistance, -1, 1);
+                vertical    = (inputCurrent.y / Screen.height) * 2 - 1;
             }
 
             // Dead center
             else if (inputCenter == InputCenter.screenCenterComplete)
             {
-                horizontal = (inputCurrent.x / Screen.width) * 2 - 1;
-                vertical = (inputCurrent.y / Screen.height) * 2 - 1;
+                horizontal  = (inputCurrent.x / Screen.width) * 2 - 1;
+                vertical    = (inputCurrent.y / Screen.height) * 2 - 1;
             }
 
             InvokeFloatEvents();
@@ -205,8 +216,8 @@ public class SingleInputManager : Singleton<SingleInputManager>, IUpdateable
 
         else
         {
-            horizontal = 0;
-            vertical = 0;
+            horizontal  = 0;
+            vertical    = 0;
         }
     }
 
@@ -264,9 +275,9 @@ public class SingleInputManager : Singleton<SingleInputManager>, IUpdateable
     }
 
 
-    public void StartUpdate() => LoopManager.AddToUpdate(this);
+    public void StartUpdate()   => LoopManager.AddToUpdate(this);
 
-    public void StopUpdate() => LoopManager.RemoveFromUpdate(this);
+    public void StopUpdate()    => LoopManager.RemoveFromUpdate(this);
 
-    public void HandleUpdate() => UserInput();
+    public void HandleUpdate()  => UserInput();
 }

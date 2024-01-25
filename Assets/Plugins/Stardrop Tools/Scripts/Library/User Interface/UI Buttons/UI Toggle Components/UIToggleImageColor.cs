@@ -15,7 +15,7 @@ namespace StardropTools.UI
 
         Tween.Tween tween;
 
-        public override void Toggle(bool value)
+        public override void SetToggle(bool value)
         {
             int index = Utilities.ConvertBoolToInt(value);
 
@@ -28,7 +28,7 @@ namespace StardropTools.UI
                     .SetEaseType(easeType)
                     .SetDuration(duration)
                     .SetID(image.GetHashCode())
-                    .Initialize();
+                    .Play();
             }
 
             else

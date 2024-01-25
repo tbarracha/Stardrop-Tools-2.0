@@ -9,7 +9,7 @@ namespace StardropTools.Tween
         [SerializeField] TweenComponent[] tweensOnDelayComplete;
         [SerializeField] TweenComponent[] tweensOnTweenComplete;
         
-        public void StartSequence()
+        public void Play()
         {
             if (mainTween == null)
                 return;
@@ -23,14 +23,14 @@ namespace StardropTools.Tween
         {
             if (tweensOnDelayComplete.Length > 0)
                 for (int i = 0; i < tweensOnDelayComplete.Length; i++)
-                    tweensOnDelayComplete[i].StartTween();
+                    tweensOnDelayComplete[i].Play();
         }
 
         void OnTweenComplete()
         {
             if (tweensOnTweenComplete.Length > 0)
                 for (int i = 0; i < tweensOnTweenComplete.Length; i++)
-                    tweensOnTweenComplete[i].StartTween();
+                    tweensOnTweenComplete[i].Play();
         }
     }
 }

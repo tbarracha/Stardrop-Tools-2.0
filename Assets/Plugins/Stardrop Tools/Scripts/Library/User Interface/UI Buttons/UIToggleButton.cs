@@ -1,4 +1,5 @@
 
+using System.Collections;
 using UnityEngine;
 
 namespace StardropTools.UI
@@ -7,46 +8,78 @@ namespace StardropTools.UI
     public class UIToggleButton : UIButton
     {
         [Header("Toggle Button")]
+        [SerializeField] protected bool debugToggleState;
+        [Space]
         [SerializeField] protected bool initialToggle;
+        [SerializeField] protected bool initialValidateToggle;
+        [SerializeField] protected bool isActingLikeDefaultButton;
+        [SerializeField] protected bool allowUntoggleSelf = true;
+        [SerializeField] protected bool canToggle = true;
+        [SerializeField] protected float toggleCooldown = 0.05f;
+        [Space]
         [SerializeField] protected Toggle toggle;
         [SerializeField] protected Transform parentComponents;
+        [SerializeField] protected UIToggleOtherToggles otherToggles;
         [SerializeField] protected UIToggleButtonComponent[] toggleComponents;
+        protected Coroutine toggleCR;
 
-        public bool Value => toggle.Value;
+        public bool Value                                           => toggle.Value;
+        public bool IsActingLikeDefaultButton                       => isActingLikeDefaultButton;
 
-        public EventHandler OnToggle => toggle.OnToggle;
-        public EventHandler<bool> OnToggleValue => toggle.OnToggleValue;
+        public CustomEvent OnToggleDry                              => toggle.OnToggle;
+        public CustomEvent<bool> OnToggle                           => toggle.OnToggleValue;
         
-        public readonly EventHandler OnToggleTrue = new EventHandler();
-        public readonly EventHandler OnToggleFalse = new EventHandler();
+        public readonly CustomEvent OnToggleTrue                    = new CustomEvent();
+        public readonly CustomEvent OnToggleFalse                   = new CustomEvent();
 
-        public readonly EventHandler<UIToggleButton> OnToggleClass = new EventHandler<UIToggleButton>();
-        public readonly EventHandler<int> OnToggleIndex = new EventHandler<int>();
+        public readonly CustomEvent<int> OnToggleIndex              = new CustomEvent<int>();
 
-        public readonly EventHandler<int> OnToggleTrueIndex = new EventHandler<int>();
-        public readonly EventHandler<int> OnToggleFalseIndex = new EventHandler<int>();
-
+        public readonly CustomEvent<int> OnToggleTrueIndex          = new CustomEvent<int>();
+        public readonly CustomEvent<int> OnToggleFalseIndex         = new CustomEvent<int>();
 
 
         public override void Initialize()
         {
             base.Initialize();
 
-            toggle.ToggleValue(initialToggle);
-            RefreshToggleComponents();
-
-            OnClick.AddListener(Toggle);
-            OnToggle.AddListener(() => OnToggleClass?.Invoke(this));
-            OnToggle.AddListener(() => OnToggleIndex?.Invoke(ButtonID));
+            SetToggle(initialToggle, initialValidateToggle);
 
             if (toggleComponents.Exists())
                 for (int i = 0; i < toggleComponents.Length; i++)
                     toggleComponents[i].Initialize();
         }
 
-
-        public void Toggle()
+        protected override void OnPressed()
         {
+            base.OnPressed();
+
+            // is a Toggle
+            if (isActingLikeDefaultButton == false)
+            {
+                Toggle();
+            }
+
+            // default button
+            else
+            {
+
+            }
+        }
+
+        public void SetToggle(bool value, bool validateEvents = false)
+        {
+            toggle.SetToggle(value, validateEvents);
+            RefreshToggleComponents();
+        }
+
+        public virtual void Toggle()
+        {
+            if (canToggle == false)
+                return;
+
+            if (Value == true && allowUntoggleSelf == false)
+                return;
+
             toggle.ToggleValue();
             OnValueChanged();
         }
@@ -63,19 +96,23 @@ namespace StardropTools.UI
         protected void RefreshToggleComponents()
         {
             for (int i = 0; i < toggleComponents.Length; i++)
-                toggleComponents[i].Toggle(Value);
+                toggleComponents[i].SetToggle(Value);
         }
 
 
         protected void OnValueChanged()
         {
+            StartToggleCooldown();
+
             if (Value == true)
                 OnTrue();
             else
                 OnFalse();
 
             RefreshToggleComponents();
-            //Debug.Log(name + ", toggled: " + Value);
+            
+            if (debugToggleState)
+                Debug.Log(name + ", toggled: " + Value);
         }
 
         protected virtual void OnTrue()
@@ -91,6 +128,72 @@ namespace StardropTools.UI
         }
 
 
+        public void ShouldActLikeDefaultButton(bool isDefaultButton)
+        {
+            isActingLikeDefaultButton = isDefaultButton;
+        }
+
+
+        public void SetAllowToggle(bool allowToggle)
+        {
+            canToggle = allowToggle;
+        }
+
+        void StartToggleCooldown()
+        {
+            StopToggleCooldown();
+            toggleCR = StartCoroutine(ToggleCooldownCR());
+        }
+
+        void StopToggleCooldown()
+        {
+            if (toggleCR != null)
+                StopCoroutine(toggleCR);
+        }
+
+        IEnumerator ToggleCooldownCR()
+        {
+            SetAllowToggle(false);
+
+            float t = 0;
+            while (t != toggleCooldown)
+            {
+                t = Mathf.Min(t + Time.deltaTime, toggleCooldown);
+                yield return null;
+            }
+
+            SetAllowToggle(true);
+        }
+
+        public void GetOtherToggles()
+        {
+            if (otherToggles == null)
+                return;
+
+            otherToggles.GetOtherToggles();
+        }
+
+
+        [NaughtyAttributes.Button("Get Parent Components")]
+        void GetParentComponents()
+        {
+            var transforms = GetComponentsInChildren<RectTransform>();
+
+            for (int i = 0; i < transforms.Length; i++)
+            {
+                Transform t = transforms[i];
+                var toggleComponents = Utilities.GetComponentListInChildren<UIToggleButtonComponent>(t);
+
+                if (toggleComponents.Exists())
+                {
+                    parentComponents = t;
+                    break;
+                }
+            }
+        }
+
+
+
         protected override void OnValidate()
         {
             base.OnValidate();
@@ -98,8 +201,8 @@ namespace StardropTools.UI
             if (toggle == null)
                 toggle = GetComponent<Toggle>();
 
-            if (parentComponents != null && Utilities.GetListComponentsInChildren<UIToggleButtonComponent>(parentComponents) != null)
-                toggleComponents = Utilities.GetListComponentsInChildren<UIToggleButtonComponent>(parentComponents).ToArray();
+            if (parentComponents != null && Utilities.GetComponentListInChildren<UIToggleButtonComponent>(parentComponents) != null)
+                toggleComponents = Utilities.GetComponentListInChildren<UIToggleButtonComponent>(parentComponents).ToArray();
         }
     }
 }

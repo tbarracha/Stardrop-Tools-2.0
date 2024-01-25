@@ -10,7 +10,7 @@ namespace StardropTools.Tween
 
         protected override void SetEssentials()
         {
-            //tweenID = textMesh.GetHashCode();
+            SetID(textMesh);
             tweenType = TweenType.TextMeshSize;
         }
 

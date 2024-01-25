@@ -7,9 +7,9 @@ namespace StardropTools.Tween
     {
         public int start;
         public int end;
-        public int lerped;
+        public int lerped { get; protected private set; }
 
-        public readonly EventHandler<int> OnTweenInt = new EventHandler<int>();
+        public readonly CustomEvent<int> OnTweenInt = new CustomEvent<int>();
 
         protected override void SetEssentials()
         {
@@ -20,6 +20,21 @@ namespace StardropTools.Tween
         {
             SetEssentials();
         }
+
+        public TweenInt(int end)
+        {
+            SetEssentials();
+            this.end = end;
+        }
+
+        public TweenInt(int start, int end)
+        {
+            SetEssentials();
+            this.start = start;
+            this.end = end;
+        }
+
+
 
         public TweenInt SetStart(int start)
         {
@@ -54,6 +69,7 @@ namespace StardropTools.Tween
 
         protected override void Loop()
         {
+            LoopIncrement();
             ResetRuntime();
             ChangeState(TweenState.Running);
         }
@@ -64,6 +80,7 @@ namespace StardropTools.Tween
             start = end;
             end = temp;
 
+            LoopIncrement();
             ResetRuntime();
             ChangeState(TweenState.Running);
         }

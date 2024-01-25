@@ -8,7 +8,7 @@ namespace StardropTools.Tween
         public Vector3 startPos;
         public Vector3 endPos;
 
-        public override Tween StartTween()
+        public override Tween Play()
         {
             if (simulationSpace == SimulationSpace.WorldSpace)
             {
@@ -27,8 +27,7 @@ namespace StardropTools.Tween
             }
 
             SetTweenEssentials();
-            tween.SetID(target.GetHashCode()).Initialize();
-            StartSequence();
+            tween.SetID(this).Play();
 
             return tween;
         }
@@ -40,19 +39,6 @@ namespace StardropTools.Tween
                 startPos = target.position;
             else
                 startPos = target.localPosition;
-        }
-
-        [NaughtyAttributes.Button("Start Tween")]
-        private void TweenStart()
-        {
-            if (Application.isPlaying)
-                StartTween();
-        }
-
-
-        protected override void OnValidate()
-        {
-            base.OnValidate();
         }
     }
 }

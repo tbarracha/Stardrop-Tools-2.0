@@ -6,32 +6,33 @@ namespace StardropTools
     [System.Serializable]
     public class Timer
     {
-        [SerializeField] TimerLoop loopType;
-        [SerializeField] TimerState timerState;
-        [SerializeField] float delay;
-        [SerializeField] float duration;
+        [SerializeField] protected TimerLoop loopType;
+        [SerializeField] protected TimerState timerState;
+        [SerializeField] protected float delay;
+        [SerializeField] protected float duration;
         [Space]
-        [SerializeField] float runtime;
-        [SerializeField] float percent;
+        [SerializeField] protected float runtime;
+        [SerializeField] protected float percent;
 
-        bool ignoreTimeScale;
+        protected bool ignoreTimeScale;
+        private System.Action onCompleteCallback;
 
         public float Runtime => runtime;
         public float Percent => percent;
 
 
         #region Events
-        public readonly EventHandler OnTimerStart = new EventHandler();
-        public readonly EventHandler OnTimerComplete = new EventHandler();
-        public readonly EventHandler OnTimerUpdate = new EventHandler();
-        public readonly EventHandler OnTimerPaused = new EventHandler();
-        public readonly EventHandler OnTimerCanceled = new EventHandler();
+        public readonly CustomEvent OnTimerStart = new CustomEvent();
+        public readonly CustomEvent OnTimerComplete = new CustomEvent();
+        public readonly CustomEvent OnTimerUpdate = new CustomEvent();
+        public readonly CustomEvent OnTimerPaused = new CustomEvent();
+        public readonly CustomEvent OnTimerCanceled = new CustomEvent();
 
-        public readonly EventHandler<float> OnRuntime = new EventHandler<float>();
-        public readonly EventHandler<float> OnPercent = new EventHandler<float>();
+        public readonly CustomEvent<float> OnRuntime = new CustomEvent<float>();
+        public readonly CustomEvent<float> OnPercent = new CustomEvent<float>();
 
-        public readonly EventHandler OnDelayStart = new EventHandler();
-        public readonly EventHandler OnDelayComplete = new EventHandler();
+        public readonly CustomEvent OnDelayStart = new CustomEvent();
+        public readonly CustomEvent OnDelayComplete = new CustomEvent();
 
         #endregion // Events
 
@@ -80,7 +81,7 @@ namespace StardropTools
         }
 
 
-        public Timer Initialize()
+        public Timer Play()
         {
             ResetTimer();
 
@@ -94,6 +95,14 @@ namespace StardropTools
 
             return this;
         }
+
+        public Timer Play(System.Action onComplete)
+        {
+            onCompleteCallback = onComplete;
+            return Play();
+        }
+
+        public Timer Start() => Play();
 
         public void ChangeState(TimerState nextState)
         {
@@ -184,8 +193,13 @@ namespace StardropTools
 
         protected virtual void Complete()
         {
+            onCompleteCallback?.Invoke();
+
             if (loopType == TimerLoop.None)
+            {
+                onCompleteCallback = null;
                 RemoveFromManagerList();
+            }
 
             else if (loopType == TimerLoop.Loop)
                 Loop();
@@ -198,7 +212,7 @@ namespace StardropTools
         public virtual void Stop()
             => RemoveFromManagerList();
 
-        void Loop()
+        protected void Loop()
         {
             ResetTimer();
             ChangeState(TimerState.Running);
@@ -206,13 +220,13 @@ namespace StardropTools
 
         protected void RemoveFromManagerList()
         {
-            OnTimerStart.ClearAllListeners();
-            OnTimerUpdate.ClearAllListeners();
-            OnTimerComplete.ClearAllListeners();
-            OnTimerPaused.ClearAllListeners();
-            OnTimerCanceled.ClearAllListeners();
-            OnDelayStart.ClearAllListeners();
-            OnDelayComplete.ClearAllListeners();
+            OnTimerStart    ?.ClearAllListeners();
+            OnTimerUpdate   ?.ClearAllListeners();
+            OnTimerComplete ?.ClearAllListeners();
+            OnTimerPaused   ?.ClearAllListeners();
+            OnTimerCanceled ?.ClearAllListeners();
+            OnDelayStart    ?.ClearAllListeners();
+            OnDelayComplete ?.ClearAllListeners();
 
             TimerManager.Instance.RemoveTimer(this);
         }

@@ -1,6 +1,6 @@
 ﻿
 /// <summary>
-/// Static class that stores all Coroutine WaitForSeconds for performances
+/// Static class that stores Coroutine WaitForSeconds(t) for performances
 /// </summary>
 public static class WaitForSecondsManager
 {

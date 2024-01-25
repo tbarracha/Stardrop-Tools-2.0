@@ -1,0 +1,1 @@
+﻿Only take package if you have the Unity Legacy Ads package installed!

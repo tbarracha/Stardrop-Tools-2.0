@@ -7,13 +7,13 @@ namespace StardropTools
 
         public float Float { get => value; set => SetFloat(value); }
 
-        public readonly EventHandler<float> OnFloatChanged;
+        public readonly CustomEvent<float> OnFloatChanged;
 
 
         public FloatValue(float value)
         {
             this.value = value;
-            OnFloatChanged = new EventHandler<float>();
+            OnFloatChanged = new CustomEvent<float>();
         }
 
         public void InvokeEvents(bool invoke)

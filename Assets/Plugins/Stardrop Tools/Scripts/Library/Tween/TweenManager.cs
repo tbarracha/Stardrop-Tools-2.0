@@ -12,9 +12,7 @@ namespace StardropTools.Tween
         protected override void Awake()
         {
             base.Awake();
-
-            if (tweens == null)
-                tweens = new List<Tween>();
+            tweens = new List<Tween>();
         }
 
         public bool ProcessTween(Tween tween)
@@ -69,10 +67,7 @@ namespace StardropTools.Tween
                 tween.isInManagerList = true;
 
                 if (isUpdating == false)
-                {
                     StartUpdate();
-                    isUpdating = true;
-                }
             }
         }
 
@@ -87,14 +82,15 @@ namespace StardropTools.Tween
 
             if (tween.isInManagerList == true)
             {
-                tween.isInManagerList = false;
                 tweens.Remove(tween);
+                tween.isInManagerList = false;
             }
         }
 
         void UpdateTweens()
         {
             if (tweens.Exists())
+            {
                 for (int i = 0; i < tweens.Count; i++)
                 {
                     if (tweens.Exists() == false)
@@ -102,14 +98,11 @@ namespace StardropTools.Tween
 
                     tweens[i].UpdateTweenState();
                 }
+            }
 
             tweenCount = tweens.Count;
-
-            if (tweenCount == 0)
-            {
+            if (tweens.Count == 0)
                 StopUpdate();
-                isUpdating = false;
-            }
         }
 
 
@@ -135,13 +128,13 @@ namespace StardropTools.Tween
                 tween.Stop();
         }
 
-        public static void StartTweenComponents(TweenComponent[] tweenComponents)
+        public static void PlayTweenComponents(TweenComponent[] tweenComponents)
         {
             if (tweenComponents.Exists() == false)
                 return;
 
             for (int i = 0; i < tweenComponents.Length; i++)
-                tweenComponents[i].StartTween();
+                tweenComponents[i].Play();
         }
 
         public static void StopTweenComponents(TweenComponent[] tweenComponents)
@@ -150,14 +143,28 @@ namespace StardropTools.Tween
                 return;
 
             for (int i = 0; i < tweenComponents.Length; i++)
-                tweenComponents[i].StopTween();
+                tweenComponents[i].Stop();
         }
 
 
-        public void StartUpdate() => LoopManager.AddToUpdate(this);
+        public void StartUpdate()
+        {
+            if (isUpdating == true)
+                return;
 
-        public void StopUpdate() => LoopManager.RemoveFromUpdate(this);
+            LoopManager.AddToUpdate(this);
+            isUpdating = true;
+        }
 
-        public void HandleUpdate() => UpdateTweens();
+        public void StopUpdate()
+        {
+            if (isUpdating == false)
+                return;
+
+            LoopManager.RemoveFromUpdate(this);
+            isUpdating = false;
+        }
+
+        public void HandleUpdate()  => UpdateTweens();
     }
 }
