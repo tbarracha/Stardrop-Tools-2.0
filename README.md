@@ -19,6 +19,6 @@ It enhances the development process by providing a robust set of tools and utili
 
 ### Currently Working On
 - More Tweens
-- Refactoring AnimatorHandler to AnimationControllerManager for easier AnimatorController state changing
+- Refactoring AnimatorHandler to AnimatiorControllerManager for easier AnimatorController state changing
 - Animation Preview for event setting
 - Mobile & PC Notifications
