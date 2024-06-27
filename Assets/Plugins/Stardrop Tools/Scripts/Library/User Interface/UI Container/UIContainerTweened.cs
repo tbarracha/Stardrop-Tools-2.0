@@ -13,7 +13,7 @@ namespace StardropTools.UI
         [SerializeField] protected TweenComponentManager tweenManager_Open;
         [SerializeField] protected TweenComponentManager tweenManager_Close;
         
-        public CustomEvent OnOpen
+        public EventCallback OnOpen
         {
             get
             {
@@ -26,7 +26,7 @@ namespace StardropTools.UI
             }
         }
 
-        public CustomEvent OnClose
+        public EventCallback OnClose
         {
             get
             {
@@ -55,8 +55,8 @@ namespace StardropTools.UI
                 } while (SizeDelta != size);
             }
 
-            OnOpen?.AddListener(OnOpened);
-            OnClose?.AddListener(OnClosed);
+            OnOpen?.Subscribe(OnOpened);
+            OnClose?.Subscribe(OnClosed);
 
             if (closeOnInitialize)
                 Close();

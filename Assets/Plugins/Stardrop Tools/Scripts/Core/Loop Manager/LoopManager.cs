@@ -1,5 +1,4 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace StardropTools
 {
@@ -20,7 +19,7 @@ namespace StardropTools
 
         #region Events
 
-        public static readonly CustomEvent OnFrameworkInitialized = new CustomEvent();
+        public static readonly EventCallback OnFrameworkInitialized = new EventCallback();
 
         #endregion
 

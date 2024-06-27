@@ -8,6 +8,7 @@ namespace StardropTools.CustomCommands
     using System.Reflection;
     using UnityEngine;
     using UnityEditor;
+    using StardropTools;
 
     // % = control
     // # = shift
@@ -460,7 +461,7 @@ namespace StardropTools.CustomCommands
                 foreach (GameObject go in objs)
                 {
                     Undo.RecordObject(go.transform, "Inverse Axis");
-                    go.transform.position = VecUtils.InverseVector3Axis(go.transform.position, 0);
+                    go.transform.position = VectorUtils.InverseVector3Axis(go.transform.position, 0);
                 }
             }
         }
@@ -477,7 +478,7 @@ namespace StardropTools.CustomCommands
                 foreach (GameObject go in objs)
                 {
                     Undo.RecordObject(go.transform, "Inverse Axis");
-                    go.transform.position = VecUtils.InverseVector3Axis(go.transform.position, 1);
+                    go.transform.position = VectorUtils.InverseVector3Axis(go.transform.position, 1);
                 }
             }
         }
@@ -494,7 +495,7 @@ namespace StardropTools.CustomCommands
                 foreach (GameObject go in objs)
                 {
                     Undo.RecordObject(go.transform, "Inverse Axis");
-                    go.transform.position = VecUtils.InverseVector3Axis(go.transform.position, 2);
+                    go.transform.position = VectorUtils.InverseVector3Axis(go.transform.position, 2);
                 }
             }
         }

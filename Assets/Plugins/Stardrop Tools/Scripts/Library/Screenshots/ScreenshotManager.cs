@@ -1,14 +1,15 @@
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace StardropTools
+namespace StardropTools.ScreenRecord
 {
     public class ScreenshotManager : MonoBehaviour
     {
         [Header("List")]
         [SerializeField] List<GameObject> objectsToScreenshot = new List<GameObject>();
-        [SerializeField] string screenshotFolder = "Screenshots";
+        [SerializeField] string screenshotFolder = "Assets/Screenshots";
         [SerializeField] KeyCode screenshotKey = KeyCode.S;
 
         [Header("Selected Camera")]
@@ -59,8 +60,14 @@ namespace StardropTools
             screenshot.ReadPixels(new Rect(0, 0, width, height), 0, 0);
             screenshot.Apply();
 
+            // Ensure the screenshot folder exists
+            if (!Directory.Exists(screenshotFolder))
+            {
+                Directory.CreateDirectory(screenshotFolder);
+            }
+
             // Save the screenshot as a PNG file with transparency
-            string filename = screenshotFolder + "/" + fileName; // Use the provided filename
+            string filename = Path.Combine(screenshotFolder, fileName); // Use the provided filename
             System.IO.File.WriteAllBytes(filename, screenshot.EncodeToPNG());
 
             // Clean up
@@ -79,6 +86,7 @@ namespace StardropTools
 
             Debug.Log("Screenshot saved as " + filename);
         }
+
 
         public static void TryDestroy(Object obj)
         {

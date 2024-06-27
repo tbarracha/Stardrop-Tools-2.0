@@ -33,6 +33,11 @@ namespace StardropTools
                         obj.name = typeof(T).Name;
                         instance = obj.AddComponent<T>();
                     }
+
+                    if (instance != null)
+                    {
+                        DontDestroyOnLoad(instance);
+                    }
                 }
                 return instance;
             }
@@ -45,11 +50,10 @@ namespace StardropTools
                 instance = this as T;
                 DontDestroyOnLoad(gameObject);
             }
-
-            else
-            {
-                Destroy(gameObject);
-            }
+            //else
+            //{
+            //    Destroy(gameObject);
+            //}
         }
         #endregion // singleton
 
@@ -76,31 +80,41 @@ namespace StardropTools
         /// </summary>
         protected virtual void EventSubscription()
         {
-            BaseEventManager.GameStateEvents.OnGameStateChanged.AddListener(GameStateChanged);
+
         }
 
-        public abstract void GameStateChanged(GameState newGameState, GameState previousGameState);
-
         /*
-        public override void GameStateChanged(GameState newGameState, GameState previousGameState)
+        public abstract void GameStateChanged(GameState currentState, GameState prevGameState);
+
+        public override void GameStateChanged(GameState currentState, GameState prevGameState)
         {
-            string stateName = newGameState.StateName;
-
-            switch (stateName)
+            switch (currentState.TryGetStandardGameState())
             {
-                case BaseGameManager.DefaultGameStateNames.Initialization:
+                case StandardGameStates.Initializing:
                     break;
 
-                case BaseGameManager.DefaultGameStateNames.MainMenu:
+                case StandardGameStates.MainMenu:
                     break;
 
-                case BaseGameManager.DefaultGameStateNames.Play:
+                case StandardGameStates.Play:
                     break;
 
-                case BaseGameManager.DefaultGameStateNames.Paused:
+                case StandardGameStates.Paused:
                     break;
 
-                case BaseGameManager.DefaultGameStateNames.PlayEnd:
+                case StandardGameStates.GameOver:
+                    break;
+
+                case StandardGameStates.Loading:
+                    break;
+
+                case StandardGameStates.LevelTransition:
+                    break;
+
+                case StandardGameStates.Settings:
+                    break;
+
+                case StandardGameStates.Exit:
                     break;
             }
         }

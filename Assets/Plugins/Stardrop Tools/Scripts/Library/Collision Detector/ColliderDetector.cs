@@ -1,4 +1,5 @@
 ﻿
+using StardropTools;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -22,11 +23,11 @@ namespace StardropTools
 
         public bool HasContact => hasContact;
 
-        public readonly CustomEvent OnContactStart  = new CustomEvent();
-        public readonly CustomEvent OnContactEnd    = new CustomEvent();
+        public readonly EventCallback OnContactStart  = new EventCallback();
+        public readonly EventCallback OnContactEnd    = new EventCallback();
 
-        public readonly CustomEvent<Collider> OnColliderEnter   = new CustomEvent<Collider>();
-        public readonly CustomEvent<Collider> OnColliderExit    = new CustomEvent<Collider>();
+        public readonly EventCallback<Collider> OnColliderEnter   = new EventCallback<Collider>();
+        public readonly EventCallback<Collider> OnColliderExit    = new EventCallback<Collider>();
 
         protected override void Start()
         {
@@ -34,6 +35,11 @@ namespace StardropTools
 
             if (ignoreSelf)
                 IgnoreSelf();
+        }
+
+        public void SetLayerMask(LayerMask layerMask)
+        {
+            contactLayer = layerMask;
         }
 
         public override void HandleUpdate()

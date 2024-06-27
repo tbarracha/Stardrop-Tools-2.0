@@ -1,283 +1,285 @@
 
 using UnityEngine;
 using UnityEngine.EventSystems;
-using StardropTools;
 
-/// <summary>
-/// Input Class focused on single finger/mouse input. Designed for mobile usage
-/// </summary>
-public class SingleInputManager : Singleton<SingleInputManager>, IUpdateable
+namespace StardropTools
 {
     /// <summary>
-    /// 0-joystick center is finger input point, 1-screen center only applies to Horizontal, 2-screen center only applies to Vertical, 3-screen center is dead center
+    /// Input Class focused on single finger/mouse input. Designed for mobile usage
     /// </summary>
-    public enum InputCenter { dynamicJoystick, screenCenterHorizontal, screenCenterVertical, screenCenterComplete }
-
-    [Header("Legacy Input")]
-    [SerializeField] InputCenter inputCenter;
-    [SerializeField] float horizontal;
-    [SerializeField] float vertical;
-    [Space]
-    [SerializeField] bool hasInput;
-    [SerializeField] bool isOverUI;
-
-    [Header("Debug")]
-    [SerializeField] Vector2 screenSize;
-    [SerializeField] float screenAvg = 0;
-    [SerializeField] float maxScreenDistance = 100f;
-    [SerializeField] float screenPercentTarget = .1f;
-    [SerializeField] bool calculateScreenPercent;
-    [Space]
-    [SerializeField] Vector2 inputStart;
-    [SerializeField] Vector2 inputCurrent;
-    [Space]
-    [SerializeField] float distanceX;
-    [SerializeField] float distanceY;
-    [SerializeField] float distance;
-
-    [Header("Raycast")]
-    [SerializeField] EventSystem eventSystem;
-    [SerializeField] new Camera camera;
-    [SerializeField] LayerMask maskPick;
-    [SerializeField] LayerMask maskGround;
-
-    public Vector3 DirectionXZ { get => new Vector3(horizontal, 0, vertical); }
-
-    
-    private Ray ray;
-    RaycastHit hit;
-    public System.Collections.Generic.List<RaycastResult> raycastList;
-
-
-    #region Parameters
-    public bool HasInput { get => hasInput; }
-    public bool IsOverUI => CheckIfOverUI();
-
-    public float Horizontal { get => horizontal; }
-    public float Vertical { get => vertical; }
-
-    public Vector2 InputStart { get => inputStart; }
-    public Vector2 InputCurrent { get => inputCurrent; }
-
-    public Ray CameraRay { get => ray; }
-    public RaycastHit RaycastHit { get => hit; }
-    public System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult> uiRaycastList { get => raycastList; }
-    #endregion // params
-
-    #region Events
-
-    // ---------- !! ADD EVENTS FOR VALUES: HORIZONTAL, VERTICAL, INPUTSTART, ETC
-    public static readonly CustomEvent OnInputStart = new CustomEvent();
-    public static readonly CustomEvent OnInputEnd = new CustomEvent();
-    public static readonly CustomEvent OnInput = new CustomEvent();
-
-    public static readonly CustomEvent OnInputStartUI = new CustomEvent();
-    public static readonly CustomEvent OnInputEndUI = new CustomEvent();
-
-    public static readonly CustomEvent<float> OnInputHorizontal = new CustomEvent<float>();
-    public static readonly CustomEvent<float> OnInputVertical = new CustomEvent<float>();
-
-    public static readonly CustomEvent<float> OnInputDistance = new CustomEvent<float>();
-    #endregion // events
-
-    protected override void Awake()
+    public class SingleInputManager : Singleton<SingleInputManager>, IUpdateable
     {
-        base.Awake();
+        /// <summary>
+        /// 0-joystick center is finger input point, 1-screen center only applies to Horizontal, 2-screen center only applies to Vertical, 3-screen center is dead center
+        /// </summary>
+        public enum InputCenter { dynamicJoystick, screenCenterHorizontal, screenCenterVertical, screenCenterComplete }
 
-        if (camera == null)
-            camera = Camera.main;
+        [Header("Legacy Input")]
+        [SerializeField] InputCenter inputCenter;
+        [SerializeField] float horizontal;
+        [SerializeField] float vertical;
+        [Space]
+        [SerializeField] bool hasInput;
+        [SerializeField] bool isOverUI;
 
-        screenSize = new Vector2(Screen.width, Screen.height);
-        CalculateScreenPercent();
+        [Header("Debug")]
+        [SerializeField] Vector2 screenSize;
+        [SerializeField] float screenAvg = 0;
+        [SerializeField] float maxScreenDistance = 100f;
+        [SerializeField] float screenPercentTarget = .1f;
+        [SerializeField] bool calculateScreenPercent;
+        [Space]
+        [SerializeField] Vector2 inputStart;
+        [SerializeField] Vector2 inputCurrent;
+        [Space]
+        [SerializeField] float distanceX;
+        [SerializeField] float distanceY;
+        [SerializeField] float distance;
 
-        StartUpdate();
-    }
+        [Header("Raycast")]
+        [SerializeField] EventSystem eventSystem;
+        [SerializeField] new Camera camera;
+        [SerializeField] LayerMask maskPick;
+        [SerializeField] LayerMask maskGround;
 
-    public void SetInputCenter(InputCenter inputCenter)
-    {
-        if (inputCenter == this.inputCenter)
-            return;
+        public Vector3 DirectionXZ { get => new Vector3(horizontal, 0, vertical); }
 
-        this.inputCenter = inputCenter;
-    }
 
-    public void UserInput()
-    {
-        if (camera == null)
-            camera = Camera.main;
+        private Ray ray;
+        RaycastHit hit;
+        public System.Collections.Generic.List<RaycastResult> raycastList;
 
-        if (eventSystem == null)
-            eventSystem = EventSystem.current;
 
-        // Input start
-        if (Input.GetMouseButtonDown(0))
+        #region Parameters
+        public bool HasInput { get => hasInput; }
+        public bool IsOverUI => CheckIfOverUI();
+
+        public float Horizontal { get => horizontal; }
+        public float Vertical { get => vertical; }
+
+        public Vector2 InputStart { get => inputStart; }
+        public Vector2 InputCurrent { get => inputCurrent; }
+
+        public Ray CameraRay { get => ray; }
+        public RaycastHit RaycastHit { get => hit; }
+        public System.Collections.Generic.List<RaycastResult> uiRaycastList { get => raycastList; }
+        #endregion // params
+
+        #region Events
+
+        // ---------- !! ADD EVENTS FOR VALUES: HORIZONTAL, VERTICAL, INPUTSTART, ETC
+        public static readonly EventCallback OnInputStart = new EventCallback();
+        public static readonly EventCallback OnInputEnd = new EventCallback();
+        public static readonly EventCallback OnInput = new EventCallback();
+
+        public static readonly EventCallback OnInputStartUI = new EventCallback();
+        public static readonly EventCallback OnInputEndUI = new EventCallback();
+
+        public static readonly EventCallback<float> OnInputHorizontal = new EventCallback<float>();
+        public static readonly EventCallback<float> OnInputVertical = new EventCallback<float>();
+
+        public static readonly EventCallback<float> OnInputDistance = new EventCallback<float>();
+        #endregion // events
+
+        protected override void Awake()
         {
-            if (hasInput == false)
-                hasInput = true;
+            base.Awake();
 
-            inputStart = Input.mousePosition;
+            if (camera == null)
+                camera = Camera.main;
 
-            if (isOverUI)
-                OnInputStartUI?.Invoke();
-
-            OnInputStart?.Invoke();
-        }
-
-        // continuous input
-        if (Input.GetMouseButton(0))
-        {
-            inputCurrent = Input.mousePosition;
-
-            distanceX = inputCurrent.x - inputStart.x;
-            distanceY = inputCurrent.y - inputStart.y;
-
-            distance = (inputCurrent - inputStart).magnitude;
-
-            OnInputDistance?.Invoke(distance);
-            OnInput?.Invoke();
-        }
-
-        // input end
-        if (Input.GetMouseButtonUp(0))
-        {
-            if (hasInput == true)
-                hasInput = false;
-
-            if (isOverUI)
-                OnInputEndUI?.Invoke();
-
-            OnInputEnd?.Invoke();
-        }
-
-        if (hasInput && calculateScreenPercent)
+            screenSize = new Vector2(Screen.width, Screen.height);
             CalculateScreenPercent();
 
-        InputFilter();
-
-        //Raycast();
-        //RaycastUI();
-    }
-
-    void InputFilter()
-    {
-        if (inputCenter == InputCenter.dynamicJoystick)
-            InputJoystick();
-        else
-            InputScreenCenter();
-    }
-
-    void InputJoystick()
-    {
-        if (inputCenter != InputCenter.dynamicJoystick)
-            return;
-
-        if (hasInput)
-        {
-            horizontal = Mathf.Clamp(distanceX / maxScreenDistance, -1, 1);
-            vertical = Mathf.Clamp(distanceY / maxScreenDistance, -1, 1);
-
-            InvokeFloatEvents();
+            StartUpdate();
         }
 
-        else
+        public void SetInputCenter(InputCenter inputCenter)
         {
-            horizontal = 0;
-            vertical = 0;
-        }
-    }
-     
-    void InputScreenCenter()
-    {
-        if (hasInput)
-        {
-            // Center only for Horizontal
-            if (inputCenter == InputCenter.screenCenterHorizontal)
-            {
-                horizontal  = (inputCurrent.x / Screen.width) * 2 - 1;
-                vertical    = Mathf.Clamp(distanceY / maxScreenDistance, -1, 1);
-            }
+            if (inputCenter == this.inputCenter)
+                return;
 
-            // Center only for Vertical
-            else if (inputCenter == InputCenter.screenCenterVertical)
-            {
-                horizontal  = Mathf.Clamp(distanceX / maxScreenDistance, -1, 1);
-                vertical    = (inputCurrent.y / Screen.height) * 2 - 1;
-            }
-
-            // Dead center
-            else if (inputCenter == InputCenter.screenCenterComplete)
-            {
-                horizontal  = (inputCurrent.x / Screen.width) * 2 - 1;
-                vertical    = (inputCurrent.y / Screen.height) * 2 - 1;
-            }
-
-            InvokeFloatEvents();
+            this.inputCenter = inputCenter;
         }
 
-        else
+        public void UserInput()
         {
-            horizontal  = 0;
-            vertical    = 0;
-        }
-    }
+            if (camera == null)
+                camera = Camera.main;
 
-    void InvokeFloatEvents()
-    {
-        OnInputHorizontal?.Invoke(horizontal);
-        OnInputVertical?.Invoke(vertical);
-    }
+            if (eventSystem == null)
+                eventSystem = EventSystem.current;
 
-    void CalculateScreenPercent()
-    {
-        screenAvg = (screenSize.x + screenSize.y) * .5f;
-        maxScreenDistance = screenAvg * screenPercentTarget;
-    }
-
-
-    void Raycast() => ray = camera.ScreenPointToRay(Input.mousePosition);
-
-    public bool CheckIfOverUI()
-    {
-        isOverUI = eventSystem.IsPointerOverGameObject();
-        return isOverUI;
-    }
-
-    public void RaycastUI()
-    {
-        if (eventSystem == null)
-            eventSystem = EventSystem.current;
-
-        PointerEventData pointerEventData = new PointerEventData(eventSystem);
-        pointerEventData.position = Input.mousePosition;
-
-        raycastList = new System.Collections.Generic.List<RaycastResult>();
-        eventSystem.RaycastAll(pointerEventData, raycastList);
-
-        if (raycastList.Count == 0 && isOverUI == true)
-            isOverUI = false;
-
-        if (raycastList.Count > 0 && isOverUI == false)
-            isOverUI = true;
-    }
-
-    public bool ContainsObject(GameObject objectToCheck)
-    {
-        RaycastUI();
-
-        if (raycastList.Count > 0)
-            for (int i = 0; i < raycastList.Count; i++)
+            // Input start
+            if (Input.GetMouseButtonDown(0))
             {
-                if (raycastList[i].gameObject == objectToCheck)
-                    return true;
+                if (hasInput == false)
+                    hasInput = true;
+
+                inputStart = Input.mousePosition;
+
+                if (isOverUI)
+                    OnInputStartUI?.Invoke();
+
+                OnInputStart?.Invoke();
             }
 
-        return false;
+            // continuous input
+            if (Input.GetMouseButton(0))
+            {
+                inputCurrent = Input.mousePosition;
+
+                distanceX = inputCurrent.x - inputStart.x;
+                distanceY = inputCurrent.y - inputStart.y;
+
+                distance = (inputCurrent - inputStart).magnitude;
+
+                OnInputDistance?.Invoke(distance);
+                OnInput?.Invoke();
+            }
+
+            // input end
+            if (Input.GetMouseButtonUp(0))
+            {
+                if (hasInput == true)
+                    hasInput = false;
+
+                if (isOverUI)
+                    OnInputEndUI?.Invoke();
+
+                OnInputEnd?.Invoke();
+            }
+
+            if (hasInput && calculateScreenPercent)
+                CalculateScreenPercent();
+
+            InputFilter();
+
+            //Raycast();
+            //RaycastUI();
+        }
+
+        void InputFilter()
+        {
+            if (inputCenter == InputCenter.dynamicJoystick)
+                InputJoystick();
+            else
+                InputScreenCenter();
+        }
+
+        void InputJoystick()
+        {
+            if (inputCenter != InputCenter.dynamicJoystick)
+                return;
+
+            if (hasInput)
+            {
+                horizontal = Mathf.Clamp(distanceX / maxScreenDistance, -1, 1);
+                vertical = Mathf.Clamp(distanceY / maxScreenDistance, -1, 1);
+
+                InvokeFloatEvents();
+            }
+
+            else
+            {
+                horizontal = 0;
+                vertical = 0;
+            }
+        }
+
+        void InputScreenCenter()
+        {
+            if (hasInput)
+            {
+                // Center only for Horizontal
+                if (inputCenter == InputCenter.screenCenterHorizontal)
+                {
+                    horizontal = inputCurrent.x / Screen.width * 2 - 1;
+                    vertical = Mathf.Clamp(distanceY / maxScreenDistance, -1, 1);
+                }
+
+                // Center only for Vertical
+                else if (inputCenter == InputCenter.screenCenterVertical)
+                {
+                    horizontal = Mathf.Clamp(distanceX / maxScreenDistance, -1, 1);
+                    vertical = inputCurrent.y / Screen.height * 2 - 1;
+                }
+
+                // Dead center
+                else if (inputCenter == InputCenter.screenCenterComplete)
+                {
+                    horizontal = inputCurrent.x / Screen.width * 2 - 1;
+                    vertical = inputCurrent.y / Screen.height * 2 - 1;
+                }
+
+                InvokeFloatEvents();
+            }
+
+            else
+            {
+                horizontal = 0;
+                vertical = 0;
+            }
+        }
+
+        void InvokeFloatEvents()
+        {
+            OnInputHorizontal?.Invoke(horizontal);
+            OnInputVertical?.Invoke(vertical);
+        }
+
+        void CalculateScreenPercent()
+        {
+            screenAvg = (screenSize.x + screenSize.y) * .5f;
+            maxScreenDistance = screenAvg * screenPercentTarget;
+        }
+
+
+        void Raycast() => ray = camera.ScreenPointToRay(Input.mousePosition);
+
+        public bool CheckIfOverUI()
+        {
+            isOverUI = eventSystem.IsPointerOverGameObject();
+            return isOverUI;
+        }
+
+        public void RaycastUI()
+        {
+            if (eventSystem == null)
+                eventSystem = EventSystem.current;
+
+            PointerEventData pointerEventData = new PointerEventData(eventSystem);
+            pointerEventData.position = Input.mousePosition;
+
+            raycastList = new System.Collections.Generic.List<RaycastResult>();
+            eventSystem.RaycastAll(pointerEventData, raycastList);
+
+            if (raycastList.Count == 0 && isOverUI == true)
+                isOverUI = false;
+
+            if (raycastList.Count > 0 && isOverUI == false)
+                isOverUI = true;
+        }
+
+        public bool ContainsObject(GameObject objectToCheck)
+        {
+            RaycastUI();
+
+            if (raycastList.Count > 0)
+                for (int i = 0; i < raycastList.Count; i++)
+                {
+                    if (raycastList[i].gameObject == objectToCheck)
+                        return true;
+                }
+
+            return false;
+        }
+
+
+        public void StartUpdate() => LoopManager.AddToUpdate(this);
+
+        public void StopUpdate() => LoopManager.RemoveFromUpdate(this);
+
+        public void HandleUpdate() => UserInput();
     }
-
-
-    public void StartUpdate()   => LoopManager.AddToUpdate(this);
-
-    public void StopUpdate()    => LoopManager.RemoveFromUpdate(this);
-
-    public void HandleUpdate()  => UserInput();
 }

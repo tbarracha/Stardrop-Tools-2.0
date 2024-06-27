@@ -22,6 +22,16 @@ namespace StardropTools.Audio
         public float RandomPitch { get => GetRandomPitch(); }
         public AudioClip RandomClip { get => GetRandomClip(); }
 
+        public AudioClip[] GetMainWithRandomClips()
+        {
+            AudioClip[] audioClips = new AudioClip[2];
+
+            audioClips[0] = mainClip;
+            audioClips[1] = GetRandomClip();
+
+            return audioClips;
+        }
+
         public void AddClip(AudioClip clip)
         {
             if (clips == null)

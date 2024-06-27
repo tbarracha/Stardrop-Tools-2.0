@@ -3,51 +3,32 @@ using UnityEngine;
 
 namespace StardropTools.Tween
 {
-    /// <summary>
-    /// 0 = transparent, 1 = opaque
-    /// </summary>
     public class TweenColorOpacity : TweenFloat
     {
-        public Color color;
+        protected Color color;
+        public Color LerpedColor => color;
 
-        public readonly CustomEvent<Color> OnTweenColorOpacity = new CustomEvent<Color>();
-             
+        public TweenColorOpacity(Color color, float startValue, float endValue) : base(startValue, endValue)
+        {
+            this.color = color;
+        }
+
+        public TweenColorOpacity(Color color, float endValue) : base(endValue)
+        {
+            this.color = color;
+        }
+
+        public TweenColorOpacity() { }
+
         protected override void SetEssentials()
         {
-            //tweenID = color.GetHashCode();
-            tweenType = TweenType.ColorOpacity;
-        }
-
-        public TweenColorOpacity(Color color, float start, float end)
-        {
-            this.color = color;
-            this.start = start;
-            this.end = end;
-
-            SetEssentials();
-        }
-
-        public TweenColorOpacity(Color color, float end)
-        {
-            this.color = color;
-            start = color.a;
-            this.end = end;
-
-            SetEssentials();
+            TweenType = TweenType.ColorOpacity;
         }
 
         protected override void TweenUpdate(float percent)
         {
+            color.a = Lerped;
             base.TweenUpdate(percent);
-            color.a = lerped;
-
-            OnTweenColorOpacity?.Invoke(color);
-        }
-
-        protected override void Complete()
-        {
-            base.Complete();
-            OnTweenColorOpacity?.Invoke(color);
         }
     }
 }

@@ -12,11 +12,11 @@ namespace StardropTools.UI
         public bool IsPressed => isPressed;
         public bool IsPointerOverUI => isPointerOnUI;
 
-        public readonly CustomEvent OnPointerDownEvent = new CustomEvent();
-        public readonly CustomEvent OnPointerUpEvent = new CustomEvent();
+        public readonly EventCallback OnPointerDownEvent = new EventCallback();
+        public readonly EventCallback OnPointerUpEvent = new EventCallback();
 
-        public readonly CustomEvent OnPointerEnterEvent = new CustomEvent();
-        public readonly CustomEvent OnPointerExitEvent = new CustomEvent();
+        public readonly EventCallback OnPointerEnterEvent = new EventCallback();
+        public readonly EventCallback OnPointerExitEvent = new EventCallback();
 
         public void OnPointerDown(PointerEventData eventData)
         {

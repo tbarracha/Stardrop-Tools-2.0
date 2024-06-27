@@ -13,13 +13,13 @@ namespace StardropTools.Audio
         public AudioClip clip       { get => audioSource.clip; set => SetAudioClip(value); }
         public float volume         { get => audioSource.volume; set => SetVolume(value); }
 
-        public readonly CustomEvent OnPlay                  = new CustomEvent();
-        public readonly CustomEvent OnPause                 = new CustomEvent();
-        public readonly CustomEvent OnUnPause               = new CustomEvent();
-        public readonly CustomEvent OnStop                  = new CustomEvent();
-        public readonly CustomEvent OnAudioClipChanged      = new CustomEvent();
+        public readonly EventCallback OnPlay                  = new EventCallback();
+        public readonly EventCallback OnPause                 = new EventCallback();
+        public readonly EventCallback OnUnPause               = new EventCallback();
+        public readonly EventCallback OnStop                  = new EventCallback();
+        public readonly EventCallback OnAudioClipChanged      = new EventCallback();
         
-        public readonly CustomEvent<float> OnVolumeChanged  = new CustomEvent<float>();
+        public readonly EventCallback<float> OnVolumeChanged  = new EventCallback<float>();
 
 
         public void SetAudioClip(AudioClip clip, bool invokeEvents = true)

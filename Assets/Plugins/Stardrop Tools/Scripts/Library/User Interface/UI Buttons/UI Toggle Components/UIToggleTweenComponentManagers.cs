@@ -1,5 +1,4 @@
-﻿
-using StardropTools.Tween;
+﻿using StardropTools.Tween;
 using UnityEngine;
 
 namespace StardropTools.UI

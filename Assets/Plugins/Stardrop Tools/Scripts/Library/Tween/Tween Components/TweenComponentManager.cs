@@ -1,10 +1,9 @@
-﻿
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 
 namespace StardropTools.Tween
 {
-    public class TweenComponentManager : MonoBehaviour
+    public class TweenComponentManager : MonoBehaviour, IPlayable, IStoppable
     {
         [SerializeField] TweenComponent[] tweens;
         [SerializeField] TweenComponentManager[] nextManagers;
@@ -13,12 +12,12 @@ namespace StardropTools.Tween
         [Header("Randomize")]
         [SerializeField] TweenComponentDurationAndDelayRandomizer[] randomizers;
 
-        TweenComponent longestTween;
+        ITweenable longestTween;
         Timer timeableAction;
 
         System.Action OnPlayCompleteCallback;
 
-        public readonly CustomEvent OnTweenComplete = new CustomEvent();
+        public readonly EventCallback OnTweenComplete = new EventCallback();
 
         private void Start()
         {
@@ -32,6 +31,10 @@ namespace StardropTools.Tween
             var childTweens = Utilities.GetComponentListInChildren<TweenComponent>(transform);
 
             tweens = selfTweens.Concat(childTweens).ToArray();
+            foreach (var tween in tweens)
+            {
+                tween.GenerateRandomTweenIDMultiplier();
+            }
         }
         
         [NaughtyAttributes.Button("Start Tweens")]
@@ -55,6 +58,22 @@ namespace StardropTools.Tween
         {
             Play();
             OnPlayCompleteCallback = onPlayFinishedCallback;
+        }
+
+        public void PlayAndStop(params TweenComponentManager[] tweenComponentManagersToStop)
+        {
+            foreach (var manager in tweenComponentManagersToStop)
+                manager.Stop();
+
+            Play();
+        }
+
+        public void PlayAndStop(System.Action onPlayFinishedCallback, params TweenComponentManager[] tweenComponentManagersToStop)
+        {
+            foreach (var manager in tweenComponentManagersToStop)
+                manager.Stop();
+
+            Play(onPlayFinishedCallback);
         }
 
         [NaughtyAttributes.Button("Stop Tweens")]
@@ -118,21 +137,21 @@ namespace StardropTools.Tween
 
         public float FindLongestTween()
         {
-            if (tweens.Exists() == false)
+            if (!tweens.Exists())
                 return 0;
 
-            longestTween = null;
+            longestTween = tweens.Exists() ? tweens[0] : null;
 
             foreach (var tween in tweens)
             {
                 if (longestTween == null)
                     longestTween = tween;
 
-                if (longestTween.duration < tween.duration)
+                if (tween.Duration > longestTween.Duration)
                     longestTween = tween;
             }
 
-            return longestTween.duration;
+            return longestTween != null ? longestTween.Duration : 0;
         }
 
         float GetTimerDuration()
@@ -144,7 +163,7 @@ namespace StardropTools.Tween
                 if (longestTween == null)
                     FindLongestTween();
 
-                return longestTween.duration;
+                return longestTween.Duration;
             }
         }
 
@@ -181,13 +200,13 @@ namespace StardropTools.Tween
         public void AppyRandomDelay()
         {
             for(int i = 0;i < components.Length;i++)
-                components[i].delay = RandomDelay;
+                components[i].Delay = RandomDelay;
         }
 
         public void ApplyRandomDuration()
         {
             for (int i = 0; i < components.Length; i++)
-                components[i].duration = RandomDuration;
+                components[i].Duration = RandomDuration;
         }
     }
 }

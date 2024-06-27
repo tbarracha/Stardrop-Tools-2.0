@@ -2,11 +2,10 @@
 
 namespace StardropTools
 {
-    public class BillboardComponent : BaseComponent
+    public class BillboardComponent : BaseTransform
     {
         public Transform camTransform;
         public bool updateOnInitialization = true;
-        protected Transform thisTransform;
 
         protected Quaternion originalRotation;
 
@@ -14,7 +13,6 @@ namespace StardropTools
         {
             base.Initialize();
 
-            GetThisTransform();
             if (updateOnInitialization)
                 StartUpdate();
         }
@@ -22,14 +20,13 @@ namespace StardropTools
         public override void StartUpdate()
         {
             base.StartUpdate();
-            GetThisTransform();
             IsCamNull();
         }
 
         public override void HandleUpdate()
         {
             IsCamNull();
-            transform.rotation = camTransform.rotation * originalRotation;
+            Rotation = camTransform.rotation * originalRotation;
         }
 
         void IsCamNull()
@@ -37,14 +34,8 @@ namespace StardropTools
             if (camTransform == null)
             {
                 camTransform = Camera.main.transform;
-                originalRotation = transform.rotation;
+                originalRotation = Rotation;
             }
-        }
-
-        protected void GetThisTransform()
-        {
-            if (thisTransform == null)
-                thisTransform = transform;
         }
     }
 }

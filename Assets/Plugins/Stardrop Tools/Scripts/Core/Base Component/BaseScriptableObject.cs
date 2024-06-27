@@ -1,10 +1,9 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace StardropTools
 {
     //[CreateAssetMenu(fileName = "Base Scriptable Object", menuName = "Stardrop / Scriptables / New Base Scriptable List")]
-    public abstract class BaseScriptableObject : ScriptableObject, IInitialize, ILateInitialize
+    public abstract class BaseScriptableObject : ScriptableObject, IInitializeable, ILateInitializeable
     {
         public bool IsInitialized { get; protected set; } = false;
         public bool IsLateInitialized { get; protected set; } = false;

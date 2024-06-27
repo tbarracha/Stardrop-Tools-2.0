@@ -6,11 +6,11 @@ using UnityEngine;
 
 namespace StardropTools
 {
-    public abstract class VisualEffect : BaseTransform, IPlayableWithAction<VisualEffect>, IPoolable
+    public abstract class VisualEffect : BaseTransform, IPlayableCallback<VisualEffect>, IPoolableObject
     {
         [Header("Actions")]
-        [SerializeField] VisualEffectAction onPlayCompleteAction;
-        [SerializeField] VisualEffectAction onStopCompleteAction;
+        [SerializeField] VisualEffectPlayAction onPlayCompleteAction;
+        [SerializeField] VisualEffectPlayAction onStopCompleteAction;
         [Space]
         [SerializeField] float lifetime;
 
@@ -24,8 +24,8 @@ namespace StardropTools
 
         protected Timer lifetimeTimer;
 
-        public VisualEffectAction PlayAction { get => onPlayCompleteAction; set => onPlayCompleteAction = value; }
-        public VisualEffectAction StopAction { get => onStopCompleteAction; set => onStopCompleteAction = value; }
+        public VisualEffectPlayAction PlayAction { get => onPlayCompleteAction; set => onPlayCompleteAction = value; }
+        public VisualEffectPlayAction StopAction { get => onStopCompleteAction; set => onStopCompleteAction = value; }
         
         public float LifeTime { get => lifetime; set => lifetime = value; }
 
@@ -36,6 +36,7 @@ namespace StardropTools
             lifetimeTimer?.Stop();
         }
 
+        [NaughtyAttributes.Button("Play")]
         public VisualEffect Play()
         {
             OnPlay();
@@ -60,7 +61,7 @@ namespace StardropTools
             return this;
         }
 
-        public VisualEffect Play(VisualEffectAction visualEffectAction)
+        public VisualEffect Play(VisualEffectPlayAction visualEffectAction)
         {
             OnPlay();
 
@@ -76,7 +77,7 @@ namespace StardropTools
             return this;
         }
 
-        public VisualEffect Play(VisualEffectAction visualEffectAction, Action onPlayCallback)
+        public VisualEffect Play(VisualEffectPlayAction visualEffectAction, Action onPlayCallback)
         {
             this.onPlayCallback = onPlayCallback;
             Play(visualEffectAction);
@@ -90,6 +91,7 @@ namespace StardropTools
             lifetimeTimer?.Stop();
         }
 
+        [NaughtyAttributes.Button("Stop")]
         public void Stop()
         {
             OnStop();
@@ -110,7 +112,7 @@ namespace StardropTools
             Stop();
         }
 
-        public void Stop(VisualEffectAction visualEffectAction)
+        public void Stop(VisualEffectPlayAction visualEffectAction)
         {
             OnStop();
 
@@ -124,7 +126,7 @@ namespace StardropTools
             }
         }
 
-        public void Stop(VisualEffectAction visualEffectAction, Action onStopCallback)
+        public void Stop(VisualEffectPlayAction visualEffectAction, Action onStopCallback)
         {
             this.onStopCallback = onStopCallback;
             Stop(visualEffectAction);
@@ -145,22 +147,22 @@ namespace StardropTools
 
         protected void PerformPlayAction() => PerformPlayAction(onPlayCompleteAction);
 
-        protected virtual void PerformPlayAction(VisualEffectAction action)
+        protected virtual void PerformPlayAction(VisualEffectPlayAction action)
         {
             onPlayCallback?.Invoke();
             onPlayCallback = null;
 
             switch (action)
             {
-                case VisualEffectAction.Nothing:
+                case VisualEffectPlayAction.Nothing:
                     // Do nothing
                     break;
 
-                case VisualEffectAction.Deactivate:
+                case VisualEffectPlayAction.Deactivate:
                     SetActive(false);
                     break;
 
-                case VisualEffectAction.Despawn:
+                case VisualEffectPlayAction.Despawn:
                     Despawn();
                     break;
 
@@ -171,22 +173,22 @@ namespace StardropTools
         }
 
         protected void PerformStopAction() => PerformStopAction(onStopCompleteAction);
-        protected virtual void PerformStopAction(VisualEffectAction action)
+        protected virtual void PerformStopAction(VisualEffectPlayAction action)
         {
             onStopCallback?.Invoke();
             onStopCallback = null;
 
             switch (action)
             {
-                case VisualEffectAction.Nothing:
+                case VisualEffectPlayAction.Nothing:
                     // Do nothing
                     break;
 
-                case VisualEffectAction.Deactivate:
+                case VisualEffectPlayAction.Deactivate:
                     SetActive(false);
                     break;
 
-                case VisualEffectAction.Despawn:
+                case VisualEffectPlayAction.Despawn:
                     Despawn();
                     break;
 
@@ -199,14 +201,14 @@ namespace StardropTools
 
 
         #region Poolable
-        public PoolItem PoolItem { get; protected set; }
+        public PoolInfo PoolInfo { get; protected set; }
 
-        public void SetPoolItem(PoolItem poolItem) => this.PoolItem = poolItem;
+        public void SetPoolInfo(PoolInfo poolItem) => this.PoolInfo = poolItem;
 
         public void Despawn()
         {
-            if (PoolItem != null)
-                PoolItem.Despawn();
+            if (PoolInfo != null)
+                PoolInfo.Despawn();
             else
                 Destroy(thisObject);
         }

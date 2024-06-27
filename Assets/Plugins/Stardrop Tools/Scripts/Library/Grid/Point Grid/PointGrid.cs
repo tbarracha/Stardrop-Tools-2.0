@@ -1,5 +1,5 @@
-
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace StardropTools.Grid
@@ -56,6 +56,77 @@ namespace StardropTools.Grid
 
             return positions;
         }
+
+        public List<Vector3> GetRandomPoints(int amount, Vector3 targetPoint, float minDistanceFromTarget)
+        {
+            var randomPoints = new List<Vector3>();
+
+            while (randomPoints.Count < amount)
+            {
+                var randomPoint = GetRandomPoint();
+
+                // Check if the random point is far enough from the targetPoint and not in the list
+                if (Vector3.Distance(randomPoint, targetPoint) >= minDistanceFromTarget &&
+                    !randomPoints.Any(existingPoint => Vector3.Distance(randomPoint, existingPoint) < minDistanceFromTarget))
+                {
+                    randomPoints.Add(randomPoint);
+                }
+            }
+
+            return randomPoints;
+        }
+
+
+        public Vector3 GetRandomPointAtDistance(Vector3 referencePoint, float desiredDistance, int maxTries = 10)
+        {
+            if (gridPoints.Count == 0)
+            {
+                GenerateGrid();
+            }
+
+            Vector3 randomPoint = referencePoint;
+
+            for (int i = 0; i < maxTries; i++)
+            {
+                randomPoint = GetRandomPoint();
+
+                if (Vector3.Distance(randomPoint, referencePoint) >= desiredDistance)
+                {
+                    return randomPoint;
+                }
+            }
+
+            Debug.LogWarning("No available grid point found within the radius and try limit.");
+            return randomPoint;
+        }
+
+
+        public Vector3 GetClosestPoint(Vector3 target)
+        {
+            if (gridPoints.Count == 0)
+            {
+                Debug.LogError("No grid points available.");
+                return Vector3.zero; // Return a default value or handle the error as needed.
+            }
+
+            Vector3 closestPoint = gridPoints[0]; // Initialize with the first point in the grid.
+            float closestDistance = Vector3.Distance(target, closestPoint);
+
+            foreach (var point in gridPoints)
+            {
+                float distance = Vector3.Distance(target, point);
+
+                if (distance < closestDistance)
+                {
+                    closestPoint = point;
+                    closestDistance = distance;
+                }
+            }
+
+            return closestPoint;
+        }
+
+
 
 
         public Vector3 GetRandomCorner()

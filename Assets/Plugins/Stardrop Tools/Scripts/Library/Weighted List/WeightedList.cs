@@ -1,5 +1,4 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace StardropTools
 {
@@ -28,7 +27,7 @@ namespace StardropTools
         public WeightedList(List<WeightedItem<T>> itemList)
             => list = itemList;
 
-        public WeightedList(WeightedItem<T>[] itemArray)
+        public WeightedList(params WeightedItem<T>[] itemArray)
             => list = itemArray.ToList();
 
         public WeightedList(T[] items)

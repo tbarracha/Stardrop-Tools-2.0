@@ -24,11 +24,11 @@ namespace StardropTools.UI
                 if (tween != null)
                     tween.Stop();
 
-                tween = new TweenTextMeshColor(textMesh, colors[index])
-                    .SetEaseType(easeType)
-                    .SetDuration(duration)
-                    .SetID(textMesh.GetHashCode())
-                    .Play();
+                tween = new TweenTextMeshUGUIColor(colors[index], textMesh);
+                tween.EaseType = easeType;
+                tween.Duration = duration;
+                tween.SetID(textMesh.GetHashCode());
+                tween.Play();
             }
 
             else

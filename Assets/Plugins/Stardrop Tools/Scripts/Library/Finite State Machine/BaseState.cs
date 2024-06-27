@@ -16,7 +16,7 @@ namespace StardropTools.FiniteStateMachine
         [SerializeField] protected FiniteStateMachine stateMachine;
 
         public FiniteStateMachine StateMachine => stateMachine;
-        public int StateID => stateID;
+        public int StateId => stateID;
         public string StateName => stateName;
         public float TimeInState => timeInState;
 
@@ -25,15 +25,15 @@ namespace StardropTools.FiniteStateMachine
         public int GetStateID() => stateID;
 
 
-        public readonly CustomEvent<BaseState> OnStateEnter = new CustomEvent<BaseState>();
-        public readonly CustomEvent<BaseState> OnStateExit = new CustomEvent<BaseState>();
-        public readonly CustomEvent<BaseState> OnStateUpdate = new CustomEvent<BaseState>();
-        public readonly CustomEvent<BaseState> OnStateInput = new CustomEvent<BaseState>();
+        public readonly EventCallback<BaseState> OnStateEnter = new EventCallback<BaseState>();
+        public readonly EventCallback<BaseState> OnStateExit = new EventCallback<BaseState>();
+        public readonly EventCallback<BaseState> OnStateUpdate = new EventCallback<BaseState>();
+        public readonly EventCallback<BaseState> OnStateInput = new EventCallback<BaseState>();
 
-        public readonly CustomEvent OnEnter = new CustomEvent();
-        public readonly CustomEvent OnExit = new CustomEvent();
-        public readonly CustomEvent OnUpdate = new CustomEvent();
-        public readonly CustomEvent OnInput = new CustomEvent();
+        public readonly EventCallback OnEnter = new EventCallback();
+        public readonly EventCallback OnExit = new EventCallback();
+        public readonly EventCallback OnUpdate = new EventCallback();
+        public readonly EventCallback OnInput = new EventCallback();
 
 
         #region Constructor
@@ -51,6 +51,8 @@ namespace StardropTools.FiniteStateMachine
 
 
         #region Setters
+        public void SetID(int id) => stateID = id;
+
         public BaseState SetStateID(int stateID)
         {
             this.stateID = stateID;
@@ -159,7 +161,5 @@ namespace StardropTools.FiniteStateMachine
 
         protected virtual void ChangeState(int nextStateID)
             => stateMachine.ChangeState(nextStateID);
-
-        public void SetID(int id) => stateID = id;
     }
 }

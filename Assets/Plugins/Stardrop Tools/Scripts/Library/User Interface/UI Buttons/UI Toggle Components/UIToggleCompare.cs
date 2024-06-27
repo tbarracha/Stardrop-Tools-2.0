@@ -11,7 +11,7 @@ namespace StardropTools.UI
         public override void Initialize()
         {
             base.Initialize();
-            targetToggleButton.OnToggle.AddListener(SetToggle);
+            targetToggleButton.OnToggle.Subscribe(SetToggle);
         }
 
 

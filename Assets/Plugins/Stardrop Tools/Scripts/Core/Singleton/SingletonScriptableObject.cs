@@ -2,7 +2,7 @@
 
 namespace StardropTools
 {
-    public abstract class SingletonScriptableObject<T> : ScriptableObject where T : SingletonScriptableObject<T>
+    public abstract class SingletonScriptableObject<T> : BaseScriptableObject where T : SingletonScriptableObject<T>
     {
         [SerializeField]
         private string searchPath = "Scriptable Singletons";

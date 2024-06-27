@@ -11,8 +11,8 @@ namespace StardropTools.UI
         [SerializeField] protected bool validateValueChange     = true;
         [SerializeField] protected bool validateWholeNumbers    = false;
         [SerializeField] protected UnityEngine.UI.Slider        slider;
-        [SerializeField] protected TweenImageColorComponent[]   tweenColorsEnabled;
-        [SerializeField] protected TweenImageColorComponent[]   tweenColorsDisabled;
+        //[SerializeField] protected TweenImageColorComponent[]   tweenColorsEnabled;
+        //[SerializeField] protected TweenImageColorComponent[]   tweenColorsDisabled;
         [SerializeField] protected TMPro.TextMeshProUGUI        textMesh;
 
         protected TweenFloat tweenSliderValue;
@@ -25,9 +25,9 @@ namespace StardropTools.UI
         public bool ValidateSliderChange        => validateValueChange;
         public bool ValidateWholeNumbersChange  => validateWholeNumbers;
 
-        public readonly CustomEvent         OnValueChangedDry       = new CustomEvent();
-        public readonly CustomEvent<float>  OnValueChanged          = new CustomEvent<float>();
-        public readonly CustomEvent<int>    OnWholeValueChanged     = new CustomEvent<int>();
+        public readonly EventCallback         OnValueChangedDry       = new EventCallback();
+        public readonly EventCallback<float>  OnValueChanged          = new EventCallback<float>();
+        public readonly EventCallback<int>    OnWholeValueChanged     = new EventCallback<int>();
 
         public override void Initialize()
         {
@@ -71,19 +71,19 @@ namespace StardropTools.UI
         {
             if (IsInteractive == value)
                 return;
-
+            /*
             if (value == false)
             {
-                TweenManager.StopTweenComponents(tweenColorsEnabled);
-                TweenManager.PlayTweenComponents(tweenColorsDisabled);
+                TweenManager.StopTweenables(tweenColorsEnabled);
+                TweenManager.PlayTweenables(tweenColorsDisabled);
             }
 
             else
             {
-                TweenManager.StopTweenComponents(tweenColorsDisabled);
-                TweenManager.PlayTweenComponents(tweenColorsEnabled);
+                TweenManager.StopTweenables(tweenColorsDisabled);
+                TweenManager.PlayTweenables(tweenColorsEnabled);
             }
-
+            */
             slider.interactable = value;
         }
 
@@ -167,12 +167,12 @@ namespace StardropTools.UI
             StopTweenSliderValue();
 
             tweenSliderValue = new TweenFloat();
-            tweenSliderValue.SetStartEnd(fromValue, toValue);
+            tweenSliderValue.SetStartEndValue(fromValue, toValue);
             tweenSliderValue.SetDuration(duration);
             tweenSliderValue.SetEaseType(easeType);
             tweenSliderValue.Play();
 
-            tweenSliderValue.OnTweenFloat.AddListener(SetValue);
+            tweenSliderValue.OnTweenValue.Subscribe(SetValue);
             return tweenSliderValue;
         }
 
@@ -187,12 +187,12 @@ namespace StardropTools.UI
             StopTweenSliderValue();
 
             tweenSliderValue = new TweenFloat();
-            tweenSliderValue.SetStartEnd(Value, value);
+            tweenSliderValue.SetStartEndValue(Value, value);
             tweenSliderValue.SetDuration(duration);
             tweenSliderValue.SetEaseType(easeType);
             tweenSliderValue.Play();
 
-            tweenSliderValue.OnTweenFloat.AddListener(SetValue);
+            tweenSliderValue.OnTweenValue.Subscribe(SetValue);
             return tweenSliderValue;
         }
 

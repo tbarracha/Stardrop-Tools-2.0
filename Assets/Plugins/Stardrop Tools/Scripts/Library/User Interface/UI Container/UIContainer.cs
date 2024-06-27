@@ -16,6 +16,8 @@ namespace StardropTools.UI
         [SerializeField] protected Button[] closeButtons;
 
         public bool IsOpen => isOpen;
+        public bool ValidateIfOpen { get => validateIfOpen; set => validateIfOpen = value; }
+        public bool DisableOnClose { get => disableOnClose; set => disableOnClose = value; }
 
         public override void Initialize()
         {
@@ -24,7 +26,7 @@ namespace StardropTools.UI
             if (toggleOpenClose != null)
             {
                 toggleOpenClose.Initialize();
-                toggleOpenClose.OnToggle.AddListener(ToggledOpenClose);
+                toggleOpenClose.OnToggle.Subscribe(ToggledOpenClose);
             }
 
             for (int i = 0; i < openButtons.Length; i++)
@@ -36,7 +38,15 @@ namespace StardropTools.UI
 
         protected virtual void ToggledOpenClose(bool value)
         {
-            if (value == true)
+            if (value)
+                Open();
+            else
+                Close();
+        }
+
+        public void SetOpen(bool isOpen)
+        {
+            if (isOpen)
                 Open();
             else
                 Close();
@@ -54,7 +64,7 @@ namespace StardropTools.UI
 
         protected void DefaulOpen()
         {
-            if (validateIfOpen == true && isOpen == true)
+            if (validateIfOpen && isOpen)
                 return;
 
             isOpen = true;
@@ -65,7 +75,7 @@ namespace StardropTools.UI
 
         protected void DefaultClose()
         {
-            if (validateIfOpen == true && isOpen == false)
+            if (validateIfOpen && !isOpen)
                 return;
 
             isOpen = false;

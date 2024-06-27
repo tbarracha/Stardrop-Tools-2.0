@@ -1,13 +1,13 @@
-﻿
+﻿using StardropTools.GameStateManagement;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace StardropTools.Tutorial
 {
-    public class TutorialManager : BaseManager<TutorialManager>
+    public class TutorialManager : BaseGameManager<TutorialManager>
     {
-        public static readonly CustomEvent OnTutorialComplete = new CustomEvent();
-        public static readonly CustomEvent<int> OnTutorialStepComplete = new CustomEvent<int>();
+        public static readonly EventCallback OnTutorialComplete = new EventCallback();
+        public static readonly EventCallback<int> OnTutorialStepComplete = new EventCallback<int>();
 
         [Header("Tutorial Steps")]
         [SerializeField] TutorialStep currentStep;
@@ -23,7 +23,7 @@ namespace StardropTools.Tutorial
         {
             base.EventSubscription();
 
-            OnTutorialStepComplete.AddListener(TutorialStepCompleted);
+            OnTutorialStepComplete.Subscribe(TutorialStepCompleted);
         }
 
         public override void GameStateChanged(GameState newGameState, GameState previousGameState) { }
@@ -93,8 +93,8 @@ namespace StardropTools.Tutorial
         {
             base.OnDestroy();
 
-            OnTutorialComplete.ClearAllListeners();
-            OnTutorialStepComplete.ClearAllListeners();
+            OnTutorialComplete.ClearAllSubscriptions();
+            OnTutorialStepComplete.ClearAllSubscriptions();
         }
 
         [NaughtyAttributes.Button("Get Steps")]

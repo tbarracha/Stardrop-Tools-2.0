@@ -3,90 +3,129 @@ using UnityEngine;
 
 namespace StardropTools.Tween
 {
-    public abstract class TweenComponent : MonoBehaviour
+    public abstract class TweenComponent : MonoBehaviour, ITweenable
     {
-        [Header("Tweens To Sequence")]
-        [SerializeField] protected TweenComponent[] tweensToPlayOnComplete;
-        [SerializeField] protected TweenComponent[] tweensToPlayOnDelayCompleted;
-
         [Header("Tween Properties")]
-        public EaseType easeType;
-        public LoopType loopType;
-        [NaughtyAttributes.ShowIf("showCurve")]
-        public AnimationCurve curve; // only show this if easeType is set to AnimationCurve
-        [NaughtyAttributes.ShowIf("showLoopCount")]
-        public int loopCount;
-        public float delay;
-        public float duration;
-        public bool hasStart;
+        [SerializeField]
+        protected int tweenIDMultiplier;
+        [SerializeField]
+        protected EaseType easeType;
+        [SerializeField]
+        protected LoopType loopType;
+        [SerializeField, NaughtyAttributes.ShowIf("showCurve")]
+        protected AnimationCurve easeCurve;
+        [SerializeField]
+        protected float duration;
+        [SerializeField]
+        protected float delay;
+        [SerializeField, NaughtyAttributes.ShowIf("showLoopCount")]
+        protected int loopCount;
+        [SerializeField]
+        protected bool ignoreTimeScale;
 
-        protected Tween tween;
-        protected System.Action OnPlayFinishedCallback;
+        [SerializeField]
+        protected ITween tween;
 
-#if UNITY_EDITOR
-        protected bool showCurve, showLoopCount;
-#endif
+        public int TweenID { get => tween != null ? tween.TweenID : -1; set => tween.TweenID = value; }
 
-        public CustomEvent OnDelayCompleted => tween.OnDelayCompleted;
-        public CustomEvent OnTweenCompleted => tween.OnTweenCompleted;
-        public CustomEvent OnTweenPaused    => tween.OnTweenPaused;
-        public CustomEvent OnTweenCanceled  => tween.OnTweenCanceled;
+        public bool showCurve {  get; protected set; }
+        public bool showLoopCount { get; protected set; }
 
-
-        public abstract Tween Play();
-        public Tween Play(System.Action onPlayFinishedCallback)
+        public EaseType EaseType
         {
-            OnPlayFinishedCallback = onPlayFinishedCallback;
-            Play();
+            get => easeType;
+            set => easeType = value;
+        }
 
+        public LoopType LoopType
+        {
+            get => loopType;
+            set => loopType = value;
+        }
+
+        public AnimationCurve EaseCurve
+        {
+            get => easeCurve;
+            set => easeCurve = value;
+        }
+
+        public float Duration
+        {
+            get => duration;
+            set => duration = value;
+        }
+
+        public float Delay
+        {
+            get => delay;
+            set => delay = value;
+        }
+
+        public float TotalDuration => duration + delay;
+
+        public int LoopCount
+        {
+            get => loopCount;
+            set => loopCount = value;
+        }
+
+        public bool IgnoreTimeScale
+        {
+            get => ignoreTimeScale;
+            set => ignoreTimeScale = value;
+        }
+
+        public float Percent => tween != null ? tween.Percent : 0;
+
+
+        public Tween GetTween() => tween.GetTween();
+
+        public void GenerateRandomTweenIDMultiplier()
+        {
+            tweenIDMultiplier = (int)Random.Range(int.MinValue * .5f, int.MaxValue * .5f);
+        }
+
+        public virtual ITween Play(System.Action onPlayCallback)
+        {
+            Stop();
+            CreateTween();
+            tween.Play(onPlayCallback);
+            return tween;
+        }
+
+        public virtual ITween Play()
+        {
+            Stop();
+            CreateTween();
+            tween.Play();
             return tween;
         }
 
         public void Stop()
         {
-            if (tween != null)
-                tween.Stop();
+            tween?.Stop();
         }
 
         public void Pause()
         {
-            if (tween != null)
-                tween.Pause();
+            tween?.Pause();
         }
 
         protected virtual void SetTweenEssentials()
         {
-            tween.SetID(this);
+            tween.EaseType = EaseType;
+            tween.LoopType = LoopType;
+            tween.Duration = Duration;
+            tween.Delay = Delay;
 
-            tween.SetEaseType(easeType)
-                .SetLoopType(loopType)
-                .SetLoopCount(loopCount)
-                .SetDurationAndDelay(duration, delay);
+            if (EaseType == EaseType.AnimationCurve)
+                tween.EaseCurve = EaseCurve;
 
-            if (easeType == EaseType.AnimationCurve)
-                tween.SetAnimationCurve(curve);
-
-            tween.OnTweenCompleted.AddListener(PlayTweensOnComplete);
-            tween.OnDelayCompleted.AddListener(PlayTweensOnDelayComplete);
+            if (LoopType != LoopType.None && loopCount > 0)
+                tween.LoopCount = LoopCount;
         }
 
-        protected void PlayTweensOnComplete()
-        {
-            OnPlayFinishedCallback?.Invoke();
-            OnPlayFinishedCallback = null;
-
-            if (tweensToPlayOnComplete.Exists())
-                for (int i = 0; i < tweensToPlayOnComplete.Length; i++)
-                    tweensToPlayOnComplete[i].Play();
-        }
-
-        protected void PlayTweensOnDelayComplete()
-        {
-            if (tweensToPlayOnDelayCompleted.Exists())
-                for (int i = 0; i < tweensToPlayOnDelayCompleted.Length; i++)
-                    tweensToPlayOnDelayCompleted[i].Play();
-        }
-
+        protected abstract void CreateTween();
 
 
 #if UNITY_EDITOR
@@ -99,8 +138,8 @@ namespace StardropTools.Tween
 
         protected virtual void OnValidate()
         {
-            showCurve       = easeType == EaseType.AnimationCurve ? true : false;
-            showLoopCount   = loopType != LoopType.None;
+            showCurve       = EaseType == EaseType.AnimationCurve;
+            showLoopCount   = LoopType != LoopType.None;
         }
 #endif
     }

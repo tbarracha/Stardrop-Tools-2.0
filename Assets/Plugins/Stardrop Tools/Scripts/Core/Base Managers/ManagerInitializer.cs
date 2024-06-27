@@ -1,5 +1,4 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace StardropTools
 {
@@ -30,8 +29,16 @@ namespace StardropTools
 
             Utilities.InitializeManagers(managers);
             Utilities.LateInitializeManagers(managers);
+            OnManagersInitialized();
+        }
+
+
+        protected virtual void OnManagersInitialized()
+        {
+            Debug.Log("Managers Initialized!");
         }
         
+
         [NaughtyAttributes.Button("Make this as Parent")]
         protected void MakeThisObjectParent()
         {

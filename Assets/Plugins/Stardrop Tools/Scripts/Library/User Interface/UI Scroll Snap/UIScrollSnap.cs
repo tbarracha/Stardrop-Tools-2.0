@@ -1,5 +1,3 @@
-
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -62,13 +60,13 @@ namespace StardropTools.UI
         public int LastIndex => elements.Count - 1;
 
 
-        public readonly CustomEvent SwipeToNextPriority = new CustomEvent();
+        public readonly EventCallback SwipeToNextPriority = new EventCallback();
 
-        public readonly CustomEvent OnMoveStart         = new CustomEvent();
-        public readonly CustomEvent OnMoving            = new CustomEvent();
-        public readonly CustomEvent OnMoveComplete      = new CustomEvent();
+        public readonly EventCallback OnMoveStart         = new EventCallback();
+        public readonly EventCallback OnMoving            = new EventCallback();
+        public readonly EventCallback OnMoveComplete      = new EventCallback();
 
-        public readonly CustomEvent<int> OnIndexChanged = new CustomEvent<int>();
+        public readonly EventCallback<int> OnIndexChanged = new EventCallback<int>();
 
 
         protected override void Start()
@@ -93,7 +91,7 @@ namespace StardropTools.UI
                 {
                     buttons[i].ButtonID = i;
                     buttons[i].Initialize();
-                    buttons[i].OnClickID.AddListener(MoveToIndex);
+                    buttons[i].OnClickID.Subscribe(MoveToIndex);
                     buttons[i].SetScrollSnap(this);
                     buttons[i].Toggle(false);
                 }
@@ -103,7 +101,7 @@ namespace StardropTools.UI
 
             MoveToIndex(startIndex, true);
 
-            SwipeToNextPriority.AddListener(() => UIScrollSnapManager.Instance.MoveNext(this, direction));
+            SwipeToNextPriority.Subscribe(() => UIScrollSnapManager.Instance.MoveNext(this, direction));
         }
 
         // Add to manager & let manager decide
@@ -124,7 +122,7 @@ namespace StardropTools.UI
                 Initialize();
 
             if (isButtonOnly == false)
-                SwipeManager.OnSwipeDirection.AddListener(SwipeToIndex);
+                SwipeManager.OnSwipeDirection.Subscribe(SwipeToIndex);
             //ScrollSnapManager.Instance.AddToList(this);
         }
 
@@ -146,7 +144,7 @@ namespace StardropTools.UI
 
         public void UnsubscribeSwipe()
         {
-            SwipeManager.OnSwipeDirection.RemoveListener(SwipeToIndex);
+            SwipeManager.OnSwipeDirection.Unsubscribe(SwipeToIndex);
             selectedScrollRect = null;
         }
 
@@ -503,7 +501,7 @@ namespace StardropTools.UI
                     var scrollSnapButton = uiButtons[i].GetComponent<UIScrollSnapButton>();
                     if (scrollSnapButton == null)
                     {
-                        scrollSnapButton = uiButtons[i].AddComponent<UIScrollSnapButton>();
+                        scrollSnapButton = uiButtons[i].gameObject.AddComponent<UIScrollSnapButton>();
                         buttons.Add(scrollSnapButton);
                     }
                 }

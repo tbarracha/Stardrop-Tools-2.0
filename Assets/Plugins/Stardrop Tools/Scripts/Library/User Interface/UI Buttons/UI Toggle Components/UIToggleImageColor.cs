@@ -24,11 +24,11 @@ namespace StardropTools.UI
                 if (tween != null)
                     tween.Stop();
 
-                tween = new TweenImageColor(image, colors[index])
-                    .SetEaseType(easeType)
-                    .SetDuration(duration)
-                    .SetID(image.GetHashCode())
-                    .Play();
+                tween = new TweenImageColor(colors[index], image);
+                tween.EaseType = easeType;
+                tween.Duration = duration;
+                tween.SetID(image.GetHashCode());
+                tween.Play();
             }
 
             else

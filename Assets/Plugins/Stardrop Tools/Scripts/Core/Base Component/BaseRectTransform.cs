@@ -1,12 +1,21 @@
-
 using UnityEngine;
 
 namespace StardropTools.UI
 {
-    public class BaseRectTransform : BaseTransform
+    public abstract class BaseRectTransform : BaseTransform
     {
         [SerializeField] RectTransform thisRectTransform;
-        public RectTransform RectTransform => thisRectTransform;
+        
+        public RectTransform RectTransform
+        {
+            get
+            {
+                if (thisRectTransform == null)
+                    thisRectTransform = GetComponent<RectTransform>();
+
+                return thisRectTransform;
+            }
+        }
 
 
         #region Rect & RectTransform
@@ -33,11 +42,11 @@ namespace StardropTools.UI
         public float HeightRect { get => SizeRect.x; set => SetHeightRect(value); }
 
 
-        public void SetWidthDelta(float width) => SizeDelta = VecUtils.SetVectorX(SizeDelta, width);
-        public void SetHeightDelta(float height) => SizeDelta = VecUtils.SetVectorY(SizeDelta, height);
+        public void SetWidthDelta(float width) => SizeDelta = VectorUtils.SetVectorX(SizeDelta, width);
+        public void SetHeightDelta(float height) => SizeDelta = VectorUtils.SetVectorY(SizeDelta, height);
 
-        public void SetWidthRect(float width) => SizeRect = VecUtils.SetVectorX(SizeRect, width);
-        public void SetHeightRect(float height) => SizeRect = VecUtils.SetVectorY(SizeRect, height);
+        public void SetWidthRect(float width) => SizeRect = VectorUtils.SetVectorX(SizeRect, width);
+        public void SetHeightRect(float height) => SizeRect = VectorUtils.SetVectorY(SizeRect, height);
         #endregion // Rect
 
 

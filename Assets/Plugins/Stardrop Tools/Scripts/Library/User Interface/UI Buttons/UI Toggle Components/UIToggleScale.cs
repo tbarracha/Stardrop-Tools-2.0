@@ -24,11 +24,11 @@ namespace StardropTools.UI
                 if (tween != null)
                     tween.Stop();
 
-                tween = new TweenLocalScale(rectTransform, Vector3.one * scales[index])
-                    .SetEaseType(easeType)
-                    .SetDuration(duration)
-                    .SetID(rectTransform.GetHashCode())
-                    .Play();
+                tween = new TweenLocalScale(Vector3.one * scales[index], rectTransform);
+                tween.EaseType = easeType;
+                tween.Duration = duration;
+                tween.SetID(rectTransform.GetHashCode());
+                tween.Play();
             }
 
             else

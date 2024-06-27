@@ -10,8 +10,8 @@ namespace StardropTools.UI
 
         public string Text { get => textMesh.text; set => SetText(value); }
 
-        public readonly CustomEvent OnTextChanged = new CustomEvent();
-        public readonly CustomEvent<string> OnTextChangedString = new CustomEvent<string>();
+        public readonly EventCallback OnTextChanged = new EventCallback();
+        public readonly EventCallback<string> OnTextChangedString = new EventCallback<string>();
 
         public void SetText(string text)
         {

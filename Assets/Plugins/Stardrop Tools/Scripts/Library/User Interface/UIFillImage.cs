@@ -13,8 +13,8 @@ namespace StardropTools.UI
         public float Percent => image.fillAmount;
 
 
-        public readonly CustomEvent OnValueChanged = new CustomEvent();
-        public readonly CustomEvent<float> OnFillValueChanged = new CustomEvent<float>();
+        public readonly EventCallback OnValueChanged = new EventCallback();
+        public readonly EventCallback<float> OnFillValueChanged = new EventCallback<float>();
 
 
         public override void Initialize()
@@ -50,12 +50,13 @@ namespace StardropTools.UI
 
         public void TweenSliderValue(float fromValue, float toValue, float duration, EaseType easeType = EaseType.Linear)
         {
-            tweenFillValue.SetStartEnd(fromValue, toValue);
-            tweenFillValue.SetDuration(duration);
-            tweenFillValue.SetEaseType(easeType);
+            tweenFillValue?.Stop();
+            tweenFillValue = new TweenFloat(fromValue, toValue);
+            tweenFillValue.Duration = duration;
+            tweenFillValue.EaseType = easeType;
             tweenFillValue.Play();
 
-            tweenFillValue.OnTweenFloat.AddListener(SetFill);
+            tweenFillValue.OnTweenValue.Subscribe(SetFill);
         }
 
         public void TweenSliderValue(float fromValue, float toValue, float duration, AnimationCurve animCurve)

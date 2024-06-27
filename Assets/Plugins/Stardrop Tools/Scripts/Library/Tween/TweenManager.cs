@@ -6,18 +6,44 @@ namespace StardropTools.Tween
     public class TweenManager : Singleton<TweenManager>, IUpdateable
     {
         [SerializeField] int tweenCount;
-        List<Tween> tweens = new List<Tween>();
+        List<ITween> tweens = new List<ITween>();
         bool isUpdating;
 
         protected override void Awake()
         {
             base.Awake();
-            tweens = new List<Tween>();
+            tweens = new List<ITween>();
         }
 
-        public bool ProcessTween(Tween tween)
+
+        // API
+        // ----------------------------------------------------------------------------------
+        public void StartUpdate()
         {
-            if (Application.isPlaying == false)
+            if (isUpdating)
+                return;
+
+            LoopManager.AddToUpdate(this);
+            isUpdating = true;
+        }
+
+        public void StopUpdate()
+        {
+            if (!isUpdating)
+                return;
+
+            LoopManager.RemoveFromUpdate(this);
+            isUpdating = false;
+        }
+
+        public void HandleUpdate()
+        {
+            UpdateTweens();
+        }
+
+        public bool ProcessTween(ITween tween)
+        {
+            if (!Application.isPlaying)
             {
                 Debug.Log("Can't tween on Edit Mode!");
                 return false;
@@ -41,49 +67,58 @@ namespace StardropTools.Tween
             return true;
         }
 
+
+        /// <summary>
+        /// Remove input tween from update list
+        /// </summary>
+        public void RemoveTween(ITween tween)
+        {
+            if (tween == null)
+                return;
+
+            if (tween.IsInManagerList)
+            {
+                tweens.Remove(tween);
+                tween.IsInManagerList = false;
+            }
+        }
+
+
+
+        // internal
+        // ----------------------------------------------------------------------------------
+        
         /// <summary>
         /// Check if there is already a tween of this type
         /// </summary>
         void FilterTween(int tweenID, TweenType tweenType)
         {
-            if (tweens.Exists() == false)
+            if (!tweens.Exists() || tweenID == -1)
                 return;
 
-            for (int i = 0; i < tweens.Count; i++)
+            for (int i = tweens.Count - 1; i >= 0; i--)
             {
-                if (tweens[i].TweenID == tweenID && tweens[i].TweenType == tweenType)
-                    tweens[i].Stop();
+                ITween tween = tweens[i];
+                if (tween.TweenID == tweenID && tween.TweenType == tweenType)
+                {
+                    tween.Stop();
+                    tweens.RemoveAt(i);
+                }
             }
         }
 
-        void AddTween(Tween tween)
+        void AddTween(ITween tween)
         {
             if (tween == null)
                 return;
 
-            if (tween.isInManagerList == false)
+            if (!tween.IsInManagerList)
             {
                 tweens.Add(tween);
-                tween.isInManagerList = true;
+                tween.IsInManagerList = true;
 
-                if (isUpdating == false)
+                if (!isUpdating)
                     StartUpdate();
-            }
-        }
-
-
-        /// <summary>
-        /// Remove input tween from update list
-        /// </summary>
-        public void RemoveTween(Tween tween)
-        {
-            if (tween == null)
-                return;
-
-            if (tween.isInManagerList == true)
-            {
-                tweens.Remove(tween);
-                tween.isInManagerList = false;
             }
         }
 
@@ -106,65 +141,27 @@ namespace StardropTools.Tween
         }
 
 
-        /// <summary>
-        /// Check cached tween list for the one that meets input criteria and Stop()'s it
-        /// </summary>
-        public void StopTween(int tweenID, TweenType tweenType)
-        {
-            foreach (Tween tween in tweens)
-            {
-                if (tween.TweenID == tweenID && tween.TweenType == tweenType)
-                    tween.Stop();
-            }
-        }
+        
 
 
-        /// <summary>
-        /// Check if tween is active. If true, Stop() tween
-        /// </summary>
-        public static void StopTween(Tween tween)
+        // Static API
+        // ----------------------------------------------------------------------------------
+        public static void PlayTweenables(ITweenable[] tweenComponents)
         {
-            if (tween != null)
-                tween.Stop();
-        }
-
-        public static void PlayTweenComponents(TweenComponent[] tweenComponents)
-        {
-            if (tweenComponents.Exists() == false)
+            if (!tweenComponents.Exists())
                 return;
 
             for (int i = 0; i < tweenComponents.Length; i++)
                 tweenComponents[i].Play();
         }
 
-        public static void StopTweenComponents(TweenComponent[] tweenComponents)
+        public static void StopTweenables(ITweenable[] tweenComponents)
         {
-            if (tweenComponents.Exists() == false)
+            if (!tweenComponents.Exists())
                 return;
 
             for (int i = 0; i < tweenComponents.Length; i++)
                 tweenComponents[i].Stop();
         }
-
-
-        public void StartUpdate()
-        {
-            if (isUpdating == true)
-                return;
-
-            LoopManager.AddToUpdate(this);
-            isUpdating = true;
-        }
-
-        public void StopUpdate()
-        {
-            if (isUpdating == false)
-                return;
-
-            LoopManager.RemoveFromUpdate(this);
-            isUpdating = false;
-        }
-
-        public void HandleUpdate()  => UpdateTweens();
     }
 }

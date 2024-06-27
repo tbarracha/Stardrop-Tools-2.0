@@ -13,7 +13,17 @@ namespace StardropTools
         [NaughtyAttributes.ReadOnly]
         [SerializeField] protected Transform thisTransform;
 
-        public Transform Transform      => thisTransform;
+        public Transform Transform
+        {
+            get
+            {
+                if (thisTransform == null)
+                    thisTransform = transform;
+
+                return thisTransform;
+            }
+        }
+
         public Transform Parent         => thisTransform.parent;
         public Transform[] Children     => thisTransform.GetChildrenArray();
 
@@ -72,13 +82,13 @@ namespace StardropTools
         /// </summary>
         public void SetLocalPosition(Vector3 localPosition) => LocalPosition = localPosition;
 
-        public void SetPositionX(float x) => Position = VecUtils.SetVectorX(Position, x);
-        public void SetPositionY(float y) => Position = VecUtils.SetVectorY(Position, y);
-        public void SetPositionZ(float z) => Position = VecUtils.SetVectorZ(Position, z);
+        public void SetPositionX(float x) => Position = VectorUtils.SetVectorX(Position, x);
+        public void SetPositionY(float y) => Position = VectorUtils.SetVectorY(Position, y);
+        public void SetPositionZ(float z) => Position = VectorUtils.SetVectorZ(Position, z);
 
-        public void SetLocalPositionX(float x) => LocalPosition = VecUtils.SetVectorX(LocalPosition, x);
-        public void SetLocalPositionY(float y) => LocalPosition = VecUtils.SetVectorY(LocalPosition, y);
-        public void SetLocalPositionZ(float z) => LocalPosition = VecUtils.SetVectorZ(LocalPosition, z);
+        public void SetLocalPositionX(float x) => LocalPosition = VectorUtils.SetVectorX(LocalPosition, x);
+        public void SetLocalPositionY(float y) => LocalPosition = VectorUtils.SetVectorY(LocalPosition, y);
+        public void SetLocalPositionZ(float z) => LocalPosition = VectorUtils.SetVectorZ(LocalPosition, z);
 
         public void ResetPosition() => Position = Vector3.zero;
         public void ResetLocalPosition() => LocalPosition = Vector3.zero;
@@ -97,13 +107,13 @@ namespace StardropTools
         public void SetEulerAngles(Vector3 eulerAngles) => EulerAngles = eulerAngles;
         public void SetLocalEulerAngles(Vector3 localEulerAngles) => LocalEulerAngles = localEulerAngles;
 
-        public void SetEulerX(float x) => EulerAngles = VecUtils.SetVectorX(EulerAngles, x);
-        public void SetEulerY(float y) => EulerAngles = VecUtils.SetVectorY(EulerAngles, y);
-        public void SetEulerZ(float z) => EulerAngles = VecUtils.SetVectorZ(EulerAngles, z);
+        public void SetEulerX(float x) => EulerAngles = VectorUtils.SetVectorX(EulerAngles, x);
+        public void SetEulerY(float y) => EulerAngles = VectorUtils.SetVectorY(EulerAngles, y);
+        public void SetEulerZ(float z) => EulerAngles = VectorUtils.SetVectorZ(EulerAngles, z);
 
-        public void SetLocalEulerX(float x) => LocalEulerAngles = VecUtils.SetVectorX(LocalEulerAngles, x);
-        public void SetLocalEulerY(float y) => LocalEulerAngles = VecUtils.SetVectorY(LocalEulerAngles, y);
-        public void SetLocalEulerZ(float z) => LocalEulerAngles = VecUtils.SetVectorZ(LocalEulerAngles, z);
+        public void SetLocalEulerX(float x) => LocalEulerAngles = VectorUtils.SetVectorX(LocalEulerAngles, x);
+        public void SetLocalEulerY(float y) => LocalEulerAngles = VectorUtils.SetVectorY(LocalEulerAngles, y);
+        public void SetLocalEulerZ(float z) => LocalEulerAngles = VectorUtils.SetVectorZ(LocalEulerAngles, z);
 
         public void ResetRotation() => Rotation = Quaternion.identity;
         public void ResetLocalRotation() => LocalRotation = Quaternion.identity;
@@ -113,9 +123,9 @@ namespace StardropTools
         #region Scale
         public void SetScale(Vector3 scale) => LocalScale = scale;
 
-        public void SetScaleX(float x) => LocalScale = VecUtils.SetVectorX(LocalScale, x);
-        public void SetScaleY(float y) => LocalScale = VecUtils.SetVectorY(LocalScale, y);
-        public void SetScaleZ(float z) => LocalScale = VecUtils.SetVectorZ(LocalScale, z);
+        public void SetScaleX(float x) => LocalScale = VectorUtils.SetVectorX(LocalScale, x);
+        public void SetScaleY(float y) => LocalScale = VectorUtils.SetVectorY(LocalScale, y);
+        public void SetScaleZ(float z) => LocalScale = VectorUtils.SetVectorZ(LocalScale, z);
 
         public void ResetScale() => LocalScale = Vector3.one;
         #endregion // Scale
@@ -126,12 +136,12 @@ namespace StardropTools
         /// <summary>
         /// Event fired when we change parent via the SetParent() method
         /// </summary>
-        public readonly CustomEvent OnParentChanged = new CustomEvent();
+        public readonly EventCallback OnParentChanged = new EventCallback();
 
         /// <summary>
         /// Event fired when children change via the SetChild() method
         /// </summary>
-        public readonly CustomEvent OnChildrenChanged = new CustomEvent();
+        public readonly EventCallback OnChildrenChanged = new EventCallback();
         
         #endregion // Events
 
@@ -357,6 +367,15 @@ namespace StardropTools
         public Vector3 Translate(Vector3 direction, float speed, Space space = Space.World)
         {
             thisTransform.Translate(direction.normalized * speed * Time.deltaTime, space);
+            return Position;
+        }
+
+        /// <summary>
+        /// Translates object in the normalized direction multiplied by speed
+        /// </summary>
+        public Vector3 Translate(Vector3 direction, float speed, float deltaTime, Space space = Space.World)
+        {
+            thisTransform.Translate(direction.normalized * speed * deltaTime, space);
             return Position;
         }
 

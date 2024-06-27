@@ -54,23 +54,23 @@ public class SwipeManager : Singleton<SwipeManager>, IUpdateable
 
     #region Events
 
-    public static readonly CustomEvent<SwipeData> OnSwipe = new CustomEvent<SwipeData>();
-    public static readonly CustomEvent<SwipeDirection> OnSwipeDirection = new CustomEvent<SwipeDirection>();
+    public static readonly EventCallback<SwipeData> OnSwipe = new EventCallback<SwipeData>();
+    public static readonly EventCallback<SwipeDirection> OnSwipeDirection = new EventCallback<SwipeDirection>();
 
-    public static readonly CustomEvent<int> OnSwipeHorizontal = new CustomEvent<int>();
-    public static readonly CustomEvent<int> OnSwipeVertical = new CustomEvent<int>();
+    public static readonly EventCallback<int> OnSwipeHorizontal = new EventCallback<int>();
+    public static readonly EventCallback<int> OnSwipeVertical = new EventCallback<int>();
 
-    public static readonly CustomEvent OnSwipeUp = new CustomEvent();
-    public static readonly CustomEvent OnSwipeDown = new CustomEvent();
+    public static readonly EventCallback OnSwipeUp = new EventCallback();
+    public static readonly EventCallback OnSwipeDown = new EventCallback();
 
-    public static readonly CustomEvent OnSwipeLeft = new CustomEvent();
-    public static readonly CustomEvent OnSwipeRight = new CustomEvent();
+    public static readonly EventCallback OnSwipeLeft = new EventCallback();
+    public static readonly EventCallback OnSwipeRight = new EventCallback();
 
-    public static readonly CustomEvent OnSwipeUpLeft = new CustomEvent();
-    public static readonly CustomEvent OnSwipeUpRight = new CustomEvent();
+    public static readonly EventCallback OnSwipeUpLeft = new EventCallback();
+    public static readonly EventCallback OnSwipeUpRight = new EventCallback();
 
-    public static readonly CustomEvent OnSwipeDownLeft = new CustomEvent();
-    public static readonly CustomEvent OnSwipeDownRight = new CustomEvent();
+    public static readonly EventCallback OnSwipeDownLeft = new EventCallback();
+    public static readonly EventCallback OnSwipeDownRight = new EventCallback();
 
     #endregion // events
 

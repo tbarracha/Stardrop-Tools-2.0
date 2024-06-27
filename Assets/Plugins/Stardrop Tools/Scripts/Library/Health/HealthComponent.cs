@@ -1,285 +1,173 @@
-
+﻿
+using StardropTools.Values;
 using UnityEngine;
-using NaughtyAttributes;
 
 namespace StardropTools
 {
-    public class HealthComponent : MonoBehaviour, IDamageable, IHealeable, IAlive
+    public class HealthComponent : BaseComponent, IAlive
     {
-        [Header("Scriptable Reference")]
-        [SerializeField] HealthContainerSyncType syncType;
-        [Expandable] [SerializeField] HealthContainerSO healthContainer;
+        [SerializeField] int maxHealth = 5;
+        [SerializeField] int health = 5;
 
-        [ShowIf("showMaxHeal")]
-        [SerializeField] int startHealth;
-        [ShowIf("showMaxHeal")]
-        [SerializeField] int maxHealth;
-
-        [Header("Health")]
-        [ProgressBar("Health Percent", 1, EColor.Red)]
-        [Range(0, 1)] [SerializeField] float healthPercent;
-        [SerializeField] int health;
-        [Space]
-        [SerializeField] bool isDead;
-
-        
-
+        [NaughtyAttributes.ShowNativeProperty]
         public int Health => health;
-        public int StartHealth => startHealth;
+
+        [NaughtyAttributes.ShowNativeProperty]
+        public float HealthPercentage => (maxHealth > 0) ? (float)health / maxHealth : 0f;
+
         public int MaxHealth => maxHealth;
-        public float PercentHealth => healthPercent;
-        public bool IsDead => isDead;
 
-        #region Naughty Attributes booleans
-        bool showMaxHeal => (healthContainer == null && syncType != HealthContainerSyncType.FromContainer);
-        #endregion
+        public bool IsAlive => health > 0;
 
-        public CustomEvent OnDamaged = new CustomEvent();
-        public CustomEvent OnHealed = new CustomEvent();
+        [NaughtyAttributes.ShowNativeProperty]
+        public bool IsDead => health <= 0;
 
-        public CustomEvent<int> OnDamagedAmount = new CustomEvent<int>();
-        public CustomEvent<int> OnHealedAmount = new CustomEvent<int>();
+        public EventCallback<int> OnHealthChanged { get; private set; }
+        public EventCallback<float> OnHealthPercentChanged { get; private set; }
 
-        public CustomEvent<float> OnPercentDamaged = new CustomEvent<float>();
-        public CustomEvent<float> OnPercentHealed = new CustomEvent<float>();
+        public EventCallback OnDeath { get; private set; }
+        public EventCallback OnRevived { get; private set; }
 
-        public CustomEvent<int> OnHealthChanged = new CustomEvent<int>();
-        public CustomEvent<float> OnHealthPercentChanged = new CustomEvent<float>();
-
-        public CustomEvent OnDeath = new CustomEvent();
-        public CustomEvent OnRevived = new CustomEvent();
-
-
-        public void SetHealth(int health)
+        public override void Initialize()
         {
-            this.startHealth = health;
-            this.maxHealth = health;
+            base.Initialize();
+
+            OnHealthChanged = new EventCallback<int>();
+            OnHealthPercentChanged = new EventCallback<float>();
+
+            OnDeath = new EventCallback();
+            OnRevived = new EventCallback();
+
+            Revive();
+        }
+
+        public void SetHealthValue(int health)
+        {
+            if (this.health == health)
+                return;
+
             this.health = health;
-
-            InitialEvents();
+            HealthChanged();
         }
 
-        public void SetHealth(int startHealth, int maxHealth)
+        public void SetMaxHealth(int maxHealth)
         {
-            this.startHealth = startHealth;
+            if (this.maxHealth == maxHealth)
+                return;
+
             this.maxHealth = maxHealth;
-            health = startHealth;
-
-            InitialEvents();
+            HealthChanged();
         }
 
-        public void SetHealth(int startHealth, int maxHealth, int health)
+        public void SetHealthAndMaxHealth(int targetHealth)
         {
-            this.startHealth = startHealth;
-            this.maxHealth = maxHealth;
-            this.health = health;
+            Initialize();
 
-            InitialEvents();
+            this.health = targetHealth;
+            this.maxHealth = targetHealth;
+
+            HealthChanged();
         }
 
-
-        void InitialEvents()
-        {
-            GetPercent();
-            OnHealthChanged?.Invoke(health);
-
-            if (healthContainer != null)
-            {
-                OnHealthChanged.AddListener(healthContainer.SetHealth);
-                OnHealthPercentChanged.AddListener(healthContainer.SetPercentHealth);
-            }
-        }
-
-
-        /// <summary>
-        /// Decreases health by damage and returns remaining health. Also checks if health reaches zero
-        /// </summary>
         public int ApplyDamage(int damageAmount)
         {
-            if (isDead)
+            if (IsDead)
                 return 0;
 
-            health = Mathf.Clamp(health - damageAmount, 0, maxHealth);
-
-            if (health == 0 && isDead == false)
-                Death();            
-
-            GetPercent();
-
-            OnDamaged?.Invoke();
-            OnDamagedAmount?.Invoke(damageAmount);
-            OnPercentDamaged?.Invoke(healthPercent);
-            OnHealthChanged?.Invoke(health);
+            int nextHealth = Health - damageAmount;
+            if (nextHealth > 0)
+            {
+                health -= Mathf.Max(0, damageAmount);
+                HealthChanged();
+            }
+            else
+                Kill();
 
             return health;
         }
 
-        /// <summary>
-        /// Value from 0 to 1 and Returns remaining health
-        /// </summary>
-        public int ApplyDamagePercent(float percent, bool fromMaxHealth)
+        public int ApplyDamageCurrentHealthPercent(float percentOfCurrentHealth)
         {
-            if (isDead)
-                return 0;
-
-            int damage = fromMaxHealth ? Mathf.CeilToInt(percent * maxHealth) : Mathf.CeilToInt(percent * health);
-            return ApplyDamage(damage);
+            int damageAmount = Mathf.FloorToInt(percentOfCurrentHealth * health);
+            return ApplyDamage(damageAmount);
         }
 
+        public int ApplyDamageMaxHealthPercent(float percentOfMaxHealth)
+        {
+            int damageAmount = Mathf.FloorToInt(percentOfMaxHealth * maxHealth);
+            return ApplyDamage(damageAmount);
+        }
 
-
-        /// <summary>
-        /// Returns remaining health
-        /// </summary>
         public int ApplyHeal(int healAmount)
         {
-            if (isDead)
+            if (IsDead)
                 return 0;
 
-            health = Mathf.Clamp(health + healAmount, 0, maxHealth);
-
-            if (health > 0 && isDead == true)
-                isDead = false;
-
-            GetPercent();
-
-            OnHealed?.Invoke();
-            OnHealedAmount?.Invoke(healAmount);
-            OnPercentHealed?.Invoke(healthPercent);
-            OnHealthChanged?.Invoke(health);
+            health += Mathf.Clamp(healAmount, 0, maxHealth);
+            HealthChanged();
 
             return health;
         }
 
-
-        /// <summary>
-        /// Value from 0 to 1 and Returns remaining health
-        /// </summary>
-        public int ApplyHealPercent(float percent, bool fromMaxHealth)
+        public int ApplyHealCurrentHealthPercent(float percentOfCurrentHealth)
         {
-            if (isDead)
-                return 0;
-
-            int heal = fromMaxHealth ? Mathf.CeilToInt(percent * maxHealth) : Mathf.CeilToInt(percent * health);
-            return ApplyHeal(heal);
+            int healAmount = Mathf.FloorToInt(percentOfCurrentHealth * health);
+            return ApplyHeal(healAmount);
         }
 
+        public int ApplyHealMaxHealthPercent(float percentOfMaxHealth)
+        {
+            int healAmount = Mathf.FloorToInt(percentOfMaxHealth * maxHealth);
+            return ApplyHeal(healAmount);
+        }
 
-        /// <summary>
-        /// Clear dead flag and fill Health to Max
-        /// </summary>
+        [NaughtyAttributes.Button("Kill")]
+        public void Kill()
+        {
+            if (IsDead)
+                return;
+
+            health = 0;
+
+            HealthChanged();
+            OnDeath?.Invoke();
+        }
+
+        [NaughtyAttributes.Button("Revive")]
         public void Revive()
         {
-            isDead = false;
+            if (IsAlive)
+                return;
+
             health = maxHealth;
-            GetPercent();
 
-            OnHealthChanged?.Invoke(health);
-        }
-
-
-        /// <summary>
-        /// Clear dead flag and fill Health to set value
-        /// </summary>
-        public void Revive(int reviveHealth)
-        {
-            isDead = false;
-            health = reviveHealth;
-            GetPercent();
-
-            OnHealthChanged?.Invoke(health);
+            HealthChanged();
             OnRevived?.Invoke();
         }
 
-
-        /// <summary>
-        /// Clear dead flag and fill Health to set percent
-        /// </summary>
-        public void Revive(float percentMaxHealth)
+        public void Revive(int reviveHealth)
         {
-            isDead = false;
-            health = Mathf.CeilToInt(percentMaxHealth * maxHealth);
-            GetPercent();
-
-            OnHealthChanged?.Invoke(health);
-        }
-
-        float GetPercent()
-        {
-            healthPercent = Mathf.Clamp(health / (float)maxHealth, 0, 1);
-            OnHealthPercentChanged?.Invoke(healthPercent);
-
-            return healthPercent;
-        }
-
-
-
-        public void Kill() => ApplyDamagePercent(1, true);
-
-        protected void Death()
-        {
-            OnDeath?.Invoke();
-            isDead = true;
-        }
-
-
-        public void SyncHealthToContainer()
-        {
-            if (healthContainer != null)
-            {
-                healthContainer.SetHealth(health);
-                healthContainer.SetPercentHealth(healthPercent);
-            }
-        }
-
-        public void SetHealthFromContainer(HealthContainerSO healthContainer)
-        {
-            if (healthContainer == null)
+            if (IsAlive)
                 return;
 
-            maxHealth = healthContainer.MaxHealth;
-            startHealth = healthContainer.StartHealth;
-            health = healthContainer.Health;
+            health = reviveHealth;
 
-            InitialEvents();
+            HealthChanged();
+            OnRevived?.Invoke();
         }
 
-        public void SetHealthFromContainer() => SetHealthFromContainer(healthContainer);
-
-        void CheckSyncType()
-        {
-            if (syncType == HealthContainerSyncType.FromContainer)
-                SetHealthFromContainer();
-            if (syncType == HealthContainerSyncType.ToContainer)
-                SyncHealthToContainer();
-        }
-
-
-
-        [Button("Set Health to Start Health")]
-        void SetHealthToStart()
-        {
-            health = startHealth;
-            GetPercent();
-        }
-
-        [Button("Set Health to Max Health")]
-        void SetHealthToMax()
+        public void FullRevive()
         {
             health = maxHealth;
-            GetPercent();
+
+            HealthChanged();
+            OnRevived?.Invoke();
         }
 
-        private void OnValidate()
+        private void HealthChanged()
         {
-            GetPercent();
-
-            CheckSyncType();
-
-            if (startHealth > maxHealth)
-                maxHealth = startHealth;
-
-            health = Mathf.Clamp(health, 0, maxHealth);
+            OnHealthChanged?.Invoke(health);
+            OnHealthPercentChanged?.Invoke(HealthPercentage);
         }
     }
 }

@@ -1,16 +1,15 @@
-﻿
-using System.Collections.Generic;
+﻿using StardropTools.GameStateManagement;
 using UnityEngine;
 
 namespace StardropTools
 {
-    public abstract class BaseGameManager : ManagerInitializer
+    public abstract class BaseGameManager : ManagerInitializer, IGameStateMachine
     {
         #region Singleton
         /// <summary>
         /// The instance.
         /// </summary>
-        private static BaseGameManager instance;
+        protected static BaseGameManager instance;
 
 
         /// <summary>
@@ -48,21 +47,15 @@ namespace StardropTools
         }
         #endregion // singleton
 
-        [SerializeField] protected bool                 isSingleton;
-        [SerializeField] protected string               currentGameStateName = string.Empty;
+        [SerializeField] protected bool isSingleton;
+        [SerializeField] protected bool debugStateChange;
+        [SerializeField] protected string currentGameStateName = string.Empty;
         [SerializeField] protected BaseScriptableObject[] baseScriptableObjects;
-        
-        protected GameState        currentGameState;
-        protected List<GameState>  gameStates;
+        [SerializeField] protected GameStateMachine gameStateMachine;
 
-        public static class DefaultGameStateNames
-        {
-            public const string Initialization = "Initialization";
-            public const string MainMenu = "Main Menu";
-            public const string Play = "Play";
-            public const string Paused = "Paused";
-            public const string PlayEnd = "Play End";
-        }
+        bool canChange = true;
+
+        public GameState CurrentState => gameStateMachine.CurrentState;
 
 #if UNITY_EDITOR
         protected override void OnValidate()
@@ -74,8 +67,10 @@ namespace StardropTools
         }
 #endif
 
-        #region Initialization
 
+
+        // Initialization
+        // ---------------------------------------------------------------------------------------
         public override void Initialize()
         {
             base.Initialize();
@@ -83,202 +78,94 @@ namespace StardropTools
             if (isSingleton)
                 SingletonInitialization();
 
+            gameStateMachine = new GameStateMachine();
             CreateGameStates();
 
             EventFlow();
-            InitializeManagers();
-            LateInitialize();
-
             Utilities.Initialize(baseScriptableObjects);
-        }
+            InitializeManagers();
 
-        protected virtual void CreateGameStates()
-        {
-            gameStates = new List<GameState>();
-
-            RegisterState(DefaultGameStateNames.Initialization);
-            RegisterState(DefaultGameStateNames.MainMenu);
-            RegisterState(DefaultGameStateNames.Play);
-            RegisterState(DefaultGameStateNames.Paused);
-            RegisterState(DefaultGameStateNames.PlayEnd);
-
-            currentGameState = gameStates[0];
-            currentGameStateName = currentGameState.StateName;
+            LateInitialize();
         }
 
         protected virtual void EventFlow()
         {
-            BaseEventManager.InitializationEvents.OnPoolsInitialized.AddListener(() => ChangeGameState(1));
+            gameStateMachine.OnGameStateChanged.AddListener(GameStateChanged);
+            //BaseEventManager.InitializationEvents.OnPoolsInitialized.AddListener(() => ChangeGameState(2));
 
-            BaseEventManager.GameStateEvents.OnRequestGameStateChange.AddListener(OnGameStateRequested);
-            BaseEventManager.GameStateEvents.OnRequestGameStateIDChange.AddListener(OnGameStateRequested);
-            BaseEventManager.GameStateEvents.OnRequestGameStateNameChange.AddListener(OnGameStateRequested);
-        }
+            BaseEventManager.GameStateEvents.OnRequestGameStateChange.AddListener((state) => ChangeGameState(state));
+            BaseEventManager.GameStateEvents.OnRequestGameStateChangeById.AddListener((stateId) => ChangeGameState(stateId));
+            BaseEventManager.GameStateEvents.OnRequestGameStateChangeByName.AddListener((stateName) => ChangeGameState(stateName));
 
-        #endregion // Initialization
-
-
-        #region Public API
-
-        public bool RegisterState(GameState state)
-        {
-            if (gameStates == null)
-            {
-                gameStates = new List<GameState>();
-            }
-
-            if (gameStates.Count == 0)
-            {
-                gameStates.Add(state);
-                SetStateID(state, 0);
-                return true;
-            }
-
-            for (int i = 0; i < gameStates.Count; i++)
-            {
-                if (state == gameStates[i])
-                {
-                    return false;
-                }
-            }
-
-            gameStates.Add(state);
-            RefreshStateIDs();
-            return true;
-        }
-
-        public bool RegisterState(string stateName)
-        {
-            return RegisterState(new GameState(stateName));
-        }
-
-        public bool UnregisterState(GameState state)
-        {
-            if (gameStates == null)
-            {
-                gameStates = new List<GameState>();
-            }
-
-            if (gameStates.Count == 0)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < gameStates.Count; i++)
-            {
-                if (state.StateName.Equals(gameStates[i]))
-                {
-                    gameStates.RemoveAt(i);
-                    RefreshStateIDs();
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public bool UnregisterState(string stateName)
-        {
-            return UnregisterState(new GameState(stateName));
-        }
-
-        public bool RequestGameStateChange(GameState gameState)
-        {
-            if (gameStates.Contains(gameState))
-            {
-                ChangeGameState(gameState);
-                return true;
-            }
-
-            return false;
-        }
-
-        public bool RequestGameStateChange(string stateName)
-        {
-            foreach (GameState state in gameStates)
-            {
-                if (state.StateName.Equals(stateName))
-                {
-                    ChangeGameState(state);
-                    return true;
-                }
-            }
-
-            return false;
+            BaseEventManager.GameStateEvents.OnGameOverRequest.AddListener(GameOver);
         }
 
 
-        public bool RequestGameStateChange(int stateID)
+        // Game State
+        // ---------------------------------------------------------------------------------------
+        protected abstract void CreateGameStates();
+        
+        protected virtual void GameStateChanged(GameState currentState, GameState prevState)
         {
-            return RequestGameStateChange(gameStates[stateID]);
-        }
+            StartChangeTimer();
 
-        #endregion // API
-
-
-
-        #region Private Methods - Internal Workings
-
-        private void SetStateID(GameState state, int id) => state.StateID = id;
-
-        private void RefreshStateIDs()
-        {
-            if (gameStates == null || gameStates.Count == 0)
-                return;
-
-            int index = 0;
-            foreach (GameState state in gameStates)
+            if (debugStateChange)
             {
-                SetStateID(state, index++);
+                Debug.Log($"Game State Changed to: {currentState.StateName}, from: {prevState?.StateName}");
             }
+
+            currentGameStateName = currentState.StateName;
+            BaseEventManager.GameStateEvents.OnGameStateChanged?.Invoke(currentState, prevState);
         }
 
-        protected virtual bool ChangeGameState(GameState targetGameState)
+        public bool ChangeGameState(GameState state)
         {
-            if (targetGameState == null)
+            if (!canChange)
                 return false;
 
-            if (currentGameState != null && currentGameState.Equals(targetGameState))
+            return gameStateMachine.ChangeGameState(state);
+        }
+
+        public bool ChangeGameState(string stateName)
+        {
+            if (!canChange)
                 return false;
 
-            if (currentGameState != null)
-                currentGameState.ExitState();
-
-            var prevState    = currentGameState;
-            currentGameState = targetGameState;
-            currentGameState.EnterState(prevState);
-
-            currentGameStateName = currentGameState.StateName;
-            BaseEventManager.GameStateEvents.OnGameStateChanged?.Invoke(currentGameState, prevState);
-
-            if (prevState != null)
-                Debug.Log($"Game State Changed from {prevState.StateName} to {currentGameState.StateName}");
-            else
-                Debug.Log($"Game State Changed to {currentGameState.StateName}");
-
-            return true;
+            return gameStateMachine.ChangeGameState(stateName);
         }
 
-        protected virtual bool ChangeGameState(int stateID)
+        public bool ChangeGameState(int stateId)
         {
-            return ChangeGameState(gameStates[stateID]);
+            if (!canChange)
+                return false;
+
+            return gameStateMachine.ChangeGameState(stateId);
         }
 
-        private void OnGameStateRequested(GameState targetGameState)
+        public bool ChangeGameState(StandardGameStates standardGameState)
         {
-            RequestGameStateChange(targetGameState);
+            if (!canChange)
+                return false;
+
+            return gameStateMachine.ChangeGameState(standardGameState);
         }
 
-        private void OnGameStateRequested(string stateName)
+
+        public void GameOver(GameOverCause cause)
         {
-            RequestGameStateChange(stateName);
+            ChangeGameState(StandardGameStates.GameOver);
+            BaseEventManager.GameStateEvents.OnGameOver?.Invoke(cause);
         }
 
-        private void OnGameStateRequested(int stateID)
+        void StartChangeTimer()
         {
-            RequestGameStateChange(stateID);
+            canChange = false;
+            new Timer(.05f).Play(ResetCanChange);
         }
 
-        #endregion // private methods
+        void ResetCanChange()
+        {
+            canChange = true;
+        }
     }
 }

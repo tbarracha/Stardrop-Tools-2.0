@@ -9,11 +9,11 @@ namespace StardropTools
 
         public bool Value => toggle;
 
-        public readonly CustomEvent OnToggle = new CustomEvent();
-        public readonly CustomEvent<bool> OnToggleValue = new CustomEvent<bool>();
+        public readonly EventCallback OnToggle = new EventCallback();
+        public readonly EventCallback<bool> OnToggleValue = new EventCallback<bool>();
 
-        public readonly CustomEvent OnToggleTrue = new CustomEvent();
-        public readonly CustomEvent OnToggleFalse = new CustomEvent();
+        public readonly EventCallback OnToggleTrue = new EventCallback();
+        public readonly EventCallback OnToggleFalse = new EventCallback();
 
         public void SetToggle(bool value, bool invokeEvents)
         {

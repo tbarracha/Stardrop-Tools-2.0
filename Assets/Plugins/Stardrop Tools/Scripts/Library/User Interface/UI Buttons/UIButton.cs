@@ -4,19 +4,18 @@ using UnityEngine.UI;
 
 namespace StardropTools.UI
 {
-    [RequireComponent(typeof(Image), typeof(UIPointerEvent))]
+    [RequireComponent(typeof(Image))]
     public class UIButton : BaseRectTransform
     {
-        public int ButtonID;
+        public int ButtonID = -1;
         [SerializeField] protected Button button;
-        [SerializeField] protected UIPointerEvent pointerEvent;
         [SerializeField] protected bool useButton = true;
 
         public Button Button => button;
         public bool Interactible { get => button.interactable; set => button.interactable = value; }
 
-        public readonly CustomEvent OnClick         = new CustomEvent();
-        public readonly CustomEvent<int> OnClickID  = new CustomEvent<int>();
+        public readonly EventCallback OnClick         = new EventCallback();
+        public readonly EventCallback<int> OnClickID  = new EventCallback<int>();
 
         public override void Initialize()
         {
@@ -24,8 +23,6 @@ namespace StardropTools.UI
 
             if (useButton)
                 button.onClick.AddListener(OnPressed);
-            else
-                pointerEvent.OnPointerUpEvent.AddListener(OnPressed);
         }
 
         protected virtual void OnPressed()
@@ -44,16 +41,10 @@ namespace StardropTools.UI
             base.OnValidate();
 
             if (button == null)
-                button = GetComponent<UnityEngine.UI.Button>();
+                button = GetComponent<Button>();
 
             if (button == null)
-                button = GetComponentInParent<UnityEngine.UI.Button>();
-
-            if (pointerEvent == null)
-                pointerEvent = GetComponent<UIPointerEvent>();
-
-            if (pointerEvent == null)
-                pointerEvent = GetComponentInParent<UIPointerEvent>();
+                button = GetComponentInParent<Button>();
         }
     }
 }

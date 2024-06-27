@@ -1,5 +1,4 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace StardropTools.UI
@@ -20,7 +19,7 @@ namespace StardropTools.UI
 
         private void Start()
         {
-            SingleInputManager.OnInputStart.AddListener(IsMouseOverScrollRect);
+            SingleInputManager.OnInputStart.Subscribe(IsMouseOverScrollRect);
         }
 
         void IsMouseOverScrollRect()

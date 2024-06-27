@@ -13,7 +13,7 @@ namespace StardropTools
 #if UNITY_EDITOR
     [CanEditMultipleObjects]
 #endif
-    public abstract class BaseComponent : MonoBehaviour, IInitialize, ILateInitialize, IUpdateable
+    public abstract class BaseComponent : MonoBehaviour, IInitializeable, ILateInitializeable, IActivateable, IEnabable, IUpdateable
     {
         [Header("Initialization")]
         [SerializeField] protected InitializeComponentIn initializeAt;
@@ -28,8 +28,18 @@ namespace StardropTools
         public bool IsInitialized       { get; protected set; }
         public bool IsLateInitialized   { get; protected set; }
         public bool IsUpdating          { get; protected set; }
+        public bool IsActive            { get; protected set; }
 
-        public GameObject GameObject    => thisObject;
+        public GameObject GameObject
+        {
+            get
+            {
+                if (thisObject == null)
+                    thisObject = gameObject;
+
+                return thisObject;
+            }
+        }
 
 
         protected virtual void Awake()
@@ -72,7 +82,7 @@ namespace StardropTools
         /// </summary>
         public void SetActive(bool value)
         {
-            if (thisObject.activeSelf == value)
+            if (isActiveAndEnabled == value)
                 return;
 
             thisObject.SetActive(value);
@@ -83,59 +93,29 @@ namespace StardropTools
                 OnDeactivated();
         }
 
-        /// <summary>
-        /// Set the game object's active state, with option to StartUpdate() or StopUpdate()
-        /// </summary>
-        public void SetActive(bool value, bool startOrStopUpdate)
-        {
-            SetActive(value);
+        public void Activate() => SetActive(true);
 
-            if (startOrStopUpdate)
-            {
-                if (value)
-                    StartUpdate();
-                else
-                    StopUpdate();
-            }
-        }
+        public void Deactivate() => SetActive(false);
 
-        protected virtual void OnActivated()
-        {
-
-        }
-
-        protected virtual void OnDeactivated()
-        {
-
-        }
-
-
-        public void ActivateObject() => SetActive(true);
-
-        public void DeactivateObject() => SetActive(false);
+        protected virtual void OnActivated() { }
+        protected virtual void OnDeactivated() { }
 
 
 
         /// <summary>
         /// Set the Component's enabled state
         /// </summary>
-        public void SetEnabled(bool value) => enabled = value;
-        public void SetEnabled(bool value, bool startOrStopUpdate)
+        public void SetEnabled(bool value)
         {
-            SetEnabled(value);
-
-            if (startOrStopUpdate)
-            {
-                if (value)
-                    StartUpdate();
-                else
-                    StopUpdate();
-            }
+            enabled = value;
         }
 
-        public void EnableComponent() => SetEnabled(true);
+        public void Enable() => SetEnabled(true);
 
-        public void DisableComponent() => SetEnabled(false);
+        public void Disable() => SetEnabled(false);
+
+        protected virtual void OnEnabled() { }
+        protected virtual void OnDisabled() { }
 
 
 

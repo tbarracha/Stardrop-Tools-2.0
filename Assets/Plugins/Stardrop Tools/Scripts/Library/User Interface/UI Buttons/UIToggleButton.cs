@@ -1,4 +1,3 @@
-
 using System.Collections;
 using UnityEngine;
 
@@ -26,16 +25,16 @@ namespace StardropTools.UI
         public bool Value                                           => toggle.Value;
         public bool IsActingLikeDefaultButton                       => isActingLikeDefaultButton;
 
-        public CustomEvent OnToggleDry                              => toggle.OnToggle;
-        public CustomEvent<bool> OnToggle                           => toggle.OnToggleValue;
+        public EventCallback OnToggleDry                              => toggle.OnToggle;
+        public EventCallback<bool> OnToggle                           => toggle.OnToggleValue;
         
-        public readonly CustomEvent OnToggleTrue                    = new CustomEvent();
-        public readonly CustomEvent OnToggleFalse                   = new CustomEvent();
+        public readonly EventCallback OnToggleTrue                    = new EventCallback();
+        public readonly EventCallback OnToggleFalse                   = new EventCallback();
 
-        public readonly CustomEvent<int> OnToggleIndex              = new CustomEvent<int>();
+        public readonly EventCallback<int> OnToggleIndex              = new EventCallback<int>();
 
-        public readonly CustomEvent<int> OnToggleTrueIndex          = new CustomEvent<int>();
-        public readonly CustomEvent<int> OnToggleFalseIndex         = new CustomEvent<int>();
+        public readonly EventCallback<int> OnToggleTrueIndex          = new EventCallback<int>();
+        public readonly EventCallback<int> OnToggleFalseIndex         = new EventCallback<int>();
 
 
         public override void Initialize()
@@ -109,6 +108,7 @@ namespace StardropTools.UI
             else
                 OnFalse();
 
+            OnToggled();
             RefreshToggleComponents();
             
             if (debugToggleState)
@@ -125,6 +125,11 @@ namespace StardropTools.UI
         {
             OnToggleFalse?.Invoke();
             OnToggleFalseIndex?.Invoke(ButtonID);
+        }
+
+        protected virtual void OnToggled()
+        {
+
         }
 
 

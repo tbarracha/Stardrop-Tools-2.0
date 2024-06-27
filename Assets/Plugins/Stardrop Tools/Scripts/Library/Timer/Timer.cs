@@ -4,7 +4,7 @@ using UnityEngine;
 namespace StardropTools
 {
     [System.Serializable]
-    public class Timer
+    public class Timer : IPlayableCallback<Timer>, IStoppable
     {
         [SerializeField] protected TimerLoop loopType;
         [SerializeField] protected TimerState timerState;
@@ -22,17 +22,17 @@ namespace StardropTools
 
 
         #region Events
-        public readonly CustomEvent OnTimerStart = new CustomEvent();
-        public readonly CustomEvent OnTimerComplete = new CustomEvent();
-        public readonly CustomEvent OnTimerUpdate = new CustomEvent();
-        public readonly CustomEvent OnTimerPaused = new CustomEvent();
-        public readonly CustomEvent OnTimerCanceled = new CustomEvent();
+        public readonly EventCallback OnTimerStart = new EventCallback();
+        public readonly EventCallback OnTimerComplete = new EventCallback();
+        public readonly EventCallback OnTimerUpdate = new EventCallback();
+        public readonly EventCallback OnTimerPaused = new EventCallback();
+        public readonly EventCallback OnTimerCanceled = new EventCallback();
 
-        public readonly CustomEvent<float> OnRuntime = new CustomEvent<float>();
-        public readonly CustomEvent<float> OnPercent = new CustomEvent<float>();
+        public readonly EventCallback<float> OnRuntime = new EventCallback<float>();
+        public readonly EventCallback<float> OnPercent = new EventCallback<float>();
 
-        public readonly CustomEvent OnDelayStart = new CustomEvent();
-        public readonly CustomEvent OnDelayComplete = new CustomEvent();
+        public readonly EventCallback OnDelayStart = new EventCallback();
+        public readonly EventCallback OnDelayComplete = new EventCallback();
 
         #endregion // Events
 
@@ -220,13 +220,13 @@ namespace StardropTools
 
         protected void RemoveFromManagerList()
         {
-            OnTimerStart    ?.ClearAllListeners();
-            OnTimerUpdate   ?.ClearAllListeners();
-            OnTimerComplete ?.ClearAllListeners();
-            OnTimerPaused   ?.ClearAllListeners();
-            OnTimerCanceled ?.ClearAllListeners();
-            OnDelayStart    ?.ClearAllListeners();
-            OnDelayComplete ?.ClearAllListeners();
+            OnTimerStart    ?.ClearAllSubscriptions();
+            OnTimerUpdate   ?.ClearAllSubscriptions();
+            OnTimerComplete ?.ClearAllSubscriptions();
+            OnTimerPaused   ?.ClearAllSubscriptions();
+            OnTimerCanceled ?.ClearAllSubscriptions();
+            OnDelayStart    ?.ClearAllSubscriptions();
+            OnDelayComplete ?.ClearAllSubscriptions();
 
             TimerManager.Instance.RemoveTimer(this);
         }
